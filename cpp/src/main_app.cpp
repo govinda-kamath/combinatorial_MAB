@@ -1,4 +1,3 @@
-#include"Test.h"
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -11,8 +10,17 @@
 #include <queue>
 #include <utility>
 
+#define DEBUG
 
 class Point {
+/*A point is the base class that defines a point.
+ * It has a vector that stores the representation of
+ * the point in some high dimensional space.
+ * This class also defines a distance function which
+ * defines distances.
+ * Points in different hilbert spaces are inherited
+ * from this class.
+ * */
 public:
     std::vector <float> point;
     Point(std::vector <float> p){
@@ -27,10 +35,13 @@ public:
 };
 
 class SquaredEuclideanPoint : public Point{
-
+/* Points in Squared Euclidean space
+ * */
 public:
     SquaredEuclideanPoint(std::vector<float> p) : Point(p){}
 
+    /*Computes the exact distance between two points.
+     * Used only for debug purposes*/
     float distance(const SquaredEuclideanPoint& p1){
 
         assert(("Sizes do not match", point.size() == p1.point.size()));
@@ -45,6 +56,8 @@ public:
         return result;
     }
 
+    /*Picks a dimension of points randomly and samples the distance
+     * that dimension*/
     float sampledDistance(const SquaredEuclideanPoint& p1){
         assert(("Sizes do not match", point.size() == p1.point.size()));
 
@@ -61,6 +74,7 @@ public:
 
 template <class templatePoint>
 class Arm {
+    /* A base class of arms */
 public:
     int numberOfPulls;
     float sumOfPulls;
@@ -108,7 +122,7 @@ public:
         localSigma = globalSigma; //Todo: update sigma to new local value
         intervalWidth = std::sqrt((localSigma * localSigma * logDeltaInverse)/numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;
-        lowerConfidenceBound = std::min((float)0.0, estimateOfMean - intervalWidth);
+        lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
     }
 
     float pullArm(templatePoint &p1, float globalSigma,
@@ -130,7 +144,7 @@ public:
     }
 
     float trueMean(const templatePoint &p1){
-        return point->distance(p1);
+        return point->distance(p1)/p1.point.size();
     }
 
 };
@@ -138,6 +152,8 @@ public:
 
 template <class templatePoint>
 class ArmKNN : public Arm<templatePoint>{
+    /*
+     * Arms for k-Nearest Neighbours*/
 public:
     templatePoint *fixedPoint;
 
@@ -153,6 +169,10 @@ public:
         return pullArm(*fixedPoint, globalSigma, logDeltaInverse, update);
     }
 
+    using Arm<templatePoint>::trueMean;
+    float trueMean(){
+        return trueMean(*fixedPoint);
+    }
 };
 
 
@@ -171,6 +191,7 @@ S& Container(std::priority_queue<T, S, C>& q) {
 
 template <class templateArm>
 class UCB{
+    /* UCB for the general case*/
 public:
     unsigned numberOfArms;
     std::vector<templateArm> armsContainer;
@@ -206,17 +227,22 @@ public:
                 globalSumOfSquaresOfPulls += observedSample * observedSample;
             }
         }
-
         globalNumberOfPulls = numberOfInitialPulls*armsContainer.size();
         globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
                                     std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
-
+#ifdef DEBUG
+        std::cout << "Sigma after initialization " << globalSigma <<std::endl;
+        std::cout << "Mean after initialization " << globalSumOfPulls/globalNumberOfPulls <<std::endl;
+        std::cout << "Mean Squared after initialization " << std::pow(globalSumOfPulls/globalNumberOfPulls,2) <<std::endl;
+        std::cout << "Second Moment after initialization " << globalSumOfSquaresOfPulls/globalNumberOfPulls <<std::endl;
+#endif
 
         for (int index =0; index < armsContainer.size(); index++){
 
             armsContainer[index].updateConfidenceIntervals(globalSigma, logDeltaInverse);
             arms.push(armsContainer[index]);
         }
+
     }
 
     void runUCB(unsigned maxIterations){
@@ -230,6 +256,7 @@ public:
     }
 
     bool iterationOfUCB(){
+        /*An iteration of UCB*/
         templateArm bestArm = arms.top();
         arms.pop();
         templateArm secondBestArm = arms.top();
@@ -286,37 +313,26 @@ int main(int argc, char *argv[]){
         armsVec.push_back(tmpArm);
     }
 
-//    float testArray[4] = {0, 1, 3, 5};
-//    std::vector<float> testVector1, testVector2, testVector3 ;
-//    for (int index=0; index<4; index++) {
-//        testVector1.push_back(index);
-//        testVector2.push_back(index+12);
-//        testVector3.push_back(index-1);
-//    }
-//    SquaredEuclideanPoint testPoint1(testVector1), testPoint2(testVector2), testPoint3(testVector3);
-//    ArmKNN<SquaredEuclideanPoint> arm1(1, testPoint2, testPoint1), arm2 (2, testPoint3, testPoint1);
-//
-//    std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
-//    armsVec.push_back(arm1);
-//    armsVec.push_back(arm2);
-//
-    float delta(0.1);
+    float delta(0.01);
     UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
 
-    std::cout << "adfjkha"<< std::endl;
-    UCB1.initialise(100);
-    std::cout << "adfjkha"<< std::endl;
-    UCB1.runUCB(100);
+    UCB1.initialise(50);
+    UCB1.runUCB(1000);
 
-//    std::cout << armsVec[1].numberOfPulls<<std::endl;
-    std::cout << UCB1.globalSumOfPulls<<std::endl;
-    std::cout << "sigma " << UCB1.globalSigma<<std::endl;
-    std::cout << UCB1.arms.top().estimateOfMean << std::endl;
-    std::cout << UCB1.arms.top().id << std::endl;
-//
     std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
-    std::cout << hackedArmsVec[0].numberOfPulls<<std::endl;
-    std::cout << hackedArmsVec[1].numberOfPulls<<std::endl;
+#ifdef DEBUG
+    for(unsigned i=0; i< hackedArmsVec.size(); i++){
+        std::cout << hackedArmsVec[i].id <<" True Mean= "<< armsVec[hackedArmsVec[i].id].trueMean()
+                << " sigma = " << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls/hackedArmsVec[i].numberOfPulls -
+                                             std::pow(hackedArmsVec[i].sumOfPulls/hackedArmsVec[i].numberOfPulls,2)))
+                << " estimate = " << hackedArmsVec[i].estimateOfMean << " total pulls="
+                  << hackedArmsVec[i].numberOfPulls << std::endl;
+    }
 
+    std::cout << "average pull " << UCB1.globalNumberOfPulls/armsVec.size()<<std::endl;
+    std::cout << "sigma " << UCB1.globalSigma<<std::endl;
+    std::cout << "best arm's estimate "<<UCB1.arms.top().estimateOfMean << std::endl;
+    std::cout << UCB1.arms.top().id << std::endl;
+#endif
     return 0;
 }
