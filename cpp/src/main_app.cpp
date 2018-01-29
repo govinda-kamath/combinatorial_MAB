@@ -1,6 +1,8 @@
 #include"Test.h"
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <cassert>
 #include <algorithm>
@@ -206,7 +208,8 @@ public:
         }
 
         globalNumberOfPulls = numberOfInitialPulls*armsContainer.size();
-        globalSigma = (globalSumOfSquaresOfPulls - std::pow(globalSumOfPulls,2))/globalNumberOfPulls;
+        globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
+                                    std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
 
 
         for (int index =0; index < armsContainer.size(); index++){
@@ -227,7 +230,8 @@ public:
     }
 
     bool iterationOfUCB(){
-        templateArm bestArm = arms.pop();
+        templateArm bestArm = arms.top();
+        arms.pop();
         templateArm secondBestArm = arms.top();
         float UCBofBestArm, LCBofSecondBestArm;
         UCBofBestArm = bestArm.upperConfidenceBound;
@@ -241,7 +245,8 @@ public:
             globalSumOfPulls += sample;
             globalSumOfSquaresOfPulls += std::pow(sample,2);
             globalNumberOfPulls++;
-            globalSigma = (globalSumOfSquaresOfPulls - std::pow(globalSumOfPulls,2))/globalNumberOfPulls;
+            globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
+                                     std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
             arms.push(bestArm);
         }
         return  false;
@@ -252,28 +257,63 @@ public:
 
 int main(int argc, char *argv[]){
 
-    float testArray[4] = {0, 1, 3, 5};
-    std::vector<float> testVector1, testVector2, testVector3 ;
-    for (int index=0; index<4; index++) {
-        testVector1.push_back(index);
-        testVector2.push_back(index+12);
-        testVector3.push_back(index-1);
-    }
-    SquaredEuclideanPoint testPoint1(testVector1), testPoint2(testVector2), testPoint3(testVector3);
-    ArmKNN<SquaredEuclideanPoint> arm1(1, testPoint2, testPoint1), arm2 (2, testPoint3, testPoint1);
+    std::string filePath, line;
+    filePath = "/Users/govinda/Code/combinatorial_MAB/test_dataset/1000_images.txt";
+    std::fstream fileReader(filePath);
+    unsigned long pointIndex(0);
 
+    std::vector<SquaredEuclideanPoint > pointsVec;
     std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
-    armsVec.push_back(arm1);
-    armsVec.push_back(arm2);
 
+
+    while(std::getline(fileReader, line)){
+        float tmpValue;
+
+        std::vector<float> tmpVec;
+        std::stringstream ss(line);
+        while (ss >> tmpValue){
+            tmpVec.push_back(tmpValue);
+        }
+        SquaredEuclideanPoint tmpPoint(tmpVec);
+
+        pointsVec.push_back(tmpPoint);
+        pointIndex++;
+
+    }
+
+    for (unsigned i(1); i < pointsVec.size(); i++){
+        ArmKNN<SquaredEuclideanPoint> tmpArm(i-1, pointsVec[i], pointsVec[0]);
+        armsVec.push_back(tmpArm);
+    }
+
+//    float testArray[4] = {0, 1, 3, 5};
+//    std::vector<float> testVector1, testVector2, testVector3 ;
+//    for (int index=0; index<4; index++) {
+//        testVector1.push_back(index);
+//        testVector2.push_back(index+12);
+//        testVector3.push_back(index-1);
+//    }
+//    SquaredEuclideanPoint testPoint1(testVector1), testPoint2(testVector2), testPoint3(testVector3);
+//    ArmKNN<SquaredEuclideanPoint> arm1(1, testPoint2, testPoint1), arm2 (2, testPoint3, testPoint1);
+//
+//    std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
+//    armsVec.push_back(arm1);
+//    armsVec.push_back(arm2);
+//
     float delta(0.1);
     UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
 
-    UCB1.initialise();
-    std::cout << armsVec[1].numberOfPulls<<std::endl;
-    std::cout << UCB1.globalSumOfPulls<<std::endl;
-    std::cout << UCB1.arms.top().estimateOfMean << std::endl;
+    std::cout << "adfjkha"<< std::endl;
+    UCB1.initialise(100);
+    std::cout << "adfjkha"<< std::endl;
+    UCB1.runUCB(100);
 
+//    std::cout << armsVec[1].numberOfPulls<<std::endl;
+    std::cout << UCB1.globalSumOfPulls<<std::endl;
+    std::cout << "sigma " << UCB1.globalSigma<<std::endl;
+    std::cout << UCB1.arms.top().estimateOfMean << std::endl;
+    std::cout << UCB1.arms.top().id << std::endl;
+//
     std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
     std::cout << hackedArmsVec[0].numberOfPulls<<std::endl;
     std::cout << hackedArmsVec[1].numberOfPulls<<std::endl;
