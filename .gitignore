@@ -1,3 +1,6 @@
+# CLion stuff
+.idea/
+
 # Prerequisites
 *.d
 
