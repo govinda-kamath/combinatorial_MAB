@@ -16,9 +16,9 @@ public:
     Point(std::vector <float> p){
         point = p;
     }
-    ~Point () {
-        delete &point;
-}
+//    ~Point () {
+//        delete &point;
+//}
 
     virtual float distance(const Point& p1){}
     virtual float sampledDistance(const Point& p1){}
@@ -55,7 +55,7 @@ public:
     }
 };
 
-
+template <class templatePoint>
 class Arm {
 public:
     int numberOfPulls;
@@ -65,7 +65,7 @@ public:
     float estimateOfMean;
     float estimateOfSecondMoment;
     float SumOfSquaresOfPulls;
-    Point * point;
+    templatePoint * point;
 
     Arm(){
         numberOfPulls = 0;
@@ -77,21 +77,21 @@ public:
         estimateOfSecondMoment = NAN;
     }
 
-    Arm(SquaredEuclideanPoint p){
+    Arm(templatePoint p){
         Arm();
-        point = new SquaredEuclideanPoint(p.point);
+        point = new templatePoint(p.point);
     }
 
-    ~Arm(){
-        delete &numberOfPulls;
-        delete &sumOfPulls;
-        delete &upperConfidenceBound;
-        delete &lowerConfidenceBound;
-        delete &estimateOfMean;
-        delete &estimateOfSecondMoment;
-        delete &SumOfSquaresOfPulls;
-        delete &point;
-    }
+//    ~Arm(){
+//        delete &numberOfPulls;
+//        delete &sumOfPulls;
+//        delete &upperConfidenceBound;
+//        delete &lowerConfidenceBound;
+//        delete &estimateOfMean;
+//        delete &estimateOfSecondMoment;
+//        delete &SumOfSquaresOfPulls;
+//        delete &point;
+//    }
 
     void printArm(){
         std::cout << "Number of pulls" << numberOfPulls
@@ -112,7 +112,7 @@ public:
         lowerConfidenceBound = std::min((float)0.0, estimateOfMean - intervalWidth);
     }
 
-    float pullArm(const SquaredEuclideanPoint &p1, float globalSigma,
+    float pullArm(const templatePoint &p1, float globalSigma,
                             float logDeltaInverse, bool update = true) {
         float sample;
 
@@ -131,42 +131,44 @@ public:
     }
 
 
-    float trueMean(const SquaredEuclideanPoint &p1){
+    float trueMean(const templatePoint &p1){
         return point->distance(p1);
     }
 
 
 };
 
-template <class T>
 
-class ArmKNN : public Arm{
+template <class templatePoint>
+class ArmKNN : public Arm<templatePoint>{
 public:
-    T *fixedPoint;
+    templatePoint *fixedPoint;
 
-    ArmKNN(T p) : Arm(p) {}
+    ArmKNN(templatePoint p) : Arm<templatePoint>(p) {}
 
-    ArmKNN(T p, T fixPoint) : Arm(p) {
-        fixedPoint = new T(fixPoint.point);
+    ArmKNN(templatePoint p, templatePoint fixPoint) : Arm<templatePoint>(p) {
+        fixedPoint = new templatePoint(fixPoint.point);
     }
 
-    using Arm::pullArm;
+    using Arm<templatePoint>::pullArm;
     float pullArm(float globalSigma, float logDeltaInverse, bool update = true){
         pullArm(*fixedPoint, globalSigma, logDeltaInverse, update);
     }
 
 };
 
-bool armsLessThan(const Arm& l, const Arm& r)
+template <class templatePoint>
+bool armsLessThan(const Arm<templatePoint>& l, const Arm<templatePoint>& r)
 {
     return l.lowerConfidenceBound < r.lowerConfidenceBound;
 }
 
+template <class templateArm>
 class UCB{
 public:
     unsigned numberOfArms;
-    std::vector<Arm> armsContainer;
-    std::priority_queue<Arm, std::vector<Arm> > arms;
+    std::vector<templateArm> armsContainer;
+    std::priority_queue<templateArm, std::vector<templateArm> > arms;
     float logDeltaInverse;
 
     float globalSigma;
@@ -175,16 +177,10 @@ public:
     float globalSumOfSquaresOfPulls;
 
 
-    UCB(std::vector<Arm> armsContainer, float delta){
+    UCB(std::vector<templateArm> armsVec, float delta){
 
+        armsContainer = armsVec;
         numberOfArms = armsContainer.size();
-
-//        for (std::vector<Arm>::const_iterator it = armsContainer.begin(); it != armsContainer.end(); ++it){
-////            it->pullArm()
-//        }
-
-        for (std::vector<Arm>::const_iterator it = armsContainer.begin(); it != armsContainer.end(); ++it)
-            arms.push(*it);
 
         logDeltaInverse = std::log(1/delta);
 
@@ -192,8 +188,30 @@ public:
         globalNumberOfPulls = 0;
         globalSumOfPulls = 0;
         globalSumOfSquaresOfPulls = 0;
+
     }
 
+    void initialise(int numberOfInitialPulls = 100){
+
+        for (typename std::vector<templateArm>::const_iterator it = armsContainer.begin();
+             it != armsContainer.end(); ++it){
+            for (unsigned i = 0; i < numberOfInitialPulls; i++) {
+                float observedSample;
+                observedSample = it->pullArm(NAN, NAN, false);
+                globalSumOfPulls += observedSample;
+                globalSumOfSquaresOfPulls += observedSample * observedSample;
+            }
+        }
+
+        globalNumberOfPulls = numberOfInitialPulls*armsContainer.size();
+        globalSigma = (globalSumOfSquaresOfPulls - std::pow(globalSumOfPulls,2))/globalNumberOfPulls;
+
+        for (typename std::vector<templateArm>::const_iterator it = armsContainer.begin();
+             it != armsContainer.end(); ++it){
+            it->updateConfidenceIntervals(globalSigma, logDeltaInverse);
+            arms.push(*it);
+        }
+    }
 
 
 };
@@ -201,7 +219,13 @@ public:
 
 
 int main(int argc, char *argv[]){
-   Test s("Joe");
-   s.display();
-   return 0;
+
+    float testArray[4] = {0, 1, 3, 5};
+    std::vector<float> testVector ;
+    for (int index=0; index<4; index++) {
+        testVector.push_back(index);
+        std::cout << index <<std::endl;
+    }
+    SquaredEuclideanPoint testPoint(testVector);
+    return 0;
 }
