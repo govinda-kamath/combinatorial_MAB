@@ -55,6 +55,8 @@ public:
     }
 };
 
+
+
 template <class templatePoint>
 class Arm {
 public:
@@ -66,6 +68,7 @@ public:
     float estimateOfSecondMoment;
     float SumOfSquaresOfPulls;
     templatePoint * point;
+    unsigned long id;
 
     Arm(){
         numberOfPulls = 0;
@@ -77,8 +80,9 @@ public:
         estimateOfSecondMoment = NAN;
     }
 
-    Arm(templatePoint p){
+    Arm(unsigned long armNumber, templatePoint p){
         Arm();
+        id = armNumber;
         point = new templatePoint(p.point);
     }
 
@@ -135,9 +139,9 @@ class ArmKNN : public Arm<templatePoint>{
 public:
     templatePoint *fixedPoint;
 
-    ArmKNN(templatePoint p) : Arm<templatePoint>(p) {}
+    ArmKNN(unsigned long id, templatePoint p) : Arm<templatePoint>(id, p) {}
 
-    ArmKNN(templatePoint p, templatePoint fixPoint) : Arm<templatePoint>(p) {
+    ArmKNN(unsigned long id, templatePoint p, templatePoint fixPoint) : Arm<templatePoint>(id, p) {
         fixedPoint = new templatePoint(fixPoint.point);
     }
 
@@ -192,7 +196,7 @@ public:
 
     void initialise(int numberOfInitialPulls = 100){
 
-          for (int index =0; index < armsContainer.size(); index++){
+        for (int index = 0; index < armsContainer.size(); index++){
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
                 observedSample = armsContainer[index].pullArm(0, 0, false);
@@ -212,6 +216,36 @@ public:
         }
     }
 
+    void runUCB(unsigned maxIterations){
+        for (unsigned i(0); i < maxIterations; i++){
+            bool stop;
+            stop = iterationOfUCB();
+            if (stop){
+                break;
+            }
+        }
+    }
+
+    bool iterationOfUCB(){
+        templateArm bestArm = arms.pop();
+        templateArm secondBestArm = arms.top();
+        float UCBofBestArm, LCBofSecondBestArm;
+        UCBofBestArm = bestArm.upperConfidenceBound;
+        LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
+        if (UCBofBestArm < LCBofSecondBestArm){
+            arms.push(bestArm);
+            return true;
+        } else {
+            float sample;
+            sample = bestArm.pullArm(globalSigma, logDeltaInverse);
+            globalSumOfPulls += sample;
+            globalSumOfSquaresOfPulls += std::pow(sample,2);
+            globalNumberOfPulls++;
+            globalSigma = (globalSumOfSquaresOfPulls - std::pow(globalSumOfPulls,2))/globalNumberOfPulls;
+            arms.push(bestArm);
+        }
+        return  false;
+    }
 };
 
 
@@ -226,7 +260,7 @@ int main(int argc, char *argv[]){
         testVector3.push_back(index-1);
     }
     SquaredEuclideanPoint testPoint1(testVector1), testPoint2(testVector2), testPoint3(testVector3);
-    ArmKNN<SquaredEuclideanPoint> arm1(testPoint2, testPoint1), arm2 (testPoint3, testPoint1);
+    ArmKNN<SquaredEuclideanPoint> arm1(1, testPoint2, testPoint1), arm2 (2, testPoint3, testPoint1);
 
     std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
     armsVec.push_back(arm1);
