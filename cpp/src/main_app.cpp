@@ -76,7 +76,7 @@ template <class templatePoint>
 class Arm {
     /* A base class of arms */
 public:
-    int numberOfPulls;
+    unsigned long numberOfPulls;
     float sumOfPulls;
     float upperConfidenceBound;
     float lowerConfidenceBound;
@@ -219,7 +219,7 @@ public:
 
     void initialise(int numberOfInitialPulls = 100){
 
-        for (int index = 0; index < armsContainer.size(); index++){
+        for (unsigned long index = 0; index < armsContainer.size(); index++){
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
                 observedSample = armsContainer[index].pullArm(0, 0, false);
@@ -237,7 +237,7 @@ public:
         std::cout << "Second Moment after initialization " << globalSumOfSquaresOfPulls/globalNumberOfPulls <<std::endl;
 #endif
 
-        for (int index =0; index < armsContainer.size(); index++){
+        for (unsigned long index = 0; index < armsContainer.size(); index++){
 
             armsContainer[index].updateConfidenceIntervals(globalSigma, logDeltaInverse);
             arms.push(armsContainer[index]);
@@ -317,9 +317,24 @@ int main(int argc, char *argv[]){
     UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
 
     UCB1.initialise(50);
+    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+#ifdef DEBUG
+    for(unsigned i=0; i< hackedArmsVec.size(); i++){
+        std::cout << hackedArmsVec[i].id <<" True Mean= "<< armsVec[hackedArmsVec[i].id].trueMean()
+                  << " sigma = " << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls/hackedArmsVec[i].numberOfPulls -
+                                               std::pow(hackedArmsVec[i].sumOfPulls/hackedArmsVec[i].numberOfPulls,2)))
+                  << " estimate = " << hackedArmsVec[i].estimateOfMean << " total pulls="
+                  << hackedArmsVec[i].numberOfPulls << std::endl;
+    }
+
+    std::cout << "average pull " << UCB1.globalNumberOfPulls/armsVec.size()<<std::endl;
+    std::cout << "sigma " << UCB1.globalSigma<<std::endl;
+    std::cout << "best arm's estimate "<<UCB1.arms.top().estimateOfMean << std::endl;
+    std::cout << UCB1.arms.top().id << std::endl;
+#endif
     UCB1.runUCB(1000);
 
-    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+//    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
     for(unsigned i=0; i< hackedArmsVec.size(); i++){
         std::cout << hackedArmsVec[i].id <<" True Mean= "<< armsVec[hackedArmsVec[i].id].trueMean()
