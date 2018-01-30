@@ -286,7 +286,7 @@ int main(int argc, char *argv[]){
 
     std::string filePath, line;
     filePath = "/Users/govinda/Code/combinatorial_MAB/test_dataset/1000_images.txt";
-    std::fstream fileReader(filePath);
+    std::fstream fileReader(filePath.c_str());
     unsigned long pointIndex(0);
 
     std::vector<SquaredEuclideanPoint > pointsVec;
