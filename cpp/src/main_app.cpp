@@ -272,19 +272,22 @@ public:
         templateArm bestArm = arms.top();
         arms.pop();
         templateArm secondBestArm = arms.top();
-        float UCBofBestArm, LCBofSecondBestArm;
+        float UCBofBestArm, LCBofBestArm, LCBofSecondBestArm;
         UCBofBestArm = bestArm.upperConfidenceBound;
+        LCBofBestArm = bestArm.lowerConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         if (UCBofBestArm < LCBofSecondBestArm){
             //Checking if UCB should stop
             arms.push(bestArm);
+#ifdef DEBUG
             std::cout << "stopping UCB "<< UCBofBestArm << std::endl;
             std::cout << "stopping LCB "<< LCBofSecondBestArm << std::endl;
+#endif
             return true;
         } else {
             float sample;
             sample = bestArm.pullArm(globalSigma, logDeltaInverse);
-            if (bestArm.upperConfidenceBound == bestArm.lowerConfidenceBound){
+            if (UCBofBestArm == LCBofBestArm){
                 //Checking if the best arm is being computed in full and updating
                 //things accordingly.
                 unsigned long dimension(bestArm.dimension);
