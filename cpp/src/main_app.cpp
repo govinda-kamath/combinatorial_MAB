@@ -79,6 +79,7 @@ public:
     float estimateOfMean;
     float estimateOfSecondMoment;
     float SumOfSquaresOfPulls;
+    unsigned long dimension;
     templatePoint * point;
     unsigned long id;
 
@@ -95,6 +96,7 @@ public:
     Arm(unsigned long armNumber, templatePoint p) : Arm() {
         id = armNumber;
         point = new templatePoint(p.point);
+        dimension = point->point.size();
     }
 
     ~Arm(){
@@ -124,16 +126,28 @@ public:
                             float logDeltaInverse, bool update = true) {
         float sample;
 
-        sample = point->sampledDistance(p1);
+        if (numberOfPulls >= dimension){
+            sample = point->distance(p1)/dimension;
+            numberOfPulls += dimension;
+            estimateOfMean = sample;
+            upperConfidenceBound = estimateOfMean;
+            lowerConfidenceBound = estimateOfMean;
+            sumOfPulls += sample*dimension;
+            SumOfSquaresOfPulls += std::pow(sample,2)*dimension;
+            estimateOfSecondMoment = sample*sample;
+        }
+        else {
+            sample = point->sampledDistance(p1);
 
-        numberOfPulls ++;
-        sumOfPulls += sample;
-        estimateOfMean = sumOfPulls/numberOfPulls;
-        SumOfSquaresOfPulls += sample*sample;
-        estimateOfSecondMoment = SumOfSquaresOfPulls/numberOfPulls;
+            numberOfPulls++;
+            sumOfPulls += sample;
+            estimateOfMean = sumOfPulls / numberOfPulls;
+            SumOfSquaresOfPulls += sample * sample;
+            estimateOfSecondMoment = SumOfSquaresOfPulls / numberOfPulls;
 
-        if (update)
-            updateConfidenceIntervals(globalSigma,logDeltaInverse);
+            if (update)
+                updateConfidenceIntervals(globalSigma, logDeltaInverse);
+        }
 
         return sample;
     }
@@ -227,9 +241,12 @@ public:
                                     std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
 #ifdef DEBUG
         std::cout << "Sigma after initialization " << globalSigma <<std::endl;
-        std::cout << "Mean after initialization " << globalSumOfPulls/globalNumberOfPulls <<std::endl;
-        std::cout << "Mean Squared after initialization " << std::pow(globalSumOfPulls/globalNumberOfPulls,2) <<std::endl;
-        std::cout << "Second Moment after initialization " << globalSumOfSquaresOfPulls/globalNumberOfPulls <<std::endl;
+        std::cout << "Mean after initialization "
+                  << globalSumOfPulls/globalNumberOfPulls <<std::endl;
+        std::cout << "Mean Squared after initialization "
+                  << std::pow(globalSumOfPulls/globalNumberOfPulls,2) <<std::endl;
+        std::cout << "Second Moment after initialization "
+                  << globalSumOfSquaresOfPulls/globalNumberOfPulls <<std::endl;
 #endif
 
         for (unsigned long index = 0; index < armsContainer.size(); index++){
@@ -240,8 +257,8 @@ public:
 
     }
 
-    void runUCB(unsigned maxIterations){
-        for (unsigned i(0); i < maxIterations; i++){
+    void runUCB(unsigned long maxIterations){
+        for (unsigned long i(0); i < maxIterations; i++){
             bool stop;
             stop = iterationOfUCB();
             if (stop){
@@ -259,16 +276,29 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         if (UCBofBestArm < LCBofSecondBestArm){
+            //Checking if UCB should stop
             arms.push(bestArm);
+            std::cout << "stopping UCB "<< UCBofBestArm << std::endl;
+            std::cout << "stopping LCB "<< LCBofSecondBestArm << std::endl;
             return true;
         } else {
             float sample;
             sample = bestArm.pullArm(globalSigma, logDeltaInverse);
-            globalSumOfPulls += sample;
-            globalSumOfSquaresOfPulls += std::pow(sample,2);
-            globalNumberOfPulls++;
-            globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
-                                     std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
+            if (bestArm.upperConfidenceBound == bestArm.lowerConfidenceBound){
+                //Checking if the best arm is being computed in full and updating
+                //things accordingly.
+                unsigned long dimension(bestArm.dimension);
+                globalNumberOfPulls += dimension;
+                globalSumOfPulls += sample*dimension;
+                globalSumOfSquaresOfPulls += std::pow(sample, 2)*dimension;
+            }
+            else {
+                globalSumOfPulls += sample;
+                globalSumOfSquaresOfPulls += std::pow(sample, 2);
+                globalNumberOfPulls++;
+            }
+            globalSigma = std::sqrt((globalSumOfSquaresOfPulls / globalNumberOfPulls -
+                                     std::pow(globalSumOfPulls / globalNumberOfPulls, 2)));
             arms.push(bestArm);
         }
         return  false;
@@ -336,7 +366,7 @@ int main(int argc, char *argv[]){
     std::cout << "best arm's estimate "<<UCB1.arms.top().estimateOfMean << std::endl;
     std::cout << UCB1.arms.top().id << std::endl;
 #endif
-    UCB1.runUCB(1000);
+    UCB1.runUCB(10000000000);
 
 //    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
@@ -344,7 +374,10 @@ int main(int argc, char *argv[]){
         std::cout << hackedArmsVec[i].id <<" True Mean= "<< armsVec[hackedArmsVec[i].id].trueMean()
                 << " sigma = " << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls/hackedArmsVec[i].numberOfPulls -
                                              std::pow(hackedArmsVec[i].sumOfPulls/hackedArmsVec[i].numberOfPulls,2)))
-                << " estimate = " << hackedArmsVec[i].estimateOfMean << " total pulls="
+                << " estimate = " << hackedArmsVec[i].estimateOfMean
+                  << " lcb = " << hackedArmsVec[i].lowerConfidenceBound
+                << " ucb = " << hackedArmsVec[i].upperConfidenceBound
+                  << " total pulls="
                   << hackedArmsVec[i].numberOfPulls << std::endl;
     }
 
