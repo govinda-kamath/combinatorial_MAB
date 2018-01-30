@@ -5,6 +5,8 @@
 #include <vector>
 #include <cassert>
 #include <queue>
+#include <ctime>
+#include <time.h>
 
 #define DEBUG
 
@@ -100,7 +102,7 @@ public:
     }
 
     ~Arm(){
-        delete point; //no clue why this errors out
+//        delete point; //no clue why this errors out
     }
 
     void printArm(){
@@ -174,7 +176,6 @@ public:
 
     using Arm<templatePoint>::pullArm;
     float pullArm(float globalSigma, float logDeltaInverse, bool update = true){
-
         return pullArm(*fixedPoint, globalSigma, logDeltaInverse, update);
     }
 
@@ -228,7 +229,7 @@ public:
 
     void initialise(int numberOfInitialPulls = 100){
 
-        for (unsigned long index = 0; index < armsContainer.size(); index++){
+        for (unsigned long index = 0; index < numberOfArms; index++){
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
                 observedSample = armsContainer[index].pullArm(0, 0, false);
@@ -236,7 +237,7 @@ public:
                 globalSumOfSquaresOfPulls += observedSample * observedSample;
             }
         }
-        globalNumberOfPulls = numberOfInitialPulls*armsContainer.size();
+        globalNumberOfPulls = numberOfInitialPulls*numberOfArms;
         globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
                                     std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
 #ifdef DEBUG
@@ -249,7 +250,7 @@ public:
                   << globalSumOfSquaresOfPulls/globalNumberOfPulls <<std::endl;
 #endif
 
-        for (unsigned long index = 0; index < armsContainer.size(); index++){
+        for (unsigned long index = 0; index < numberOfArms; index++){
 
             armsContainer[index].updateConfidenceIntervals(globalSigma, logDeltaInverse);
             arms.push(armsContainer[index]);
@@ -329,6 +330,7 @@ int main(int argc, char *argv[]){
     std::vector<SquaredEuclideanPoint > pointsVec;
     std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
 
+    clock_t t_read = clock();
 
     while(std::getline(fileReader, line)){
         float tmpValue;
@@ -352,8 +354,11 @@ int main(int argc, char *argv[]){
 
 
     UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
-
+    std::cout << "Reading time (ms)" << 1000*(clock() - t_read)/CLOCKS_PER_SEC << std::endl;
+    clock_t t_init = clock();
     UCB1.initialise(numberOfInitialPulls);
+    std::cout << "Initializing time (ms)" << 1000*(clock() - t_init)/CLOCKS_PER_SEC << std::endl;
+
     std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
     for(unsigned i=0; i< hackedArmsVec.size(); i++){
@@ -369,7 +374,9 @@ int main(int argc, char *argv[]){
     std::cout << "best arm's estimate "<<UCB1.arms.top().estimateOfMean << std::endl;
     std::cout << UCB1.arms.top().id << std::endl;
 #endif
+    clock_t t_iterate = clock();
     UCB1.runUCB(10000000000);
+    std::cout << "Iteration time (ms) " << 1000*(clock() - t_iterate)/CLOCKS_PER_SEC << std::endl;
 
 //    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
