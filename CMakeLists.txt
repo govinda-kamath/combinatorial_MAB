@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(combinatorial_MAB)
+set(CMAKE_CXX_STANDARD 11)
 
 #Bring the headers, such as Student.h into the project
 include_directories(cpp/include)

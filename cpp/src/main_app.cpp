@@ -283,9 +283,16 @@ public:
 
 int main(int argc, char *argv[]){
 
-    std::string filePath, line;
-    filePath = "/Users/govinda/Code/combinatorial_MAB/test_dataset/1000_images.txt";
-    filePath ="/data/MAB/work/dataset/test_dataset/basic_io_dataset/10k_images.txt";
+    std::cout << "We have entered " << argc
+         << " arguments." << std::endl;
+
+
+
+    std::string filePath(argv[1]), line;
+    int numberOfInitialPulls(atoi(argv[2]));
+
+//    filePath = "/Users/govinda/Code/combinatorial_MAB/test_dataset/1000_images.txt";
+//    filePath ="/data/MAB/work/dataset/test_dataset/basic_io_dataset/10k_images.txt";
     std::fstream fileReader(filePath.c_str());
     unsigned long pointIndex(0);
 
@@ -316,7 +323,7 @@ int main(int argc, char *argv[]){
     float delta(0.01);
     UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
 
-    UCB1.initialise(200);
+    UCB1.initialise(numberOfInitialPulls);
     std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
     for(unsigned i=0; i< hackedArmsVec.size(); i++){
