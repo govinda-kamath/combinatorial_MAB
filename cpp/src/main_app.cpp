@@ -4,11 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <cassert>
-#include <algorithm>
-#include <string>
-#include <cstdlib>
 #include <queue>
-#include <utility>
 
 #define DEBUG
 
@@ -290,6 +286,7 @@ int main(int argc, char *argv[]){
 
     std::string filePath(argv[1]), line;
     int numberOfInitialPulls(atoi(argv[2]));
+    float delta(atof(argv[3]));
 
 //    filePath = "/Users/govinda/Code/combinatorial_MAB/test_dataset/1000_images.txt";
 //    filePath ="/data/MAB/work/dataset/test_dataset/basic_io_dataset/10k_images.txt";
@@ -320,7 +317,7 @@ int main(int argc, char *argv[]){
         armsVec.push_back(tmpArm);
     }
 
-    float delta(0.01);
+
     UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
 
     UCB1.initialise(numberOfInitialPulls);
