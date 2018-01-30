@@ -19,7 +19,7 @@ class Point {
  * */
 public:
     std::vector <float> point;
-    Point(std::vector <float> p){
+    explicit Point(std::vector <float> p){
         point = p;
     }
     ~Point () {
@@ -34,7 +34,7 @@ class SquaredEuclideanPoint : public Point{
 /* Points in Squared Euclidean space
  * */
 public:
-    SquaredEuclideanPoint(std::vector<float> p) : Point(p){}
+    explicit SquaredEuclideanPoint(std::vector<float> p) : Point(p){}
 
     /*Computes the exact distance between two points.
      * Used only for debug purposes*/
@@ -100,7 +100,7 @@ public:
     }
 
     ~Arm(){
-//        delete &point; //no clue why this errors out
+        delete point; //no clue why this errors out
     }
 
     void printArm(){
@@ -127,7 +127,7 @@ public:
         float sample;
 
         if (numberOfPulls >= dimension){
-            sample = point->distance(p1)/dimension;
+            sample = trueMean(p1);
             numberOfPulls += dimension;
             estimateOfMean = sample;
             upperConfidenceBound = estimateOfMean;
