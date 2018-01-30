@@ -330,7 +330,7 @@ int main(int argc, char *argv[]){
     std::vector<SquaredEuclideanPoint > pointsVec;
     std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
 
-    clock_t t_read = clock();
+    clock_t timeRead = clock();
 
     while(std::getline(fileReader, line)){
         float tmpValue;
@@ -354,10 +354,10 @@ int main(int argc, char *argv[]){
 
 
     UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
-    std::cout << "Reading time (ms)" << 1000*(clock() - t_read)/CLOCKS_PER_SEC << std::endl;
-    clock_t t_init = clock();
+    std::cout << "Reading time (ms)" << 1000*(clock() - timeRead)/CLOCKS_PER_SEC << std::endl;
+    clock_t timeInitialize = clock();
     UCB1.initialise(numberOfInitialPulls);
-    std::cout << "Initializing time (ms)" << 1000*(clock() - t_init)/CLOCKS_PER_SEC << std::endl;
+    std::cout << "Initializing time (ms)" << 1000*(clock() - timeInitialize)/CLOCKS_PER_SEC << std::endl;
 
     std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
@@ -374,11 +374,18 @@ int main(int argc, char *argv[]){
     std::cout << "best arm's estimate "<<UCB1.arms.top().estimateOfMean << std::endl;
     std::cout << UCB1.arms.top().id << std::endl;
 #endif
-    clock_t t_iterate = clock();
+    clock_t timeIterate = clock();
     UCB1.runUCB(10000000000);
-    std::cout << "Iteration time (ms) " << 1000*(clock() - t_iterate)/CLOCKS_PER_SEC << std::endl;
+    std::cout << "Iteration time (ms) " << 1000*(clock() - timeIterate)/CLOCKS_PER_SEC << std::endl;
 
 //    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+    clock_t timeTrueMean = clock();
+
+    for(unsigned i=0; i< hackedArmsVec.size(); i++){
+        float tmp = armsVec[hackedArmsVec[i].id].trueMean();
+    }
+    std::cout << "True Mean time (ms) " << 1000*(clock() - timeTrueMean)/CLOCKS_PER_SEC << std::endl;
+
 #ifdef DEBUG
     for(unsigned i=0; i< hackedArmsVec.size(); i++){
         std::cout << hackedArmsVec[i].id <<" True Mean= "<< armsVec[hackedArmsVec[i].id].trueMean()
