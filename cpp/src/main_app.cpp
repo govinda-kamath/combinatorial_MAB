@@ -5,6 +5,9 @@
 #include <vector>
 #include <cassert>
 #include <queue>
+#include <dlib/image_io.h>
+#include <dlib/image_transforms.h>
+#include <glob.h>
 
 #define DEBUG
 
@@ -100,7 +103,7 @@ public:
     }
 
     ~Arm(){
-        delete point; //no clue why this errors out
+//        delete point; //no clue why this errors out
     }
 
     void printArm(){
@@ -308,86 +311,208 @@ public:
     }
 };
 
+void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
+
+    dlib::array2d <dlib::rgb_pixel> imageRGB;
+    dlib::load_image(imageRGB, filePath.c_str());
+    unsigned  numColumns(imageRGB.nc()), numRows(imageRGB.nr());
+    unsigned numPixels(numColumns*numRows);
+    unsigned vecLength(numPixels*3);
+
+//    std::cout << numColumns <<"\t" << numRows <<
+//              "\t" << numPixels << "\t" << vecLength << std::endl;
+
+    if (imageVec.size() != vecLength){
+
+//        std::cout << "initialising" << std::endl;
+        imageVec.clear();
+        imageVec.reserve(vecLength);
+
+        for (unsigned i(0); i < numRows; i++){
+            for (unsigned j(0); j < numColumns; j++) {
+                imageVec.push_back((float) imageRGB[i][j].red);
+            }
+        }
+
+
+
+        for (unsigned i(0); i < numRows; i++){
+            for (unsigned j(0); j < numColumns; j++) {
+                imageVec.push_back((float) imageRGB[i][j].blue);
+            }
+        }
+
+        for (unsigned i(0); i < numRows; i++){
+            for (unsigned j(0); j < numColumns; j++) {
+                imageVec.push_back((float) imageRGB[i][j].green);
+            }
+        }
+
+    } else {
+
+        for (unsigned i(0); i < numRows; i++) {
+            for (unsigned j(0); j < numColumns; j++) {
+                imageVec[i * numRows + j] = (float) imageRGB[i][j].red;
+            }
+        }
+
+        for (unsigned i(0); i < numRows; i++) {
+            for (unsigned j(0); j < numColumns; j++) {
+                imageVec[numPixels + i * numRows + j] = (float) imageRGB[i][j].blue;
+            }
+        }
+
+        for (unsigned i(0); i < numRows; i++) {
+            for (unsigned j(0); j < numColumns; j++) {
+                imageVec[2 * numPixels + i * numRows + j] = (float) imageRGB[i][j].green;
+            }
+        }
+    }
+}
 
 
 int main(int argc, char *argv[]){
 
+
+
     std::cout << "We have entered " << argc
          << " arguments." << std::endl;
 
+    std::vector<SquaredEuclideanPoint> pointsVec;
+    std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
+    int numberOfInitialPulls(200);
+    float delta(0.001);
+
+    if(argc != 4) {
+
+//        std::string filePathTest("/Users/govinda/Code/combinatorial_MAB/val_27.JPEG");
+//        readImageAsVector(filePathTest,tmpVectorImage);
+//        std::cout << "length of read vector " << tmpVectorImage.size() << std::endl;
+//        readImageAsVector(filePathTest,tmpVectorImage);
+//        std::cout << "length of read vector " << tmpVectorImage.size() << std::endl;
+
+        glob_t glob_result;
+        std::vector<float> tmpVec;
+
+        std::string directoryPath("/Users/govinda/Code/combinatorial_MAB/test_dataset/tiny-imagenet-200/test/images");
+        unsigned long fileNumber(0);
+        std::string search_name;
+
+        std::vector<std::string> pathsToImages;
+        search_name = directoryPath + "/test_"+std::to_string(fileNumber)+".JPEG";
+        std::cout << search_name << std::endl;
+
+        glob(search_name.c_str(),GLOB_TILDE,NULL,&glob_result);
+
+        while (glob_result.gl_pathc != 0){
+//            std::cout << std::string(glob_result.gl_pathv[0]) << std::endl;
+
+            pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
+            fileNumber ++;
+            search_name = directoryPath + "/test_"+std::to_string(fileNumber)+".JPEG";
+            glob(search_name.c_str(),GLOB_TILDE,NULL,&glob_result);
+//            std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
+        }
 
 
-    std::string filePath(argv[1]), line;
-    int numberOfInitialPulls(atoi(argv[2]));
-    float delta(atof(argv[3]));
+        unsigned long pointIndex(0);
+
+
+
+
+        for  (unsigned long i(0); i < pathsToImages.size(); i++) {
+            float tmpValue;
+
+            std::vector<float> tmpVec;
+            SquaredEuclideanPoint tmpPoint(tmpVec);
+
+            readImageAsVector(pathsToImages[i],tmpVec);
+
+            pointsVec.push_back(tmpPoint);
+            pointIndex++;
+
+            if (pointIndex%1000 == 999){
+                std::cout << pointIndex+1 << " points read." << std::endl;
+            }
+
+        }
+
+
+
+
+    } else {
+        std::string filePath(argv[1]), line;
+        int numberOfInitialPulls(atoi(argv[2]));
+        float delta(atof(argv[3]));
 
 //    filePath = "/Users/govinda/Code/combinatorial_MAB/test_dataset/1000_images.txt";
 //    filePath ="/data/MAB/work/dataset/test_dataset/basic_io_dataset/10k_images.txt";
-    std::fstream fileReader(filePath.c_str());
-    unsigned long pointIndex(0);
-
-    std::vector<SquaredEuclideanPoint > pointsVec;
-    std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
+        std::fstream fileReader(filePath.c_str());
+        unsigned long pointIndex(0);
 
 
-    while(std::getline(fileReader, line)){
-        float tmpValue;
+        while (std::getline(fileReader, line)) {
+            float tmpValue;
 
-        std::vector<float> tmpVec;
-        std::stringstream ss(line);
-        while (ss >> tmpValue){
-            tmpVec.push_back(tmpValue);
+            std::vector<float> tmpVec;
+            std::stringstream ss(line);
+            while (ss >> tmpValue) {
+                tmpVec.push_back(tmpValue);
+            }
+            SquaredEuclideanPoint tmpPoint(tmpVec);
+
+            pointsVec.push_back(tmpPoint);
+            pointIndex++;
+
         }
-        SquaredEuclideanPoint tmpPoint(tmpVec);
-
-        pointsVec.push_back(tmpPoint);
-        pointIndex++;
-
-    }
-
-    for (unsigned i(1); i < pointsVec.size(); i++){
-        ArmKNN<SquaredEuclideanPoint> tmpArm(i-1, pointsVec[i], pointsVec[0]);
-        armsVec.push_back(tmpArm);
-    }
 
 
-    UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
+        for (unsigned i(1); i < pointsVec.size(); i++) {
+            ArmKNN<SquaredEuclideanPoint> tmpArm(i - 1, pointsVec[i], pointsVec[0]);
+            armsVec.push_back(tmpArm);
+        }
 
-    UCB1.initialise(numberOfInitialPulls);
-    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+
+        UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
+
+        UCB1.initialise(numberOfInitialPulls);
+        std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
-    for(unsigned i=0; i< hackedArmsVec.size(); i++){
-        std::cout << hackedArmsVec[i].id <<" True Mean= "<< armsVec[hackedArmsVec[i].id].trueMean()
-                  << " sigma = " << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls/hackedArmsVec[i].numberOfPulls -
-                                               std::pow(hackedArmsVec[i].sumOfPulls/hackedArmsVec[i].numberOfPulls,2)))
-                  << " estimate = " << hackedArmsVec[i].estimateOfMean << " total pulls="
-                  << hackedArmsVec[i].numberOfPulls << std::endl;
-    }
+        for (unsigned i = 0; i < hackedArmsVec.size(); i++) {
+            std::cout << hackedArmsVec[i].id << " True Mean= " << armsVec[hackedArmsVec[i].id].trueMean()
+                      << " sigma = "
+                      << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls / hackedArmsVec[i].numberOfPulls -
+                                    std::pow(hackedArmsVec[i].sumOfPulls / hackedArmsVec[i].numberOfPulls, 2)))
+                      << " estimate = " << hackedArmsVec[i].estimateOfMean << " total pulls="
+                      << hackedArmsVec[i].numberOfPulls << std::endl;
+        }
 
-    std::cout << "average pull " << UCB1.globalNumberOfPulls/armsVec.size()<<std::endl;
-    std::cout << "sigma " << UCB1.globalSigma<<std::endl;
-    std::cout << "best arm's estimate "<<UCB1.arms.top().estimateOfMean << std::endl;
-    std::cout << UCB1.arms.top().id << std::endl;
+        std::cout << "average pull " << UCB1.globalNumberOfPulls / armsVec.size() << std::endl;
+        std::cout << "sigma " << UCB1.globalSigma << std::endl;
+        std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
+        std::cout << UCB1.arms.top().id << std::endl;
 #endif
-    UCB1.runUCB(10000000000);
+        UCB1.runUCB(10000000000);
 
 //    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
-    for(unsigned i=0; i< hackedArmsVec.size(); i++){
-        std::cout << hackedArmsVec[i].id <<" True Mean= "<< armsVec[hackedArmsVec[i].id].trueMean()
-                << " sigma = " << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls/hackedArmsVec[i].numberOfPulls -
-                                             std::pow(hackedArmsVec[i].sumOfPulls/hackedArmsVec[i].numberOfPulls,2)))
-                << " estimate = " << hackedArmsVec[i].estimateOfMean
-                  << " lcb = " << hackedArmsVec[i].lowerConfidenceBound
-                << " ucb = " << hackedArmsVec[i].upperConfidenceBound
-                  << " total pulls="
-                  << hackedArmsVec[i].numberOfPulls << std::endl;
-    }
+        for (unsigned i = 0; i < hackedArmsVec.size(); i++) {
+            std::cout << hackedArmsVec[i].id << " True Mean= " << armsVec[hackedArmsVec[i].id].trueMean()
+                      << " sigma = "
+                      << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls / hackedArmsVec[i].numberOfPulls -
+                                    std::pow(hackedArmsVec[i].sumOfPulls / hackedArmsVec[i].numberOfPulls, 2)))
+                      << " estimate = " << hackedArmsVec[i].estimateOfMean
+                      << " lcb = " << hackedArmsVec[i].lowerConfidenceBound
+                      << " ucb = " << hackedArmsVec[i].upperConfidenceBound
+                      << " total pulls="
+                      << hackedArmsVec[i].numberOfPulls << std::endl;
+        }
 
-    std::cout << "average pull " << UCB1.globalNumberOfPulls/armsVec.size()<<std::endl;
-    std::cout << "sigma " << UCB1.globalSigma<<std::endl;
-    std::cout << "best arm's estimate "<<UCB1.arms.top().estimateOfMean << std::endl;
-    std::cout << UCB1.arms.top().id << std::endl;
+        std::cout << "average pull " << UCB1.globalNumberOfPulls / armsVec.size() << std::endl;
+        std::cout << "sigma " << UCB1.globalSigma << std::endl;
+        std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
+        std::cout << UCB1.arms.top().id << std::endl;
 #endif
+    }
     return 0;
 }
