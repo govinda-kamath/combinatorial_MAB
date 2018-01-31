@@ -255,7 +255,7 @@ public:
     }
     void initialise(int numberOfInitialPulls = 100){
 
-        unsigned numberOfThreads = //std::thread::hardware_concurrency();
+        unsigned numberOfThreads = /std::thread::hardware_concurrency();
         std::cout << numberOfThreads << " number of threads used in each batch of initialization.\n";
         std::vector<std::thread> initThreads(numberOfThreads);
 
