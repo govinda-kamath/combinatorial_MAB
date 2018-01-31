@@ -8,6 +8,8 @@
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include <glob.h>
+#include <ctime>
+#include <time.h>
 
 #define DEBUG
 
@@ -177,7 +179,6 @@ public:
 
     using Arm<templatePoint>::pullArm;
     float pullArm(float globalSigma, float logDeltaInverse, bool update = true){
-
         return pullArm(*fixedPoint, globalSigma, logDeltaInverse, update);
     }
 
@@ -231,7 +232,7 @@ public:
 
     void initialise(int numberOfInitialPulls = 100){
 
-        for (unsigned long index = 0; index < armsContainer.size(); index++){
+        for (unsigned long index = 0; index < numberOfArms; index++){
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
                 observedSample = armsContainer[index].pullArm(0, 0, false);
@@ -239,7 +240,7 @@ public:
                 globalSumOfSquaresOfPulls += observedSample * observedSample;
             }
         }
-        globalNumberOfPulls = numberOfInitialPulls*armsContainer.size();
+        globalNumberOfPulls = numberOfInitialPulls*numberOfArms;
         globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
                                     std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
 #ifdef DEBUG
@@ -252,7 +253,7 @@ public:
                   << globalSumOfSquaresOfPulls/globalNumberOfPulls <<std::endl;
 #endif
 
-        for (unsigned long index = 0; index < armsContainer.size(); index++){
+        for (unsigned long index = 0; index < numberOfArms; index++){
 
             armsContainer[index].updateConfidenceIntervals(globalSigma, logDeltaInverse);
             arms.push(armsContainer[index]);
@@ -373,8 +374,6 @@ void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
 
 int main(int argc, char *argv[]){
 
-
-
     std::cout << "We have entered " << argc
          << " arguments." << std::endl;
 
@@ -450,6 +449,10 @@ int main(int argc, char *argv[]){
         std::fstream fileReader(filePath.c_str());
         unsigned long pointIndex(0);
 
+    std::vector<SquaredEuclideanPoint > pointsVec;
+    std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
+
+    clock_t timeRead = clock();
 
         while (std::getline(fileReader, line)) {
             float tmpValue;
@@ -473,10 +476,13 @@ int main(int argc, char *argv[]){
         }
 
 
-        UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
+    UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec,delta);
+    std::cout << "Reading time (ms)" << 1000*(clock() - timeRead)/CLOCKS_PER_SEC << std::endl;
+    clock_t timeInitialize = clock();
+    UCB1.initialise(numberOfInitialPulls);
+    std::cout << "Initializing time (ms)" << 1000*(clock() - timeInitialize)/CLOCKS_PER_SEC << std::endl;
 
-        UCB1.initialise(numberOfInitialPulls);
-        std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
 #ifdef DEBUG
         for (unsigned i = 0; i < hackedArmsVec.size(); i++) {
             std::cout << hackedArmsVec[i].id << " True Mean= " << armsVec[hackedArmsVec[i].id].trueMean()
@@ -492,9 +498,18 @@ int main(int argc, char *argv[]){
         std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
         std::cout << UCB1.arms.top().id << std::endl;
 #endif
-        UCB1.runUCB(10000000000);
+    clock_t timeIterate = clock();
+    UCB1.runUCB(10000000000);
+    std::cout << "Iteration time (ms) " << 1000*(clock() - timeIterate)/CLOCKS_PER_SEC << std::endl;
 
 //    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+    clock_t timeTrueMean = clock();
+
+    for(unsigned i=0; i< hackedArmsVec.size(); i++){
+        float tmp = armsVec[hackedArmsVec[i].id].trueMean();
+    }
+    std::cout << "True Mean time (ms) " << 1000*(clock() - timeTrueMean)/CLOCKS_PER_SEC << std::endl;
+
 #ifdef DEBUG
         for (unsigned i = 0; i < hackedArmsVec.size(); i++) {
             std::cout << hackedArmsVec[i].id << " True Mean= " << armsVec[hackedArmsVec[i].id].trueMean()
