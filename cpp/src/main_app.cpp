@@ -232,50 +232,48 @@ public:
 
     }
 
-    void initialiseSingleArm(unsigned long armIindex, int numberOfInitialPulls){
+    void initialiseFewArm(unsigned long armIindex_start, unsigned long armIindex_end, int numberOfInitialPulls){
 
-        float armSumOfPulls, armSumOfSquaresOfPulls;
-        armSumOfPulls = 0;
-        armSumOfSquaresOfPulls = 0;
+        float localSumOfPulls, localSumOfSquaresOfPulls;
+        localSumOfPulls = 0;
+        localSumOfSquaresOfPulls = 0;
         // Pulling an arm numberOfInitialPulls times
-        for (unsigned i = 0; i < numberOfInitialPulls; i++) {
-            float observedSample(0);
-            observedSample = armsContainer[armIindex].pullArm(0, 0, false);
-            armSumOfPulls += observedSample;
-            armSumOfSquaresOfPulls += observedSample * observedSample;
+        for (unsigned long armIndex = armIindex_start; armIndex< armIindex_end; armIndex++) {
+            for (unsigned i = 0; i < numberOfInitialPulls; i++) {
+                float observedSample(0);
+                observedSample = armsContainer[armIndex].pullArm(0, 0, false);
+                localSumOfPulls += observedSample;
+                localSumOfSquaresOfPulls += observedSample * observedSample;
+            }
         }
         // locking the global variables which have to be updated
         {
             std::lock_guard<std::mutex> guard(initializeMutex);
-            globalSumOfPulls += armSumOfPulls;
-            globalSumOfSquaresOfPulls += armSumOfSquaresOfPulls;
+            globalSumOfPulls += localSumOfPulls;
+            globalSumOfSquaresOfPulls += localSumOfSquaresOfPulls;
         }
     }
     void initialise(int numberOfInitialPulls = 100){
 
-        unsigned numberOfThreads = std::thread::hardware_concurrency();
+        unsigned numberOfThreads = 1;//std::thread::hardware_concurrency();
         std::cout << numberOfThreads << " number of threads used in each batch of initialization.\n";
+        std::vector<std::thread> initThreads(numberOfThreads);
 
-        for (unsigned long index = 0; index < std::ceil(numberOfArms/numberOfThreads); index++){
-                std::vector<std::thread> initThreads(numberOfThreads);
+        unsigned long chuckSize = (numberOfArms/numberOfThreads);
+        for(unsigned t = 0; t < numberOfThreads; t++){
+            unsigned long armIndex_start = t*chuckSize;
+            unsigned long armIndex_end = (t+1)*chuckSize;
 
-            for(unsigned t = 0; t < numberOfThreads; t++){
-                unsigned long armIndex = t+ index*numberOfThreads;
-                if (armIndex > numberOfArms)
-                    break;
-//                std::cout << "Starting thread for arm " << armIndex << std::endl;
-                initThreads[t] = std::thread(&UCB::initialiseSingleArm, this, armIndex, numberOfInitialPulls);
-            }
-
-            for(unsigned t = 0; t < numberOfThreads; t++){
-                unsigned long armIndex = t+ index*numberOfThreads;
-                if (armIndex > numberOfArms)
-                    break;
-//                std::cout << "Joining thread for arm " << armIndex << std::endl;
-                initThreads[t].join();
-            }
-
+//          std::cout << "Starting thread for arm " << armIndex << std::endl;
+            initThreads[t] = std::thread(&UCB::initialiseFewArm, this, armIndex_start, armIndex_end, numberOfInitialPulls);
         }
+
+        for(unsigned t = 0; t < numberOfThreads; t++){
+//          std::cout << "Joining thread for arm " << armIndex << std::endl;
+            initThreads[t].join();
+        }
+
+
 
 
         globalNumberOfPulls = numberOfInitialPulls*numberOfArms;
