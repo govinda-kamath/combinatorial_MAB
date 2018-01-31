@@ -7,3 +7,4 @@ public:
 	Test(std::string);
 	virtual void display();
 };
+
