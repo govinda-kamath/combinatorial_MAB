@@ -228,13 +228,13 @@ public:
 
     }
 
-    void initialiseFewArm(unsigned long armIindex_start, unsigned long armIindex_end, int numberOfInitialPulls){
+    void initialiseFewArm(unsigned long armIndexStart, unsigned long armIndexEnd, int numberOfInitialPulls){
 
         float localSumOfPulls, localSumOfSquaresOfPulls;
         localSumOfPulls = 0;
         localSumOfSquaresOfPulls = 0;
         // Pulling an arm numberOfInitialPulls times
-        for (unsigned long armIndex = armIindex_start; armIndex< armIindex_end; armIndex++) {
+        for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
                 observedSample = armsContainer[armIndex].pullArm(0, 0, false);
