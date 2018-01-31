@@ -8,7 +8,7 @@
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include <glob.h>
-
+#include <chrono>
 #define DEBUG
 
 class Point {
@@ -237,7 +237,8 @@ public:
         for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
-                observedSample = armsContainer[armIndex].pullArm(0, 0, false);
+                std::this_thread::sleep_for(700);
+                observedSample = 1; //armsContainer[armIndex].pullArm(0, 0, false);
                 localSumOfPulls += observedSample;
                 localSumOfSquaresOfPulls += observedSample * observedSample;
 
