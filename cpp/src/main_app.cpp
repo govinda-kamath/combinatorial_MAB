@@ -5,6 +5,8 @@
 #include <vector>
 #include <cassert>
 #include <queue>
+#include <thread>
+#include <mutex>
 #include <ctime>
 #include <time.h>
 
@@ -212,7 +214,7 @@ public:
     float globalNumberOfPulls;
     float globalSumOfPulls;
     float globalSumOfSquaresOfPulls;
-
+    std::mutex initializeMutex;
     UCB(std::vector<templateArm> &armsVec, float delta){
 
         armsContainer = armsVec;
@@ -227,16 +229,52 @@ public:
 
     }
 
+    void initialiseSingleArm(unsigned long armIindex, int numberOfInitialPulls){
+
+        float armSumOfPulls, armSumOfSquaresOfPulls;
+        armSumOfPulls = 0;
+        armSumOfSquaresOfPulls = 0;
+        // Pulling an arm numberOfInitialPulls times
+        for (unsigned i = 0; i < numberOfInitialPulls; i++) {
+            float observedSample(0);
+            observedSample = armsContainer[armIindex].pullArm(0, 0, false);
+            armSumOfPulls += observedSample;
+            armSumOfSquaresOfPulls += observedSample * observedSample;
+        }
+        {
+            // locking the global variables which have to be updated
+            std::lock_guard<std::mutex> guard(initializeMutex);
+            globalSumOfPulls += armSumOfPulls;
+            globalSumOfSquaresOfPulls += armSumOfSquaresOfPulls;
+        }
+    }
     void initialise(int numberOfInitialPulls = 100){
 
-        for (unsigned long index = 0; index < numberOfArms; index++){
-            for (unsigned i = 0; i < numberOfInitialPulls; i++) {
-                float observedSample(0);
-                observedSample = armsContainer[index].pullArm(0, 0, false);
-                globalSumOfPulls += observedSample;
-                globalSumOfSquaresOfPulls += observedSample * observedSample;
+        unsigned numberOfThreads = std::thread::hardware_concurrency();
+        std::cout << numberOfThreads << " number of threads used in each batch of initialization.\n";
+
+        for (unsigned long index = 0; index < std::ceil(numberOfArms/numberOfThreads); index++){
+                std::vector<std::thread> initThreads(numberOfThreads);
+
+            for(unsigned t = 0; t < numberOfThreads; t++){
+                unsigned long armIndex = t+ index*numberOfThreads;
+                if (armIndex > numberOfArms)
+                    break;
+//                std::cout << "Starting thread for arm " << armIndex << std::endl;
+                initThreads[t] = std::thread(&UCB::initialiseSingleArm, this, armIndex, numberOfInitialPulls);
             }
+
+            for(unsigned t = 0; t < numberOfThreads; t++){
+                unsigned long armIndex = t+ index*numberOfThreads;
+                if (armIndex > numberOfArms)
+                    break;
+//                std::cout << "Joining thread for arm " << armIndex << std::endl;
+                initThreads[t].join();
+            }
+
         }
+
+
         globalNumberOfPulls = numberOfInitialPulls*numberOfArms;
         globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
                                     std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
@@ -255,7 +293,6 @@ public:
             armsContainer[index].updateConfidenceIntervals(globalSigma, logDeltaInverse);
             arms.push(armsContainer[index]);
         }
-
     }
 
     void runUCB(unsigned long maxIterations){
