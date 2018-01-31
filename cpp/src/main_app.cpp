@@ -8,7 +8,7 @@
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include <glob.h>
-#include <chrono>
+
 #define DEBUG
 
 class Point {
@@ -237,8 +237,8 @@ public:
         for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
-                std::this_thread::sleep_for(700);
-                observedSample = 1; //armsContainer[armIndex].pullArm(0, 0, false);
+//                std::this_thread::sleep_for(700);
+                observedSample = armsContainer[armIndex].pullArm(0, 0, false);
                 localSumOfPulls += observedSample;
                 localSumOfSquaresOfPulls += observedSample * observedSample;
 
@@ -521,8 +521,6 @@ int main(int argc, char *argv[]){
     std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
     std::cout << UCB1.arms.top().id << std::endl;
 #endif
-
-
 
     return 0;
 }
