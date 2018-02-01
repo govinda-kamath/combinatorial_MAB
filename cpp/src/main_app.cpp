@@ -143,8 +143,8 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
 
 //        std::cout << "average pull " << UCB1.globalNumberOfPulls / armsVec.size() << std::endl;
 //        std::cout << "sigma " << UCB1.globalSigma << std::endl;
-    std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
-    std::cout << UCB1.arms.top().id << "\n\n\n" << std::endl;
+//    std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
+//    std::cout << UCB1.arms.top().id << "\n\n\n" << std::endl;
 #endif
 }
 
