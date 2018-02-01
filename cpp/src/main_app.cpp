@@ -8,7 +8,7 @@
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include <glob.h>
-
+#include <chrono>
 #include "Points.h"
 #include "Arms.h"
 #include "UCB.h"
@@ -94,6 +94,7 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
                unsigned long mainPointIndexEnd, int numberOfInitialPulls,
                float delta){
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
+//        std::this_thread::sleep_for(std::chrono::milliseconds(600))
         std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
         std::cout << index << "\t";
         for (unsigned i(0); i < pointsVec.size(); i++) {
@@ -189,21 +190,20 @@ int main(int argc, char *argv[]){
 
     //Parallelize
     clock_t loopTime = clock();
-    std::vector<std::thread> initThreads(numCores);
+//    std::vector<std::thread> initThreads(numCores);
     unsigned long chunkSize = (maxNumberOfPoints/numCores);
+
+    #pragma omp parallel for
     for(unsigned t = 0; t < numCores; t++) {
 
         unsigned long mainPointIndexStart = t * chunkSize;
         unsigned long amainPointIndexEnd = (t + 1) * chunkSize;
-        initThreads[t] = std::thread(singleRun, std::ref(pointsVec), mainPointIndexStart, amainPointIndexEnd, numberOfInitialPulls, delta);
+//        initThreads[t] = std::thread(singleRun, std::ref(pointsVec), mainPointIndexStart, amainPointIndexEnd, numberOfInitialPulls, delta);
+        singleRun(pointsVec, mainPointIndexStart, amainPointIndexEnd, numberOfInitialPulls, delta);
 
 
     }
 
-    for(unsigned t = 0; t < numCores; t++){
-//            std::cout << "Joining thread for group " << t << std::endl;
-        initThreads[t].join();
-    }
 
     std::cout << "Average time (ms)" << 1000 * (clock() - loopTime) / (CLOCKS_PER_SEC*maxNumberOfPoints) << std::endl;
 
