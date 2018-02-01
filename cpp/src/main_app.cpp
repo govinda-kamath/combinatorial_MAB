@@ -147,7 +147,7 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
 }
 
 int main(int argc, char *argv[]){
-
+x`
     std::cout << "We have entered " << argc
               << " arguments." << std::endl;
 
