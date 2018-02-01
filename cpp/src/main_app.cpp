@@ -137,7 +137,8 @@ int main(int argc, char *argv[]){
 
     int numberOfInitialPulls = (int) reader.GetInteger("UCB", "numberOfInitialPulls", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
-    int numCores = (int) reader.GetReal("UCB", "cores", 1);
+    int numCores = (int) reader.GetReal("UCB", "numCores", 1);
+    unsigned long  maxNumberOfPoints = (unsigned long) reader.GetReal("UCB", "noPoints", 50);
 
     std::cout << numberOfInitialPulls << std::endl;
     std::cout << delta << std::endl;
@@ -187,7 +188,6 @@ int main(int argc, char *argv[]){
     //Parallelize
     clock_t loopTime = clock();
     std::cout << "Number of cores = " << numCores<<std::endl;
-    unsigned long  maxNumberOfPoints = 50;
     std::vector<std::thread> initThreads(numCores);
     unsigned long chunkSize = (maxNumberOfPoints/numCores);
     for(unsigned t = 0; t < numCores; t++) {
