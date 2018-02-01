@@ -11,6 +11,8 @@
 
 #include "Points.h"
 #include "Arms.h"
+#include "INIReader.h"
+
 #include "UCB.h"
 #define DEBUG
 
@@ -153,23 +155,42 @@ x`
 
     std::vector<SquaredEuclideanPoint> pointsVec;
 
-    std::string directoryPath(argv[1]);
-    std::string filePrefix(argv[2]);
-    std::string fileSuffix(argv[3]);
-    int numberOfInitialPulls(atoi(argv[4]));
-    float delta(atof(argv[5]));
+    std::string nameConfig(argv[1]);
+    INIReader reader(nameConfig);
+
+    if (reader.ParseError() < 0) {
+        std::cout << "Can't load "<< nameConfig << std::endl;
+        return 1;
+    }
+
+    std::string directoryPath = reader.Get("path", "directory", "");
+    std::string filePrefix = reader.Get("path", "prefix", "");
+    std::string fileSuffix = reader.Get("path", "suffix", "");
+
+    std::cout << directoryPath << std::endl;
+    std::cout << filePrefix << std::endl;
+    std::cout << fileSuffix << std::endl;
+
+
+
+
+    int numberOfInitialPulls = (int) reader.GetInteger("UCB", "numberOfInitialPulls", 100);
+    float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+
+    std::cout << numberOfInitialPulls << std::endl;
+    std::cout << delta << std::endl;
 
     glob_t glob_result;
     std::vector<float> tmpVec;
 
     unsigned long fileNumber(0);
-    std::string search_name;
-
+    std::string searchName;
+//
     std::vector<std::string> pathsToImages;
-    search_name = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
-    std::cout << search_name << std::endl;
+    searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
+    std::cout << searchName << std::endl;
 
-    glob(search_name.c_str(),GLOB_TILDE,NULL,&glob_result);
+    glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
 
     clock_t timeRead = clock();
     while (glob_result.gl_pathc != 0){
@@ -177,8 +198,8 @@ x`
 
         pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
         fileNumber ++;
-        search_name = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
-        glob(search_name.c_str(),GLOB_TILDE,NULL,&glob_result);
+        searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
+        glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
 //            std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
     }
 

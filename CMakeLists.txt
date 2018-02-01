@@ -8,11 +8,13 @@ include_directories(cpp/include)
 #Can manually add the sources using the set command as follows:
 #set(SOURCES src/mainapp.cpp src/Student.cpp)
 add_subdirectory(dlib/dlib dlib_build)
+add_subdirectory(cpp/lib lib)
+
 
 #However, the file(GLOB...) allows for wildcard additions:
 file(GLOB SOURCES "cpp/src/*.cpp")
 
 
-add_executable(test_code ${SOURCES} cpp/src/Points.cpp cpp/include/Points.h cpp/include/Arms.h)
+add_executable(test_code ${SOURCES} cpp/src/Points.cpp cpp/include/Points.h cpp/include/Arms.h cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c cpp/lib/INIReader.cpp)
 #target_link_libraries(test_code cpp/include/Test)
 target_link_libraries(test_code dlib::dlib)

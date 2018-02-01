@@ -7,8 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <thread>
-#include <dlib/image_io.h>
-
+#include <cassert>
 
 Point::Point(std::vector <float> p){
     point = p;
