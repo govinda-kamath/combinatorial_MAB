@@ -128,9 +128,7 @@ int main(int argc, char *argv[]){
     std::string filePrefix = reader.Get("path", "prefix", "");
     std::string fileSuffix = reader.Get("path", "suffix", "");
 
-    std::cout << directoryPath << std::endl;
-    std::cout << filePrefix << std::endl;
-    std::cout << fileSuffix << std::endl;
+
 
 
 
@@ -140,9 +138,13 @@ int main(int argc, char *argv[]){
     int numCores = (int) reader.GetReal("UCB", "numCores", 1);
     unsigned long  maxNumberOfPoints = (unsigned long) reader.GetReal("UCB", "noPoints", 50);
 
+    std::cout << "Running K-nn for " << maxNumberOfPoints << " points using ";
+    std::cout << "Number of cores = " << numCores<<std::endl;
     std::cout << numberOfInitialPulls << std::endl;
     std::cout << delta << std::endl;
-
+    std::cout << directoryPath << std::endl;
+    std::cout << filePrefix << std::endl;
+    std::cout << fileSuffix << std::endl;
     glob_t glob_result;
     std::vector<float> tmpVec;
 
@@ -187,7 +189,6 @@ int main(int argc, char *argv[]){
 
     //Parallelize
     clock_t loopTime = clock();
-    std::cout << "Number of cores = " << numCores<<std::endl;
     std::vector<std::thread> initThreads(numCores);
     unsigned long chunkSize = (maxNumberOfPoints/numCores);
     for(unsigned t = 0; t < numCores; t++) {
