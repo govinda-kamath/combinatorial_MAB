@@ -117,7 +117,13 @@ int main(int argc, char *argv[]){
 
     std::vector<SquaredEuclideanPoint> pointsVec;
 
-    std::string nameConfig(argv[1]);
+    std::string nameConfig;
+    try{
+        nameConfig = argv[1];
+    }
+    catch(const std::exception&){
+        nameConfig = "nominal.ini";
+    }
     INIReader reader(nameConfig);
 
     if (reader.ParseError() < 0) {
