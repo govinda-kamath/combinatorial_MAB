@@ -105,7 +105,7 @@ public:
 
         globalNumberOfPulls = numberOfInitialPulls*numberOfArms;
         globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
-                                    std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
+                                 std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
 #ifdef DEBUG
         std::cout << "Sigma after initialization " << globalSigma <<std::endl;
         std::cout << "Mean after initialization "
@@ -238,7 +238,7 @@ void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
 int main(int argc, char *argv[]){
 
     std::cout << "We have entered " << argc
-         << " arguments." << std::endl;
+              << " arguments." << std::endl;
 
     std::vector<SquaredEuclideanPoint> pointsVec;
     std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
@@ -317,7 +317,7 @@ int main(int argc, char *argv[]){
     std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
     std::cout << UCB1.arms.top().id << std::endl;
 #endif
-            clock_t timeIterate = clock();
+    clock_t timeIterate = clock();
     UCB1.runUCB(10000000000);
     std::cout << "Iteration time (ms) " << 1000 * (clock() - timeIterate) / CLOCKS_PER_SEC << std::endl;
 
