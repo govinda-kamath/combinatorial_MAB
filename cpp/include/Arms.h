@@ -26,7 +26,7 @@ public:
     float estimateOfSecondMoment;
     float SumOfSquaresOfPulls;
     unsigned long dimension;
-    templatePoint * point;
+    const templatePoint * point;
     unsigned long id;
 
     Arm(){
@@ -39,9 +39,9 @@ public:
         estimateOfSecondMoment = NAN;
     }
 
-    Arm(unsigned long armNumber, templatePoint p) : Arm() {
+    Arm(unsigned long armNumber, const templatePoint &p) : Arm() {
         id = armNumber;
-        point = new templatePoint(p.point);
+        point = &p;
         dimension = point->point.size();
     }
 
@@ -68,7 +68,7 @@ public:
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
     }
 
-    float pullArm(templatePoint &p1, float globalSigma,
+    float pullArm(const templatePoint &p1, float globalSigma,
                   float logDeltaInverse, bool update = true) {
         float sample;
 
@@ -99,7 +99,7 @@ public:
     }
 
     float trueMean(const templatePoint &p1){
-        return point->distance(p1)/p1.point.size();
+        return point->distance(p1)/p1.getVecSize();
     }
 
 };
@@ -110,12 +110,12 @@ class ArmKNN : public Arm<templatePoint>{
     /*
      * Arms for k-Nearest Neighbours*/
 public:
-    templatePoint *fixedPoint;
+    const templatePoint *fixedPoint;
 
-    ArmKNN(unsigned long id, templatePoint p) : Arm<templatePoint>(id, p) {}
+    ArmKNN(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
-    ArmKNN(unsigned long id, templatePoint p, templatePoint fixPoint) : Arm<templatePoint>(id, p) {
-        fixedPoint = new templatePoint(fixPoint.point);
+    ArmKNN(unsigned long id, const templatePoint &p, const templatePoint &fixPoint) : Arm<templatePoint>(id, p) {
+        fixedPoint = &fixPoint;
     }
 
     using Arm<templatePoint>::pullArm;

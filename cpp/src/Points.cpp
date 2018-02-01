@@ -10,16 +10,22 @@
 #include <dlib/image_io.h>
 
 
-Point::Point(std::vector <float> p){point = p;}
+Point::Point(std::vector <float> p){
+    point = p;
+    vecSize = p.size();
+}
 
-float Point::distance(const Point& p1){}
-float Point::sampledDistance(const Point& p1){}
+unsigned long Point::getVecSize() const {
+    return vecSize;
+}
+float Point::distance(const Point& p1) const {}
+float Point::sampledDistance(const Point& p1) const {}
 
 SquaredEuclideanPoint::SquaredEuclideanPoint(std::vector<float> p) : Point(p){}
 
 /*Computes the exact distance between two points.
  * Used only for debug purposes*/
-float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint& p1){
+float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint& p1) const {
     assert(("Sizes do not match", point.size() == p1.point.size()));
 
     float result(0);
@@ -34,9 +40,9 @@ float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint& p1){
 
 /*Picks a dimension of points randomly and samples the distance
  * that dimension*/
-float SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint& p1){
+float SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint& p1) const {
     assert(("Sizes do not match", point.size() == p1.point.size()));
-    unsigned vecSize = p1.point.size();
+    unsigned vecSize = getVecSize();
     unsigned randomCoOrdinate;
     randomCoOrdinate = std::rand() % vecSize;
     return (point[randomCoOrdinate] - p1.point[randomCoOrdinate])

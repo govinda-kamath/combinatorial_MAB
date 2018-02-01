@@ -18,10 +18,12 @@ class Point {
  * */
 public:
     std::vector <float> point;
+    unsigned long vecSize;
     Point(std::vector <float> p);
 
-    virtual float distance(const Point& p1);
-    virtual float sampledDistance(const Point& p1);
+    virtual float distance(const Point& p1) const;
+    virtual float sampledDistance(const Point& p1) const;
+    unsigned long getVecSize() const;
 };
 
 class SquaredEuclideanPoint : public Point{
@@ -33,11 +35,11 @@ public:
     /*Computes the exact distance between two points.
      * Used only for debug purposes*/
 
-    float distance(const SquaredEuclideanPoint& p1);
+    float distance(const SquaredEuclideanPoint& p1) const;
 
     /*Picks a dimension of points randomly and samples the distance
      * that dimension*/
-    float sampledDistance(const SquaredEuclideanPoint& p1);
+    float sampledDistance(const SquaredEuclideanPoint& p1) const;
 };
 
 

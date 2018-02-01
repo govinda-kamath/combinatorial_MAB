@@ -89,13 +89,68 @@ void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
 }
 
 
+void singleRun(const std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long mainPointIndex, int numberOfInitialPulls,
+                    float delta){
+    std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
+
+        for (unsigned i(0); i < pointsVec.size(); i++) {
+            if (i == mainPointIndex)
+                continue;
+            ArmKNN<SquaredEuclideanPoint> tmpArm(i - 1, pointsVec[i], pointsVec[mainPointIndex]);
+            armsVec.push_back(tmpArm);
+        }
+
+        UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
+
+        clock_t timeInitialize = clock();
+        UCB1.initialise(numberOfInitialPulls);
+//        std::cout << "Initializing time (ms)" << 1000 * (clock() - timeInitialize) / CLOCKS_PER_SEC << std::endl;
+
+        std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+
+//        std::cout << "sigma " << UCB1.globalSigma << std::endl;
+//        std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
+        std::cout << mainPointIndex << "\t" << UCB1.arms.top().id << std::endl;
+        clock_t timeIterate = clock();
+        UCB1.runUCB(10000000000);
+
+
+//        std::cout << "Iteration time (ms) " << 1000 * (clock() - timeIterate) / CLOCKS_PER_SEC << std::endl;
+
+        //    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
+        //
+        //    clock_t timeTrueMean = clock();
+        //
+        //    for (unsigned i = 0; i < hackedArmsVec.size(); i++) {
+        //        float tmp = armsVec[hackedArmsVec[i].id].trueMean();
+        //    }
+        //    std::cout << "True Mean time (ms) " << 1000 * (clock() - timeTrueMean) / CLOCKS_PER_SEC << std::endl;
+
+#ifdef DEBUG
+//        for (unsigned i = 0; i < 10; i++) {
+//            std::cout << hackedArmsVec[i].id << " True Mean= " << armsVec[hackedArmsVec[i].id].trueMean()
+//                      << " sigma = "
+//                      << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls / hackedArmsVec[i].numberOfPulls -
+//                                    std::pow(hackedArmsVec[i].sumOfPulls / hackedArmsVec[i].numberOfPulls, 2)))
+//                      << " estimate = " << hackedArmsVec[i].estimateOfMean
+//                      << " lcb = " << hackedArmsVec[i].lowerConfidenceBound
+//                      << " total pulls="
+//                      << hackedArmsVec[i].numberOfPulls << std::endl;
+//        }
+
+//        std::cout << "average pull " << UCB1.globalNumberOfPulls / armsVec.size() << std::endl;
+//        std::cout << "sigma " << UCB1.globalSigma << std::endl;
+//        std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
+//        std::cout << UCB1.arms.top().id << "\n\n\n" << std::endl;
+#endif
+}
+
 int main(int argc, char *argv[]){
 
     std::cout << "We have entered " << argc
               << " arguments." << std::endl;
 
     std::vector<SquaredEuclideanPoint> pointsVec;
-    std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
 
     std::string directoryPath(argv[1]);
     std::string filePrefix(argv[2]);
@@ -143,65 +198,22 @@ int main(int argc, char *argv[]){
         }
     }
 
-    for (unsigned i(1); i < pointsVec.size(); i++) {
-        ArmKNN<SquaredEuclideanPoint> tmpArm(i - 1, pointsVec[i], pointsVec[0]);
-        armsVec.push_back(tmpArm);
+//    std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
+
+    //Parallelize
+    clock_t loopTime = clock();
+    std::cout<<"Main Point Index =  " << std::endl ;
+    unsigned long  maxNumberofPoints = 100;
+    unsigned numberOfThreads = 1;
+    std::vector<std::thread> initThreads(maxNumberofPoints);
+    for( unsigned long mainPointIndex = 0; mainPointIndex<maxNumberofPoints; mainPointIndex++) {
+        initThreads[mainPointIndex] = std::thread(singleRun, std::ref(pointsVec), mainPointIndex, numberOfInitialPulls, delta);
     }
-
-    UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
-    std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
-
-    clock_t timeInitialize = clock();
-    UCB1.initialise(numberOfInitialPulls);
-    std::cout << "Initializing time (ms)" << 1000 * (clock() - timeInitialize) / CLOCKS_PER_SEC << std::endl;
-
-    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
-#ifdef DEBUG
-//        for (unsigned i = 0; i < 10; i++) {
-//            std::cout << hackedArmsVec[i].id << " True Mean= " << armsVec[hackedArmsVec[i].id].trueMean()
-//                      << " sigma = "
-//                      << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls / hackedArmsVec[i].numberOfPulls -
-//                                    std::pow(hackedArmsVec[i].sumOfPulls / hackedArmsVec[i].numberOfPulls, 2)))
-//                      << " estimate = " << hackedArmsVec[i].estimateOfMean << " total pulls="
-//                      << hackedArmsVec[i].numberOfPulls << std::endl;
-//        }
-
-    std::cout << "average pull " << UCB1.globalNumberOfPulls / armsVec.size() << std::endl;
-    std::cout << "sigma " << UCB1.globalSigma << std::endl;
-    std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
-    std::cout << UCB1.arms.top().id << std::endl;
-#endif
-    clock_t timeIterate = clock();
-    UCB1.runUCB(10000000000);
-    std::cout << "Iteration time (ms) " << 1000 * (clock() - timeIterate) / CLOCKS_PER_SEC << std::endl;
-
-//    std::vector<ArmKNN<SquaredEuclideanPoint> > &hackedArmsVec = Container(UCB1.arms);
-
-    clock_t timeTrueMean = clock();
-
-    for (unsigned i = 0; i < hackedArmsVec.size(); i++) {
-        float tmp = armsVec[hackedArmsVec[i].id].trueMean();
+    for(unsigned t = 0; t < maxNumberofPoints; t++){
+//            std::cout << "Joining thread for group " << t << std::endl;
+        initThreads[t].join();
     }
-    std::cout << "True Mean time (ms) " << 1000 * (clock() - timeTrueMean) / CLOCKS_PER_SEC << std::endl;
-
-#ifdef DEBUG
-    for (unsigned i = 0; i < hackedArmsVec.size(); i++) {
-        std::cout << hackedArmsVec[i].id << " True Mean= " << armsVec[hackedArmsVec[i].id].trueMean()
-                  << " sigma = "
-                  << std::sqrt((hackedArmsVec[i].SumOfSquaresOfPulls / hackedArmsVec[i].numberOfPulls -
-                                std::pow(hackedArmsVec[i].sumOfPulls / hackedArmsVec[i].numberOfPulls, 2)))
-                  << " estimate = " << hackedArmsVec[i].estimateOfMean
-                  << " lcb = " << hackedArmsVec[i].lowerConfidenceBound
-                  << " ucb = " << hackedArmsVec[i].upperConfidenceBound
-                  << " total pulls="
-                  << hackedArmsVec[i].numberOfPulls << std::endl;
-    }
-
-    std::cout << "average pull " << UCB1.globalNumberOfPulls / armsVec.size() << std::endl;
-    std::cout << "sigma " << UCB1.globalSigma << std::endl;
-    std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
-    std::cout << UCB1.arms.top().id << std::endl;
-#endif
+    std::cout << "Average time (ms)" << 1000 * (clock() - loopTime) / (CLOCKS_PER_SEC*maxNumberofPoints) << std::endl;
 
     return 0;
 }
