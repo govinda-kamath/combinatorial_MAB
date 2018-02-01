@@ -15,6 +15,7 @@ add_subdirectory(cpp/lib lib)
 file(GLOB SOURCES "cpp/src/*.cpp")
 
 
-add_executable(test_code ${SOURCES} cpp/src/Points.cpp cpp/include/Points.h cpp/include/Arms.h cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c cpp/lib/INIReader.cpp)
+add_executable(test_code ${SOURCES} cpp/include/Points.h cpp/include/Arms.h
+        cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c cpp/lib/INIReader.cpp)
 #target_link_libraries(test_code cpp/include/Test)
 target_link_libraries(test_code dlib::dlib)
