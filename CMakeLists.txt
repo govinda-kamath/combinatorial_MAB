@@ -13,6 +13,6 @@ add_subdirectory(dlib/dlib dlib_build)
 file(GLOB SOURCES "cpp/src/*.cpp")
 
 
-add_executable(test_code ${SOURCES})
+add_executable(test_code ${SOURCES} cpp/src/Points.cpp cpp/include/Points.h cpp/include/Arms.h)
 #target_link_libraries(test_code cpp/include/Test)
 target_link_libraries(test_code dlib::dlib)
