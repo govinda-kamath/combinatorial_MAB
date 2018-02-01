@@ -89,10 +89,11 @@ void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
 }
 
 
-void singleRun(const std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long mainPointIndex, int numberOfInitialPulls,
+void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long mainPointIndex, int numberOfInitialPulls,
                     float delta){
     std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
 
+    std::cout << mainPointIndex << "\t" ;
         for (unsigned i(0); i < pointsVec.size(); i++) {
             if (i == mainPointIndex)
                 continue;
@@ -110,7 +111,7 @@ void singleRun(const std::vector<SquaredEuclideanPoint> &pointsVec, unsigned lon
 
 //        std::cout << "sigma " << UCB1.globalSigma << std::endl;
 //        std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
-        std::cout << mainPointIndex << "\t" << UCB1.arms.top().id << std::endl;
+//        std::cout << UCB1.arms.top().id << std::endl;
         clock_t timeIterate = clock();
         UCB1.runUCB(10000000000);
 
@@ -140,8 +141,8 @@ void singleRun(const std::vector<SquaredEuclideanPoint> &pointsVec, unsigned lon
 
 //        std::cout << "average pull " << UCB1.globalNumberOfPulls / armsVec.size() << std::endl;
 //        std::cout << "sigma " << UCB1.globalSigma << std::endl;
-//        std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
-//        std::cout << UCB1.arms.top().id << "\n\n\n" << std::endl;
+        std::cout << "best arm's estimate " << UCB1.arms.top().estimateOfMean << std::endl;
+        std::cout << UCB1.arms.top().id << "\n\n\n" << std::endl;
 #endif
 }
 
@@ -202,16 +203,11 @@ int main(int argc, char *argv[]){
 
     //Parallelize
     clock_t loopTime = clock();
-    std::cout<<"Main Point Index =  " << std::endl ;
-    unsigned long  maxNumberofPoints = 100;
-    unsigned numberOfThreads = 1;
-    std::vector<std::thread> initThreads(maxNumberofPoints);
+    std::cout<<"Main Point Index =  " ;
+    unsigned long  maxNumberofPoints = 10;
     for( unsigned long mainPointIndex = 0; mainPointIndex<maxNumberofPoints; mainPointIndex++) {
-        initThreads[mainPointIndex] = std::thread(singleRun, std::ref(pointsVec), mainPointIndex, numberOfInitialPulls, delta);
-    }
-    for(unsigned t = 0; t < maxNumberofPoints; t++){
-//            std::cout << "Joining thread for group " << t << std::endl;
-        initThreads[t].join();
+        singleRun(pointsVec, mainPointIndex, numberOfInitialPulls, delta);
+
     }
     std::cout << "Average time (ms)" << 1000 * (clock() - loopTime) / (CLOCKS_PER_SEC*maxNumberofPoints) << std::endl;
 
