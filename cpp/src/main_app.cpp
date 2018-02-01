@@ -162,11 +162,11 @@ int main(int argc, char *argv[]){
     searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
     std::cout << searchName << std::endl;
 
-    glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
+    glob(searchName.c_str(), GLOB_TILDE, NULL, &glob_result);
 
     clock_t timeRead = clock();
     while (glob_result.gl_pathc != 0){
-//            std::cout << std::string(glob_result.gl_pathv[0]) << std::endl;
+            std::cout << std::string(glob_result.gl_pathv[0]) << std::endl;
 
         pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
         fileNumber ++;
