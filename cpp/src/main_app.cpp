@@ -5,10 +5,10 @@
 #include <vector>
 #include <queue>
 #include <thread>
+#include <map>
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include <glob.h>
-#include <chrono>
 #include "Points.h"
 #include "Arms.h"
 #include "UCB.h"
@@ -132,7 +132,6 @@ int main(int argc, char *argv[]){
     }
 
     std::string directoryPath = reader.Get("path", "directory", "");
-    std::string filePrefix = reader.Get("path", "prefix", "");
     std::string fileSuffix = reader.Get("path", "suffix", "");
 
 
@@ -143,7 +142,7 @@ int main(int argc, char *argv[]){
     int numberOfInitialPulls = (int) reader.GetInteger("UCB", "numberOfInitialPulls", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     int numCores = (int) reader.GetReal("UCB", "numCores", 1);
-    unsigned long  maxNumberOfPoints = (unsigned long) reader.GetReal("UCB", "noPoints", 50);
+    unsigned long  maxNumberOfPoints = (unsigned long) reader.GetReal("UCB", "noPoints", 1);
 
     std::cout << "Running K-nn for " << maxNumberOfPoints << " points using ";
     std::cout << "Number of cores = " << numCores<<std::endl;
@@ -158,22 +157,39 @@ int main(int argc, char *argv[]){
     unsigned long fileNumber(0);
     std::string searchName;
 //
-    std::vector<std::string> pathsToImages;
-    searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
+    filePrefix = "/*";
+    searchName = directoryPath + filePrefix + fileSuffix;
     std::cout << searchName << std::endl;
 
+    clock_t timeRead = clock();
     glob(searchName.c_str(), GLOB_TILDE, NULL, &glob_result);
 
-    clock_t timeRead = clock();
-    while (glob_result.gl_pathc != 0){
-            std::cout << std::string(glob_result.gl_pathv[0]) << std::endl;
+    std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
+    std::cout << glob_result.gl_pathv[0] << std::endl;
 
-        pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
-        fileNumber ++;
-        searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
-        glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
-//            std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
+    std::vector<std::string> pathsToImages;
+    pathsToImages.reserve(glob_result.gl_pathc);
+    for (unsigned long i = 0; i < glob_result.gl_pathc; i ++){
+        pathsToImages.push_back(glob_result.gl_pathv[i]);
     }
+
+    std::sort(pathsToImages.begin(), pathsToImages.end());
+//    std::map<int,std::string> indexToPath;
+//
+//
+//    for (unsigned long i = 0; i < 100; i ++){
+//        indexToPath[i] = pathsToImages[i] ;
+//    }
+
+//    while (glob_result.gl_pathc != 0){
+//            std::cout << std::string(glob_result.gl_pathv[0]) << std::endl;
+//
+//        pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
+//        fileNumber ++;
+//        searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
+//        glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
+////            std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
+//    }
 
     unsigned long pointIndex(0);
 
@@ -192,14 +208,14 @@ int main(int argc, char *argv[]){
         }
     }
 
-//    std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
+    std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
 
     //Parallelize
     clock_t loopTime = clock();
 //    std::vector<std::thread> initThreads(numCores);
     unsigned long chunkSize = (maxNumberOfPoints/numCores);
 
-    #pragma omp parallel for
+//    #pragma omp parallel for
     for(unsigned t = 0; t < numCores; t++) {
 
         unsigned long mainPointIndexStart = t * chunkSize;
