@@ -11,14 +11,17 @@ class UCB{
     /* UCB for the general case*/
 public:
     unsigned numberOfArms;
-    std::vector<templateArm> armsContainer;
-    std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
     float logDeltaInverse;
 
     float globalSigma;
     float globalNumberOfPulls;
     float globalSumOfPulls;
     float globalSumOfSquaresOfPulls;
+
+
+    std::vector<templateArm> armsContainer;
+    std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
+    std::vector<unsigned long > topKArms;
     std::mutex initializeMutex;
     UCB(std::vector<templateArm> &armsVec, float delta){
 
@@ -103,11 +106,18 @@ public:
 
     }
 
+    void storeTopKArms(){
+        for (int i=0; i<20; i++) {
+            topKArms.push_back(arms.top().id);
+            arms.pop();
+        }
+    }
     void runUCB(unsigned long maxIterations){
         for (unsigned long i(0); i < maxIterations; i++){
             bool stop;
             stop = iterationOfUCB();
             if (stop){
+                storeTopKArms();
                 break;
             }
         }
