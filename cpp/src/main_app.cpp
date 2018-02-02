@@ -39,19 +39,19 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
         UCB1.initialise(numberOfInitialPulls);
         UCB1.runUCB(100000000);
         allAnswers.push_back(UCB1.topKArms);
-//        if (index%100==0){
-//            std::cout << "Thread " << mainPointIndexStart << ". Index " << index<< " " << pathsToImages[UCB1.topKArms[0]]<<std::endl;
-//        }
+        if (index%100==0){
+            std::cout << "Thread " << mainPointIndexStart << ". Index " << index<< " " << pathsToImages[UCB1.topKArms[0]]<<std::endl;
+        }
         avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
     }
     std::cout<< "Saving the thread starting with" << mainPointIndexStart <<std::endl;
 
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
-        std::cout << "INDEX "<< index << " ";
+        saveFile << index << " ";
         for (int i = 0; i < 20; i++) {
-            std::cout << allAnswers[index - mainPointIndexStart][i] << " ";
+            saveFile << allAnswers[index - mainPointIndexStart][i] << " ";
         }
-        std::cout << "Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
+        saveFile << "Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
     }
 
 }
