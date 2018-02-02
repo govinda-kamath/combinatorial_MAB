@@ -110,9 +110,11 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned threadNum
         UCB1.initialise(numberOfInitialPulls);
         UCB1.runUCB(10000000000);
         std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-        std::cout << "Ran thread "<< threadNumber << ".Index " << index << " Time taken = " <<
-            std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()<<std::endl;
-
+        if (index%10==0) {
+            std::cout << "Ran thread " << threadNumber << ".Index " << index << " Time taken = " <<
+                      std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()
+                      << std::endl;
+        }
     }
 
 }
@@ -140,11 +142,6 @@ int main(int argc, char *argv[]){
 
     std::string directoryPath = reader.Get("path", "directory", "");
     std::string fileSuffix = reader.Get("path", "suffix", "");
-
-
-
-
-
 
     int numberOfInitialPulls = (int) reader.GetInteger("UCB", "numberOfInitialPulls", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
@@ -208,7 +205,7 @@ int main(int argc, char *argv[]){
 
         SquaredEuclideanPoint tmpPoint(tmpVec);
         pointsVec.push_back(tmpPoint);
-        pointIndex++;
+        pointIndex++a;
 
         if (pointIndex%2000 == 999){
             std::cout << pointIndex+1 << " points read." << std::endl;
