@@ -96,23 +96,30 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned threadNum
     std::cout << "Running thread "<< threadNumber << std::endl;
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
         std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-
 //        std::this_thread::sleep_for(std::chrono::seconds(1*(threadNumber+1)));
+
+
         std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
         for (unsigned i(0); i < pointsVec.size(); i++) {
             if (i == index)
                 continue;
-            ArmKNN<SquaredEuclideanPoint> tmpArm(i - 1, pointsVec[i], pointsVec[index]);
+            ArmKNN<SquaredEuclideanPoint> tmpArm(i, pointsVec[i], pointsVec[index]);
             armsVec.push_back(tmpArm);
         }
+        std::chrono::system_clock::time_point loopTimeMid = std::chrono::system_clock::now();
 
         UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
         UCB1.initialise(numberOfInitialPulls);
-        UCB1.runUCB(10000000000);
+        UCB1.runUCB(1000000);
+
+
         std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-        if (index%10==0) {
-            std::cout << "Ran thread " << threadNumber << ".Index " << index << " Time taken = " <<
+        if (index%5==0) {
+            std::cout << "Ran thread " << threadNumber << ".Index " << index << " Total Time taken = " <<
                       std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()
+                      << std::endl;
+            std::cout << "Ran thread " << threadNumber << ".Index " << index << " Mid Time taken = " <<
+                      std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeMid - loopTimeStart).count()
                       << std::endl;
         }
     }
@@ -205,7 +212,7 @@ int main(int argc, char *argv[]){
 
         SquaredEuclideanPoint tmpPoint(tmpVec);
         pointsVec.push_back(tmpPoint);
-        pointIndex++a;
+        pointIndex++;
 
         if (pointIndex%2000 == 999){
             std::cout << pointIndex+1 << " points read." << std::endl;
