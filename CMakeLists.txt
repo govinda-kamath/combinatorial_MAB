@@ -10,12 +10,16 @@ include_directories(cpp/include)
 add_subdirectory(dlib/dlib dlib_build)
 add_subdirectory(cpp/lib lib)
 
+file(GLOB INCLUDE "cpp/include/*.h")
+file(GLOB LIBRARIES "cpp/lib/*.cpp")
 
 #However, the file(GLOB...) allows for wildcard additions:
 file(GLOB SOURCES "cpp/src/*.cpp")
 
-
+#add_executable(test_code ${SOURCES} ${INCLUDE} ${LIBRARIES})
 add_executable(test_code ${SOURCES} cpp/include/Points.h cpp/include/Arms.h
-        cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c cpp/lib/INIReader.cpp)
+        cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+        cpp/lib/Points.cpp
+        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
 #target_link_libraries(test_code cpp/include/Test)
 target_link_libraries(test_code dlib::dlib)
