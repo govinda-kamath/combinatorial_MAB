@@ -40,7 +40,7 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
         UCB1.runUCB(1000000);
         allAnswers.push_back(UCB1.topKArms);
         if (index%100==0){
-            std::cout << "Thread " << mainPointIndexStart << ".Index " << index<< " " << pathsToImages[UCB1.topKArms[0]]<<std::endl;
+            std::cout << "Thread " << mainPointIndexStart << ". Index " << index<< " " << pathsToImages[UCB1.topKArms[0]]<<std::endl;
         }
         avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
     }
