@@ -59,7 +59,7 @@ public:
         return l.lowerConfidenceBound > r.lowerConfidenceBound;
     }
 
-    float updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
+    void updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
 
         float localSigma, intervalWidth;
         localSigma = globalSigma; //Todo: update sigma to new local value

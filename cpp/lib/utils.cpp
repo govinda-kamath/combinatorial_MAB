@@ -3,6 +3,7 @@
 //
 #include <vector>
 #include <queue>
+#include <numeric>
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include "utils.h"
@@ -80,9 +81,13 @@ void utils::getPathToFile(std::vector<std::string> & pathsToImages, const std::s
     std::cout << glob_result.gl_pathv[0] << std::endl;
 
     pathsToImages.reserve(glob_result.gl_pathc);
-    for (unsigned long i = 0; i < glob_result.gl_pathc; i ++){
+    for (unsigned long i(0); i < glob_result.gl_pathc; i ++){
         pathsToImages.push_back(glob_result.gl_pathv[i]);
     }
-
+    std::ofstream dataIDfile;
+    dataIDfile.open ("data_id.map", std::ofstream::out | std::ofstream::app);
+    for (unsigned long i(0); i< pathsToImages.size(); i++){
+        dataIDfile << i << " " << pathsToImages[i] << "\n";
+    }
     std::sort(pathsToImages.begin(), pathsToImages.end());
 }

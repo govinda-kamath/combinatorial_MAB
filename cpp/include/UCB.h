@@ -17,11 +17,11 @@ public:
     float globalNumberOfPulls;
     float globalSumOfPulls;
     float globalSumOfSquaresOfPulls;
-
+    unsigned numberOfBestArms;
 
     std::vector<templateArm> armsContainer;
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
-    std::vector<unsigned long > topKArms;
+    std::vector<templateArm> topKArms;
     std::mutex initializeMutex;
     UCB(std::vector<templateArm> &armsVec, float delta){
 
@@ -34,10 +34,10 @@ public:
         globalNumberOfPulls = 0;
         globalSumOfPulls = 0;
         globalSumOfSquaresOfPulls = 0;
-
+        numberOfBestArms = 5; //ToDo:: Generalize this
     }
 
-    void initialiseFewArm(unsigned long armIndexStart, unsigned long armIndexEnd, int numberOfInitialPulls){
+    void initialiseFewArm(unsigned long armIndexStart, unsigned long armIndexEnd, unsigned numberOfInitialPulls){
 
         float localSumOfPulls, localSumOfSquaresOfPulls;
         localSumOfPulls = 0;
@@ -60,7 +60,7 @@ public:
             globalSumOfSquaresOfPulls += localSumOfSquaresOfPulls;
         }
     }
-    void initialise(int numberOfInitialPulls = 100){
+    void initialise(unsigned numberOfInitialPulls = 100){
 
         unsigned numberOfThreads = 1 ;//std::thread::hardware_concurrency();
 //        std::cout << numberOfThreads << " number of threads used in each batch of initialization.\n";
@@ -82,9 +82,6 @@ public:
             initThreads[t].join();
         }
 
-
-
-
         globalNumberOfPulls = numberOfInitialPulls*numberOfArms;
         globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
                                  std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
@@ -99,28 +96,32 @@ public:
 #endif
 
         for (unsigned long index = 0; index < numberOfArms; index++){
-
             armsContainer[index].updateConfidenceIntervals(globalSigma, logDeltaInverse);
             arms.push(armsContainer[index]);
         }
 
     }
 
-    void storeTopKArms(){
-        for (int i=0; i<20; i++) {
-            topKArms.push_back(arms.top().id);
+    void storeExtraTopArms(){
+        for (unsigned i=0; i<numberOfBestArms*5; i++) {
+            topKArms.push_back(arms.top());
             arms.pop();
         }
     }
     void runUCB(unsigned long maxIterations){
+        unsigned bestArmCount = 0;
         for (unsigned long i(0); i < maxIterations; i++){
-            bool stop;
-            stop = iterationOfUCB();
-            if (stop){
-                storeTopKArms();
-                break;
+            bool bestArmFound;
+            bestArmFound = iterationOfUCB();
+            if (bestArmFound){
+                topKArms.push_back(arms.top());
+                arms.pop();
+                bestArmCount++;
+                if (bestArmCount==numberOfBestArms)
+                    break;
             }
         }
+        storeExtraTopArms(); //Storing extra arms
     }
 
     bool iterationOfUCB(){
