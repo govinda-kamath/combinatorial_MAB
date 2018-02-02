@@ -37,15 +37,16 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
 
         UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
         UCB1.initialise(numberOfInitialPulls);
-        UCB1.runUCB(1000000);
+        UCB1.runUCB(100000000);
         allAnswers.push_back(UCB1.topKArms);
         if (index%100==0){
             std::cout << "Thread " << mainPointIndexStart << ". Index " << index<< " " << pathsToImages[UCB1.topKArms[0]]<<std::endl;
         }
         avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
     }
+    std::cout<< "Saving the thread starting with" << mainPointIndexStart <<std::endl;
+
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
-        std::cout<< "Saving the thread starting with" << mainPointIndexStart <<std::endl;
         saveFile << index << " ";
         for (int i = 0; i < 20; i++) {
             saveFile << allAnswers[index - mainPointIndexStart][i] << " ";
@@ -122,7 +123,6 @@ int main(int argc, char *argv[]){
 //        initThreads[t].join();
 //    }
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/(endIndex-startIndex) << std::endl;
 
