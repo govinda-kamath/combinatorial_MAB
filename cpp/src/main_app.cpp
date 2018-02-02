@@ -91,10 +91,9 @@ void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
 
 
 void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long mainPointIndexStart,
-               unsigned long mainPointIndexEnd, int numberOfInitialPulls,
-               float delta){
+               unsigned long mainPointIndexEnd, int numberOfInitialPulls, float delta){
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
-//        std::this_thread::sleep_for(std::chrono::milliseconds(600))
+
         std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
         std::cout << index << "\t";
         for (unsigned i(0); i < pointsVec.size(); i++) {
@@ -118,10 +117,11 @@ int main(int argc, char *argv[]){
     std::vector<SquaredEuclideanPoint> pointsVec;
 
     std::string nameConfig;
-    try{
+    if (argc==2){
+        std::cout<<argc<<std::endl;
         nameConfig = argv[1];
     }
-    catch(const std::exception&){
+    else{
         nameConfig = "nominal.ini";
     }
     INIReader reader(nameConfig);
@@ -166,13 +166,35 @@ int main(int argc, char *argv[]){
 
     clock_t timeRead = clock();
     while (glob_result.gl_pathc != 0){
-            std::cout << std::string(glob_result.gl_pathv[0]) << std::endl;
+            std::cout << "GK " << std::string(glob_result.gl_pathv[0]) << std::endl;
 
         pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
         fileNumber ++;
         searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
         glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
 //            std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
+    }
+
+    DIR *dir;
+    struct dirent *ent;
+    dir = opendir (directoryPath.c_str());
+    if (dir != NULL) {
+        /* print all the files and directories within directory */
+
+        while ((ent = readdir (dir)) != NULL) {
+//            printf ("%s\n", ent->d_name);
+            searchName = directoryPath + ent->d_name;
+            glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
+            std::cout << "SN " <<std::string(glob_result.gl_pathv[0]) << std::endl;
+            if (glob_result.gl_pathc != 0){
+                pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
+            }
+        }
+        closedir (dir);
+    } else {
+        /* could not open directory */
+        perror ("Couldnt not open directory");
+        return EXIT_FAILURE;
     }
 
     unsigned long pointIndex(0);
@@ -196,21 +218,22 @@ int main(int argc, char *argv[]){
 
     //Parallelize
     clock_t loopTime = clock();
-//    std::vector<std::thread> initThreads(numCores);
+    std::vector<std::thread> initThreads(numCores);
     unsigned long chunkSize = (maxNumberOfPoints/numCores);
 
     #pragma omp parallel for
     for(unsigned t = 0; t < numCores; t++) {
 
         unsigned long mainPointIndexStart = t * chunkSize;
-        unsigned long amainPointIndexEnd = (t + 1) * chunkSize;
-//        initThreads[t] = std::thread(singleRun, std::ref(pointsVec), mainPointIndexStart, amainPointIndexEnd, numberOfInitialPulls, delta);
-        singleRun(pointsVec, mainPointIndexStart, amainPointIndexEnd, numberOfInitialPulls, delta);
+        unsigned long mainPointIndexEnd = (t + 1) * chunkSize;
+        initThreads[t] = std::thread(singleRun, std::ref(pointsVec), mainPointIndexStart, mainPointIndexEnd, numberOfInitialPulls, delta);
+//        singleRun(pointsVec, mainPointIndexStart, mainPointIndexEnd, numberOfInitialPulls, delta);
 
 
     }
-
-
+    for(unsigned t = 0; t < numCores; t++) {
+        initThreads[t].join();
+    }
     std::cout << "Average time (ms)" << 1000 * (clock() - loopTime) / (CLOCKS_PER_SEC*maxNumberOfPoints) << std::endl;
 
     return 0;
