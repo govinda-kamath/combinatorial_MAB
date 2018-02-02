@@ -25,6 +25,7 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
     saveFile.open (saveFilepath, std::ofstream::out | std::ofstream::app);
     std::vector<std::vector<unsigned long> > allAnswers;
     std::vector<float> avgNumberOfPulls;
+
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
         std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
         for (unsigned i(0); i < pointsVec.size(); i++) {
@@ -39,18 +40,17 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
         UCB1.runUCB(1000000);
         allAnswers.push_back(UCB1.topKArms);
         if (index%100==0){
-            std::cout << index<< " " << pathsToImages[UCB1.topKArms[0]]<<std::endl;
+            std::cout << "Thread " << mainPointIndexStart << ".Index " << index<< " " << pathsToImages[UCB1.topKArms[0]]<<std::endl;
         }
         avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
     }
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
-
+        std::cout<< "Saving the thread starting with" << mainPointIndexStart <<std::endl;
         saveFile << index << " ";
         for (int i = 0; i < 20; i++) {
             saveFile << allAnswers[index - mainPointIndexStart][i] << " ";
         }
-        saveFile << "Av:" << avgNumberOfPulls[index - mainPointIndexStart];
-        saveFile << "\n";
+        saveFile << "Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
     }
 
 }
