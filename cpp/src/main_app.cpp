@@ -90,12 +90,15 @@ void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
 }
 
 
-void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long mainPointIndexStart,
+void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned threadNumber, unsigned long mainPointIndexStart,
                unsigned long mainPointIndexEnd, int numberOfInitialPulls, float delta){
-    for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
 
+    std::cout << "Running thread "<< threadNumber << std::endl;
+    for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
+        std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
+
+//        std::this_thread::sleep_for(std::chrono::seconds(1*(threadNumber+1)));
         std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
-        std::cout << index << "\t";
         for (unsigned i(0); i < pointsVec.size(); i++) {
             if (i == index)
                 continue;
@@ -106,6 +109,10 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
         UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
         UCB1.initialise(numberOfInitialPulls);
         UCB1.runUCB(10000000000);
+        std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
+        std::cout << "Ran thread "<< threadNumber << ".Index " << index << " Time taken = " <<
+            std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()<<std::endl;
+
     }
 
 }
@@ -166,35 +173,13 @@ int main(int argc, char *argv[]){
 
     clock_t timeRead = clock();
     while (glob_result.gl_pathc != 0){
-            std::cout << "GK " << std::string(glob_result.gl_pathv[0]) << std::endl;
+//            std::cout << "GK " << std::string(glob_result.gl_pathv[0]) << std::endl;
 
         pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
         fileNumber ++;
         searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
         glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
 //            std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
-    }
-
-    DIR *dir;
-    struct dirent *ent;
-    dir = opendir (directoryPath.c_str());
-    if (dir != NULL) {
-        /* print all the files and directories within directory */
-
-        while ((ent = readdir (dir)) != NULL) {
-//            printf ("%s\n", ent->d_name);
-            searchName = directoryPath + ent->d_name;
-            glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
-            std::cout << "SN " <<std::string(glob_result.gl_pathv[0]) << std::endl;
-            if (glob_result.gl_pathc != 0){
-                pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
-            }
-        }
-        closedir (dir);
-    } else {
-        /* could not open directory */
-        perror ("Couldnt not open directory");
-        return EXIT_FAILURE;
     }
 
     unsigned long pointIndex(0);
@@ -217,16 +202,16 @@ int main(int argc, char *argv[]){
 //    std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
 
     //Parallelize
-    clock_t loopTime = clock();
+    std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     std::vector<std::thread> initThreads(numCores);
     unsigned long chunkSize = (maxNumberOfPoints/numCores);
 
-    #pragma omp parallel for
+//    #pragma omp parallel for
     for(unsigned t = 0; t < numCores; t++) {
 
         unsigned long mainPointIndexStart = t * chunkSize;
         unsigned long mainPointIndexEnd = (t + 1) * chunkSize;
-        initThreads[t] = std::thread(singleRun, std::ref(pointsVec), mainPointIndexStart, mainPointIndexEnd, numberOfInitialPulls, delta);
+        initThreads[t] = std::thread(singleRun, std::ref(pointsVec), t, mainPointIndexStart, mainPointIndexEnd, numberOfInitialPulls, delta);
 //        singleRun(pointsVec, mainPointIndexStart, mainPointIndexEnd, numberOfInitialPulls, delta);
 
 
@@ -234,7 +219,10 @@ int main(int argc, char *argv[]){
     for(unsigned t = 0; t < numCores; t++) {
         initThreads[t].join();
     }
-    std::cout << "Average time (ms)" << 1000 * (clock() - loopTime) / (CLOCKS_PER_SEC*maxNumberOfPoints) << std::endl;
+    std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
+
+    std::cout << "Average time (ms)"
+              << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/maxNumberOfPoints << std::endl;
 
     return 0;
 }
