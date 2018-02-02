@@ -6,6 +6,7 @@
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include "utils.h"
+#include <glob.h>
 
 void utils::readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
 
@@ -64,4 +65,24 @@ void utils::readImageAsVector (std::string filePath, std::vector<float> &imageVe
             }
         }
     }
+}
+
+void utils::getPathToFile(std::vector<std::string> & pathsToImages, const std::string directoryPath,
+                   const std::string  fileSuffix){
+    std::string filePrefix = "/*";
+    std::string searchName = directoryPath + filePrefix + fileSuffix;
+    std::cout << searchName << std::endl;
+    glob_t glob_result;
+    glob(searchName.c_str(), GLOB_TILDE, NULL, &glob_result);
+
+
+    std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
+    std::cout << glob_result.gl_pathv[0] << std::endl;
+
+    pathsToImages.reserve(glob_result.gl_pathc);
+    for (unsigned long i = 0; i < glob_result.gl_pathc; i ++){
+        pathsToImages.push_back(glob_result.gl_pathv[i]);
+    }
+
+    std::sort(pathsToImages.begin(), pathsToImages.end());
 }

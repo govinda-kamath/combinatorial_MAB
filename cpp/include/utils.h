@@ -25,4 +25,7 @@ namespace utils{
     }
 
     void readImageAsVector (std::string filePath, std::vector<float> &imageVec);
+
+    void getPathToFile(std::vector<std::string> & pathsToImages, const std::string directoryPath,
+    const std::string  fileSuffix);
 }

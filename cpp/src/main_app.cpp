@@ -8,86 +8,12 @@
 #include <map>
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
-#include <glob.h>
 #include "Points.h"
 #include "Arms.h"
 #include "UCB.h"
 #include "INIReader.h"
+#include "utils.h"
 #define DEBUG
-
-
-//Reads the protected container object of a priority queue to give access to its elements
-//A beautiful hack picked up from https://stackoverflow.com/a/12886393/3377314
-template <class T, class S, class C>
-S& Container(std::priority_queue<T, S, C>& q) {
-    struct HackedQueue : private std::priority_queue<T, S, C> {
-        static S& Container(std::priority_queue<T, S, C>& q) {
-            return q.*&HackedQueue::c;
-        }
-    };
-    return HackedQueue::Container(q);
-}
-
-
-
-void readImageAsVector (std::string filePath, std::vector<float> &imageVec) {
-
-    dlib::array2d <dlib::rgb_pixel> imageRGB;
-    dlib::load_image(imageRGB, filePath.c_str());
-    unsigned  numColumns(imageRGB.nc()), numRows(imageRGB.nr());
-    unsigned numPixels(numColumns*numRows);
-    unsigned vecLength(numPixels*3);
-
-//    std::cout << numColumns <<"\t" << numRows <<
-//              "\t" << numPixels << "\t" << vecLength << std::endl;
-
-    if (imageVec.size() != vecLength){
-
-//        std::cout << "initialising" << std::endl;
-        imageVec.clear();
-        imageVec.reserve(vecLength);
-
-        for (unsigned i(0); i < numRows; i++){
-            for (unsigned j(0); j < numColumns; j++) {
-                imageVec.push_back((float) imageRGB[i][j].red);
-            }
-        }
-
-
-
-        for (unsigned i(0); i < numRows; i++){
-            for (unsigned j(0); j < numColumns; j++) {
-                imageVec.push_back((float) imageRGB[i][j].blue);
-            }
-        }
-
-        for (unsigned i(0); i < numRows; i++){
-            for (unsigned j(0); j < numColumns; j++) {
-                imageVec.push_back((float) imageRGB[i][j].green);
-            }
-        }
-
-    } else {
-
-        for (unsigned i(0); i < numRows; i++) {
-            for (unsigned j(0); j < numColumns; j++) {
-                imageVec[i * numRows + j] = (float) imageRGB[i][j].red;
-            }
-        }
-
-        for (unsigned i(0); i < numRows; i++) {
-            for (unsigned j(0); j < numColumns; j++) {
-                imageVec[numPixels + i * numRows + j] = (float) imageRGB[i][j].blue;
-            }
-        }
-
-        for (unsigned i(0); i < numRows; i++) {
-            for (unsigned j(0); j < numColumns; j++) {
-                imageVec[2 * numPixels + i * numRows + j] = (float) imageRGB[i][j].green;
-            }
-        }
-    }
-}
 
 
 void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned threadNumber, unsigned long mainPointIndexStart,
@@ -123,8 +49,9 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned threadNum
                       << std::endl;
         }
     }
-
 }
+
+
 
 int main(int argc, char *argv[]){
     std::cout << "We have entered " << argc
@@ -161,46 +88,12 @@ int main(int argc, char *argv[]){
     std::cout << delta << std::endl;
     std::cout << directoryPath << std::endl;
     std::cout << fileSuffix << std::endl;
-    glob_t glob_result;
     std::vector<float> tmpVec;
 
     unsigned long fileNumber(0);
-    std::string searchName;
-//
-    std::string filePrefix = "/*";
-    searchName = directoryPath + filePrefix + fileSuffix;
-    std::cout << searchName << std::endl;
-
+    std::vector<std::string>  pathsToImages;
     clock_t timeRead = clock();
-    glob(searchName.c_str(), GLOB_TILDE, NULL, &glob_result);
-
-
-    std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
-    std::cout << glob_result.gl_pathv[0] << std::endl;
-
-    std::vector<std::string> pathsToImages;
-    pathsToImages.reserve(glob_result.gl_pathc);
-    for (unsigned long i = 0; i < glob_result.gl_pathc; i ++){
-        pathsToImages.push_back(glob_result.gl_pathv[i]);
-    }
-
-    std::sort(pathsToImages.begin(), pathsToImages.end());
-//    std::map<int,std::string> indexToPath;
-//
-//
-//    for (unsigned long i = 0; i < 100; i ++){
-//        indexToPath[i] = pathsToImages[i] ;
-//    }
-
-//    while (glob_result.gl_pathc != 0){
-//            std::cout << std::string(glob_result.gl_pathv[0]) << std::endl;
-//
-//        pathsToImages.push_back(std::string(glob_result.gl_pathv[0]));
-//        fileNumber ++;
-//        searchName = directoryPath + filePrefix + std::to_string(fileNumber) + fileSuffix;
-//        glob(searchName.c_str(),GLOB_TILDE,NULL,&glob_result);
-////            std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
-//    }
+    utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
 
     unsigned long pointIndex(0);
 
@@ -208,7 +101,7 @@ int main(int argc, char *argv[]){
         float tmpValue;
 
         std::vector<float> tmpVec;
-        readImageAsVector(pathsToImages[i],tmpVec);
+        utils::readImageAsVector(pathsToImages[i],tmpVec);
 
         SquaredEuclideanPoint tmpPoint(tmpVec);
         pointsVec.push_back(tmpPoint);
