@@ -22,4 +22,4 @@ add_executable(test_code ${SOURCES} cpp/include/Points.h cpp/include/Arms.h
         cpp/lib/Points.cpp
         cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
 #target_link_libraries(test_code cpp/include/Test)
-target_link_libraries(test_code dlib::dlib)
+target_link_libraries(test_code dlib::dlib pthread)
