@@ -18,7 +18,7 @@
 
 
 
-void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned  k, unsigned long mainPointIndexStart,
+void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned k, unsigned long mainPointIndexStart,
                unsigned long mainPointIndexEnd, unsigned numberOfInitialPulls, float delta, std::string saveFilepath,
                std::vector<std::string>  pathsToImages){
 
@@ -50,9 +50,8 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned  k, unsig
     std::cout<< "Saving the thread starting with " << mainPointIndexStart << " in file " << saveFilepath << std::endl;
 
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
-
         std::vector<ArmKNN<SquaredEuclideanPoint>> topKArms = allAnswers[index - mainPointIndexStart];
-        std::vector<float> topKArmsTrueMean(k);
+        std::vector<float> topKArmsTrueMean(k*5);
 
         saveFile << index << "R ";
         for (unsigned i = 0; i < k*5; i++) {
@@ -71,8 +70,6 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned  k, unsig
             saveFile <<  " " << topKArmsArgSort[i];
         }
         saveFile << "Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
-        saveFile << std::endl;
-
     }
 
 }
@@ -102,9 +99,10 @@ int main(int argc, char *argv[]){
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls", 100);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+
 //    int numCores = (int) reader.GetReal("UCB", "numCores", 1);
 
-    std::cout << "Running "<<k<<"nn for " << endIndex - startIndex << std::endl;
+    std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
     std::cout << delta << std::endl;
     std::cout << directoryPath << std::endl;
@@ -130,7 +128,7 @@ int main(int argc, char *argv[]){
     std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    singleRun(pointsVec, k ,startIndex, endIndex, numberOfInitialPulls, delta, saveFilePath, pathsToImages);
+    singleRun(pointsVec, k, startIndex, endIndex, numberOfInitialPulls, delta, saveFilePath, pathsToImages);
 //    //Parallelize
 //    std::vector<std::thread> initThreads(numCores);
 //    unsigned long chunkSize = (maxNumberOfPoints/numCores);
