@@ -34,12 +34,27 @@ public:
 
     /*Computes the exact distance between two points.
      * Used only for debug purposes*/
-
     float distance(const SquaredEuclideanPoint& p1) const;
 
     /*Picks a dimension of points randomly and samples the distance
      * that dimension*/
     float sampledDistance(const SquaredEuclideanPoint& p1) const;
+};
+
+
+class L1Point : public Point{
+/* Points in Squared Euclidean space
+ * */
+public:
+    L1Point(std::vector<float> p);
+
+    /*Computes the exact distance between two points.
+     * Used only for debug purposes*/
+    float distance(const L1Point& p1) const;
+
+    /*Picks a dimension of points randomly and samples the distance
+     * that dimension*/
+    float sampledDistance(const L1Point& p1) const;
 };
 
 

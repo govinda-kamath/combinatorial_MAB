@@ -129,4 +129,41 @@ public:
     }
 };
 
+
+
+template <class templatePoint>
+class ArmMedoid : public Arm<templatePoint>{
+    /*
+     * Arms for Medoid*/
+public:
+    const templatePoint *fixedPoint;
+    std::vector<templatePoint> *pointsVec;
+    unsigned long numberOfPoints;
+
+    ArmMedoid(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
+
+    ArmMedoid(unsigned long id, const templatePoint &p, std::vector<templatePoint> &pVec) :
+            Arm<templatePoint>(id, p) {
+        pointsVec = &pVec;
+        numberOfPoints = pVec.size();
+    }
+
+    using Arm<templatePoint>::pullArm;
+    float pullArm(float globalSigma, float logDeltaInverse, bool update = true){
+        //Choose a random point
+        unsigned long randomCoOrdinate;
+        randomCoOrdinate = std::rand() % numberOfPoints;
+        return pullArm(pointsVec[randomCoOrdinate], globalSigma, logDeltaInverse, update);
+    }
+
+    using Arm<templatePoint>::trueMean;
+    float trueMean(){
+        double Mean = 0;
+        for(unsigned long i = 0; i<numberOfPoints; i++){
+            Mean += trueMean(pointsVec[i]);
+        }
+        return (float) Mean/((double)numberOfPoints);
+    }
+};
+
 #endif //COMBINATORIAL_MAB_ARMS_H

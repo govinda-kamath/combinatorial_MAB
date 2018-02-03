@@ -102,12 +102,7 @@ public:
 
     }
 
-    void storeExtraTopArms(){
-        for (unsigned i=0; i<numberOfBestArms*5; i++) {
-            topKArms.push_back(arms.top());
-            arms.pop();
-        }
-    }
+
     void runUCB(unsigned long maxIterations){
         unsigned bestArmCount = 0;
         for (unsigned long i(0); i < maxIterations; i++){
@@ -122,6 +117,13 @@ public:
             }
         }
         storeExtraTopArms(); //Storing extra arms
+    }
+
+    void storeExtraTopArms(){
+        for (unsigned i=0; i<numberOfBestArms*5; i++) {
+            topKArms.push_back(arms.top());
+            arms.pop();
+        }
     }
 
     bool iterationOfUCB(){

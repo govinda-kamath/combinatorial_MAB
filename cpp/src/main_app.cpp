@@ -69,7 +69,7 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned k, unsign
         for (unsigned i = 0; i < k*5; i++) {
             saveFile <<  " " << topKArmsArgSort[i];
         }
-        saveFile << "Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
+        saveFile << " Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
     }
 
 }

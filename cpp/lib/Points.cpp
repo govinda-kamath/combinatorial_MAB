@@ -21,7 +21,6 @@ float Point::distance(const Point& p1) const {}
 float Point::sampledDistance(const Point& p1) const {}
 
 SquaredEuclideanPoint::SquaredEuclideanPoint(std::vector<float> p) : Point(p){}
-
 /*Computes the exact distance between two points.
  * Used only for debug purposes*/
 float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint& p1) const {
@@ -46,5 +45,33 @@ float SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint& p1) co
     randomCoOrdinate = std::rand() % vecSize;
     return (point[randomCoOrdinate] - p1.point[randomCoOrdinate])
            *(point[randomCoOrdinate] - p1.point[randomCoOrdinate]);
+}
+
+
+
+L1Point::L1Point(std::vector<float> p) : Point(p){}
+/*Computes the exact distance between two points.
+ * Used only for debug purposes*/
+float L1Point::distance(const L1Point& p1) const {
+    assert(("Sizes do not match", point.size() == p1.point.size()));
+
+    float result(0);
+
+    std::vector<float>::const_iterator pIt = point.begin();
+    std::vector<float>::const_iterator p1It = p1.point.begin();
+    for (; p1It != p1.point.end() && pIt  != point.end(); ++p1It, ++pIt){
+        result += std::abs(*p1It-*pIt);
+    }
+    return result;
+}
+
+/*Picks a dimension of points randomly and samples the distance
+ * that L1Point*/
+float L1Point::sampledDistance(const L1Point& p1) const {
+    assert(("Sizes do not match", point.size() == p1.point.size()));
+    unsigned randomCoOrdinate;
+    randomCoOrdinate = std::rand() % getVecSize();
+    return std::abs(point[randomCoOrdinate] - p1.point[randomCoOrdinate]);
+
 }
 
