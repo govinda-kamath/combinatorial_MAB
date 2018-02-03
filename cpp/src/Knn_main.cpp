@@ -104,28 +104,20 @@ int main(int argc, char *argv[]){
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
-    std::cout << delta << std::endl;
-    std::cout << directoryPath << std::endl;
-    std::vector<float> tmpVec;
 
     std::vector<std::string>  pathsToImages;
-    clock_t timeRead = clock();
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
 
-    unsigned long pointIndex(0);
     std::vector<SquaredEuclideanPoint> pointsVec;
     for  (unsigned long i(0); i < pathsToImages.size(); i++) {
         std::vector<float> tmpVec;
         utils::readImageAsVector(pathsToImages[i],tmpVec);
         SquaredEuclideanPoint tmpPoint(tmpVec);
         pointsVec.push_back(tmpPoint);
-        pointIndex++;
-        if (pointIndex%10000 == 9999){
-            std::cout << pointIndex+1 << " points read." << std::endl;
+        if (i%10000 == 9999){
+            std::cout << i+1 << " points read." << std::endl;
         }
     }
-
-    std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     singleRun(pointsVec, k, startIndex, endIndex, numberOfInitialPulls, delta, saveFilePath, pathsToImages);

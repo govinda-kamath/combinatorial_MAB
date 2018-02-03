@@ -136,13 +136,12 @@ class ArmMedoid : public Arm<templatePoint>{
     /*
      * Arms for Medoid*/
 public:
-    const templatePoint *fixedPoint;
-    std::vector<templatePoint> *pointsVec;
+    const std::vector<templatePoint> *pointsVec;
     unsigned long numberOfPoints;
 
     ArmMedoid(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
-    ArmMedoid(unsigned long id, const templatePoint &p, std::vector<templatePoint> &pVec) :
+    ArmMedoid(unsigned long id, const templatePoint &p, const std::vector<templatePoint> &pVec) :
             Arm<templatePoint>(id, p) {
         pointsVec = &pVec;
         numberOfPoints = pVec.size();
@@ -153,7 +152,7 @@ public:
         //Choose a random point
         unsigned long randomCoOrdinate;
         randomCoOrdinate = std::rand() % numberOfPoints;
-        return pullArm(pointsVec[randomCoOrdinate], globalSigma, logDeltaInverse, update);
+        return pullArm((*pointsVec)[randomCoOrdinate], globalSigma, logDeltaInverse, update);
     }
 
     using Arm<templatePoint>::trueMean;
