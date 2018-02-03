@@ -47,11 +47,11 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
         }
         avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
     }
-    std::cout<< "Saving the thread starting with" << mainPointIndexStart <<std::endl;
+    std::cout<< "Saving the thread starting with " << mainPointIndexStart << " in file " << saveFilepath << std::endl;
 
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
 
-        unsigned  k =20;
+        unsigned  k = 24;
         std::vector<ArmKNN<SquaredEuclideanPoint>> topKArms = allAnswers[index - mainPointIndexStart];
         std::vector<float> topKArmsTrueMean(k);
 
