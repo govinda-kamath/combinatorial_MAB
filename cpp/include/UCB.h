@@ -23,7 +23,7 @@ public:
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
     std::vector<templateArm> topKArms;
     std::mutex initializeMutex;
-    UCB(std::vector<templateArm> &armsVec, float delta){
+    UCB(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms){
 
         armsContainer = armsVec;
         numberOfArms = armsContainer.size();
@@ -34,7 +34,7 @@ public:
         globalNumberOfPulls = 0;
         globalSumOfPulls = 0;
         globalSumOfSquaresOfPulls = 0;
-        numberOfBestArms = 5; //ToDo:: Generalize this
+        numberOfBestArms = nOfBestArms;
     }
 
     void initialiseFewArm(unsigned long armIndexStart, unsigned long armIndexEnd, unsigned numberOfInitialPulls){

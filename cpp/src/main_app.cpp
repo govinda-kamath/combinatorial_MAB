@@ -18,7 +18,7 @@
 
 
 
-void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long mainPointIndexStart,
+void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned  k, unsigned long mainPointIndexStart,
                unsigned long mainPointIndexEnd, unsigned numberOfInitialPulls, float delta, std::string saveFilepath,
                std::vector<std::string>  pathsToImages){
 
@@ -37,7 +37,7 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
             armsVec.push_back(tmpArm);
         }
 
-        UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta);
+        UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta, k);
         UCB1.initialise(numberOfInitialPulls);
         UCB1.runUCB(200*pointsVec.size());
         allAnswers.push_back(UCB1.topKArms);
@@ -51,24 +51,23 @@ void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned long main
 
     for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
 
-        unsigned  k = 24;
         std::vector<ArmKNN<SquaredEuclideanPoint>> topKArms = allAnswers[index - mainPointIndexStart];
         std::vector<float> topKArmsTrueMean(k);
 
         saveFile << index << "R ";
-        for (unsigned i = 0; i < k; i++) {
+        for (unsigned i = 0; i < k*5; i++) {
             saveFile << topKArms[i].id << " ";
             topKArmsTrueMean[i] = topKArms[i].trueMean();
         }
         saveFile << std::endl;
 
-        std::vector<int> topKArmsArgSort(k);
+        std::vector<int> topKArmsArgSort(k*5);
         std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
         auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
         std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
 
         saveFile << index << "A";
-        for (unsigned i = 0; i < k; i++) {
+        for (unsigned i = 0; i < k*5; i++) {
             saveFile <<  " " << topKArmsArgSort[i];
         }
         saveFile << "Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
@@ -101,11 +100,11 @@ int main(int argc, char *argv[]){
     std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls", 100);
+    unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
-
 //    int numCores = (int) reader.GetReal("UCB", "numCores", 1);
 
-//    std::cout << "Running K-nn for " << maxNumberOfPoints << " points using "<< "Number of cores = " << numCores<<std::endl;
+    std::cout << "Running "<<k<<"nn for " << endIndex - startIndex << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
     std::cout << delta << std::endl;
     std::cout << directoryPath << std::endl;
@@ -131,7 +130,7 @@ int main(int argc, char *argv[]){
     std::cout << "Reading time (ms)" << 1000 * (clock() - timeRead) / CLOCKS_PER_SEC << std::endl;
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    singleRun(pointsVec, startIndex, endIndex, numberOfInitialPulls, delta, saveFilePath, pathsToImages);
+    singleRun(pointsVec, k ,startIndex, endIndex, numberOfInitialPulls, delta, saveFilePath, pathsToImages);
 //    //Parallelize
 //    std::vector<std::thread> initThreads(numCores);
 //    unsigned long chunkSize = (maxNumberOfPoints/numCores);
