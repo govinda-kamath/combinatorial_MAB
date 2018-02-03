@@ -4,6 +4,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+option(knn "KNN" ON)
+option(medoid "Medoid" ON)
+
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
@@ -24,16 +27,20 @@ file(GLOB LIBRARIES "cpp/lib/*.cpp")
 #However, the file(GLOB...) allows for wildcard additions:
 #file(GLOB SOURCES "cpp/src/*.cpp")
 #add_executable(knn ${SOURCES} ${INCLUDE} ${LIBRARIES})
-add_executable(knn cpp/src/Knn_main.cpp
+if(${knn})
+    add_executable(knn cpp/src/Knn_main.cpp
         cpp/include/Points.h cpp/include/Arms.h
         cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
         cpp/lib/Points.cpp
         cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
-target_link_libraries(knn dlib::dlib pthread)
+    target_link_libraries(knn dlib::dlib pthread)
+endif()
 
-add_executable(medoid cpp/src/Medoid_main.cpp
+if(${medoid})
+    add_executable(medoid cpp/src/Medoid_main.cpp
         cpp/include/Points.h cpp/include/Arms.h
         cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
         cpp/lib/Points.cpp
         cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
-target_link_libraries(medoid dlib::dlib pthread)
+    target_link_libraries(medoid dlib::dlib pthread)
+endif()
