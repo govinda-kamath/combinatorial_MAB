@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
         SquaredEuclideanPoint tmpPoint(tmpVec);
         pointsVec.push_back(tmpPoint);
         pointIndex++;
-        if (pointIndex%2000 == 999){
+        if (pointIndex%10000 == 9999){
             std::cout << pointIndex+1 << " points read." << std::endl;
         }
     }
