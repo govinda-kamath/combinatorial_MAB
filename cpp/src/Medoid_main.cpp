@@ -43,15 +43,7 @@ int main(int argc, char *argv[]){
     std::vector<ArmMedoid<L1Point> > armsVec;
 
     // Points
-    for  (unsigned long i(0); i < pathsToImages.size(); i++) {
-        std::vector<float> tmpVec;
-        utils::readImageAsVector(pathsToImages[i],tmpVec);
-        L1Point tmpPoint(tmpVec);
-        pointsVec.push_back(tmpPoint);
-        if (i%10000 == 9999){
-            std::cout << i+1 << " points read." << std::endl;
-        }
-    }
+    utils::vectorsToPoints(pointsVec, pathsToImages);
 
     //Arms
     for (unsigned i(0); i < pointsVec.size(); i++) {
