@@ -22,10 +22,18 @@ file(GLOB INCLUDE "cpp/include/*.h")
 file(GLOB LIBRARIES "cpp/lib/*.cpp")
 
 #However, the file(GLOB...) allows for wildcard additions:
-file(GLOB SOURCES "cpp/src/*.cpp")
+#file(GLOB SOURCES "cpp/src/*.cpp")
 #add_executable(knn ${SOURCES} ${INCLUDE} ${LIBRARIES})
-add_executable(knn ${SOURCES} cpp/include/Points.h cpp/include/Arms.h
+add_executable(knn cpp/src/Knn_main.cpp
+        cpp/include/Points.h cpp/include/Arms.h
         cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
         cpp/lib/Points.cpp
         cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
 target_link_libraries(knn dlib::dlib pthread)
+
+add_executable(medoid cpp/src/Medoid_main.cpp
+        cpp/include/Points.h cpp/include/Arms.h
+        cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+        cpp/lib/Points.cpp
+        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
+target_link_libraries(medoid dlib::dlib pthread)
