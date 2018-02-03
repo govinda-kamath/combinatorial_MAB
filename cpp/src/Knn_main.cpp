@@ -87,7 +87,6 @@ int main(int argc, char *argv[]){
 //    long startIndex(0); // Start index
 //    long endIndex(100); // End index
 
-
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
         std::cout << "Can't load "<< nameConfig << std::endl;
@@ -100,7 +99,6 @@ int main(int argc, char *argv[]){
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
 
-//    int numCores = (int) reader.GetReal("UCB", "numCores", 1);
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
@@ -108,6 +106,7 @@ int main(int argc, char *argv[]){
     std::vector<std::string>  pathsToImages;
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
 
+    //Points
     std::vector<SquaredEuclideanPoint> pointsVec;
     for  (unsigned long i(0); i < pathsToImages.size(); i++) {
         std::vector<float> tmpVec;
@@ -119,9 +118,19 @@ int main(int argc, char *argv[]){
         }
     }
 
+    // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     singleRun(pointsVec, k, startIndex, endIndex, numberOfInitialPulls, delta, saveFilePath, pathsToImages);
-//    //Parallelize
+    std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
+    std::cout << "Average time (ms) "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
+                      (endIndex-startIndex) << std::endl;
+
+    return 0;
+}
+
+
+//    //Parallel
 //    std::vector<std::thread> initThreads(numCores);
 //    unsigned long chunkSize = (maxNumberOfPoints/numCores);
 //
@@ -131,17 +140,9 @@ int main(int argc, char *argv[]){
 //        unsigned long mainPointIndexStart = t * chunkSize;
 //        unsigned long mainPointIndexEnd = (t + 1) * chunkSize;
 //        initThreads[t] = std::thread(singleRun, std::ref(pointsVec), t, mainPointIndexStart, mainPointIndexEnd, numberOfInitialPulls, delta);
-////
 //
 //
 //    }
 //    for(unsigned t = 0; t < numCores; t++) {
 //        initThreads[t].join();
 //    }
-    std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-    std::cout << "Average time (ms) "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
-                      (endIndex-startIndex) << std::endl;
-
-    return 0;
-}
