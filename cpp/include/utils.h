@@ -9,7 +9,6 @@
 #ifndef COMBINATORIAL_MAB_UTILS_H
 #define COMBINATORIAL_MAB_UTILS_H
 
-#endif //COMBINATORIAL_MAB_UTILS_H
 
 namespace utils{
     //Reads the protected container object of a priority queue to give access to its elements
@@ -44,3 +43,4 @@ namespace utils{
     }
 
 }
+#endif //COMBINATORIAL_MAB_UTILS_H

@@ -13,66 +13,66 @@
 #include "Arms.h"
 #include "UCB.h"
 #include "INIReader.h"
-#include "utils.h"
+#include "Knn.h"
 #define DEBUG
 
-
-
-void singleRun(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned k, unsigned long mainPointIndexStart,
-               unsigned long mainPointIndexEnd, unsigned numberOfInitialPulls, float delta, std::string saveFilepath,
-               std::vector<std::string>  pathsToImages){
-
-
-    std::ofstream saveFile;
-    saveFile.open (saveFilepath, std::ofstream::out | std::ofstream::app);
-    std::vector<std::vector<ArmKNN<SquaredEuclideanPoint>> > allAnswers;
-    std::vector<float> avgNumberOfPulls;
-
-    for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
-        std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
-        for (unsigned i(0); i < pointsVec.size(); i++) {
-            if (i == index)
-                continue;
-            ArmKNN<SquaredEuclideanPoint> tmpArm(i, pointsVec[i], pointsVec[index]);
-            armsVec.push_back(tmpArm);
-        }
-
-        UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta, k);
-        UCB1.initialise(numberOfInitialPulls);
-        UCB1.runUCB(200*pointsVec.size());
-        allAnswers.push_back(UCB1.topKArms);
-        if (index%100==0){
-            std::cout << "Thread " << mainPointIndexStart << ". Index " << index<< " "
-                      << pathsToImages[UCB1.topKArms[0].id]<<std::endl;
-        }
-        avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
-    }
-    std::cout<< "Saving the thread starting with " << mainPointIndexStart << " in file " << saveFilepath << std::endl;
-
-    for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
-        std::vector<ArmKNN<SquaredEuclideanPoint>> topKArms = allAnswers[index - mainPointIndexStart];
-        std::vector<float> topKArmsTrueMean(k*5);
-
-        saveFile << index << "R ";
-        for (unsigned i = 0; i < k*5; i++) {
-            saveFile << topKArms[i].id << " ";
-            topKArmsTrueMean[i] = topKArms[i].trueMean();
-        }
-        saveFile << std::endl;
-
-        std::vector<int> topKArmsArgSort(k*5);
-        std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
-        auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
-        std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
-
-        saveFile << index << "A";
-        for (unsigned i = 0; i < k*5; i++) {
-            saveFile <<  " " << topKArmsArgSort[i];
-        }
-        saveFile << " Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
-    }
-
-}
+//
+//
+//void KNN(std::vector<SquaredEuclideanPoint> &pointsVec, unsigned k, unsigned long mainPointIndexStart,
+//               unsigned long mainPointIndexEnd, unsigned numberOfInitialPulls, float delta, std::string saveFilepath,
+//               std::vector<std::string>  pathsToImages){
+//
+//
+//    std::ofstream saveFile;
+//    saveFile.open (saveFilepath, std::ofstream::out | std::ofstream::app);
+//    std::vector<std::vector<ArmKNN<SquaredEuclideanPoint>> > allAnswers;
+//    std::vector<float> avgNumberOfPulls;
+//
+//    for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd; index++){
+//        std::vector<ArmKNN<SquaredEuclideanPoint> > armsVec;
+//        for (unsigned i(0); i < pointsVec.size(); i++) {
+//            if (i == index)
+//                continue;
+//            ArmKNN<SquaredEuclideanPoint> tmpArm(i, pointsVec[i], pointsVec[index]);
+//            armsVec.push_back(tmpArm);
+//        }
+//
+//        UCB<ArmKNN<SquaredEuclideanPoint> > UCB1(armsVec, delta, k);
+//        UCB1.initialise(numberOfInitialPulls);
+//        UCB1.runUCB(200*pointsVec.size());
+//        allAnswers.push_back(UCB1.topKArms);
+//        if (index%100==0){
+//            std::cout << "Thread " << mainPointIndexStart << ". Index " << index<< " "
+//                      << pathsToImages[UCB1.topKArms[0].id]<<std::endl;
+//        }
+//        avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
+//    }
+//    std::cout<< "Saving the thread starting with " << mainPointIndexStart << " in file " << saveFilepath << std::endl;
+//
+//    for (unsigned long index = mainPointIndexStart; index<mainPointIndexEnd ; index++) {
+//        std::vector<ArmKNN<SquaredEuclideanPoint>> topKArms = allAnswers[index - mainPointIndexStart];
+//        std::vector<float> topKArmsTrueMean(k*5);
+//
+//        saveFile << index << "R ";
+//        for (unsigned i = 0; i < k*5; i++) {
+//            saveFile << topKArms[i].id << " ";
+//            topKArmsTrueMean[i] = topKArms[i].trueMean();
+//        }
+//        saveFile << std::endl;
+//
+//        std::vector<int> topKArmsArgSort(k*5);
+//        std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
+//        auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
+//        std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
+//
+//        saveFile << index << "A";
+//        for (unsigned i = 0; i < k*5; i++) {
+//            saveFile <<  " " << topKArmsArgSort[i];
+//        }
+//        saveFile << " Av:" << avgNumberOfPulls[index - mainPointIndexStart] << "\n";
+//    }
+//
+//}
 
 
 
@@ -112,8 +112,13 @@ int main(int argc, char *argv[]){
     utils::vectorsToPoints(pointsVec, pathsToImages);
 
     // Arms and UCB
+
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    singleRun(pointsVec, k, startIndex, endIndex, numberOfInitialPulls, delta, saveFilePath, pathsToImages);
+    Knn<SquaredEuclideanPoint> knn( pointsVec, k, numberOfInitialPulls, delta );
+    std::vector<unsigned long> indices(endIndex-startIndex);
+    std::iota(indices.begin(), indices.end(), startIndex);
+    knn.run(indices);
+
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/

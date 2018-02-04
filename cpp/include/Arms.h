@@ -27,7 +27,7 @@ public:
     float SumOfSquaresOfPulls;
     unsigned long dimension;
     unsigned log10Dimension;
-    const templatePoint * point;
+    const templatePoint *point;
     unsigned long id;
 
     Arm(){
@@ -44,7 +44,7 @@ public:
         id = armNumber;
         point = &p;
         dimension = d;
-        log10Dimension = std::ceil(std::log10(dimension));
+        log10Dimension = (unsigned) std::ceil(std::log10(dimension));
 
     }
 
@@ -121,6 +121,7 @@ class ArmKNN : public Arm<templatePoint>{
 public:
     const templatePoint *fixedPoint;
 
+    ArmKNN(): Arm<templatePoint>(){}
     ArmKNN(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
     ArmKNN(unsigned long id, const templatePoint &p, const templatePoint &fixPoint) : Arm<templatePoint>(id, p, p.vecSize) {

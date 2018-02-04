@@ -32,7 +32,7 @@ if(${knn})
         cpp/include/Points.h cpp/include/Arms.h
         cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
         cpp/lib/Points.cpp
-        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
+        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp cpp/src/Knn.h)
     target_link_libraries(knn dlib::dlib pthread)
 endif()
 
