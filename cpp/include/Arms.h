@@ -39,10 +39,11 @@ public:
         estimateOfSecondMoment = NAN;
     }
 
-    Arm(unsigned long armNumber, const templatePoint &p) : Arm() {
+    Arm(unsigned long armNumber, const templatePoint &p, unsigned long d) : Arm() {
         id = armNumber;
         point = &p;
-        dimension = point->point.size();
+        dimension = d;
+
     }
 
     ~Arm(){
@@ -73,7 +74,7 @@ public:
         float sample;
 
         if (numberOfPulls >= dimension){
-            sample = trueMean(p1);
+            sample = trueMean();
             numberOfPulls += dimension;
             estimateOfMean = sample;
             upperConfidenceBound = estimateOfMean;
@@ -102,6 +103,12 @@ public:
         return point->distance(p1)/p1.getVecSize();
     }
 
+    // The child class will has to extend this
+    virtual float trueMean(){
+        std::cout<<"True mean should not be calculated here!!" <<std::endl;
+        return -1;
+    };
+
 };
 
 
@@ -114,7 +121,7 @@ public:
 
     ArmKNN(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
-    ArmKNN(unsigned long id, const templatePoint &p, const templatePoint &fixPoint) : Arm<templatePoint>(id, p) {
+    ArmKNN(unsigned long id, const templatePoint &p, const templatePoint &fixPoint) : Arm<templatePoint>(id, p, p.vecSize) {
         fixedPoint = &fixPoint;
     }
 
@@ -142,7 +149,7 @@ public:
     ArmMedoid(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
     ArmMedoid(unsigned long id, const templatePoint &p, const std::vector<templatePoint> &pVec) :
-            Arm<templatePoint>(id, p) {
+            Arm<templatePoint>(id, p, p.vecSize*pVec.size()) {
         pointsVec = &pVec;
         numberOfPoints = pVec.size();
     }
@@ -159,7 +166,7 @@ public:
     float trueMean(){
         double Mean = 0;
         for(unsigned long i = 0; i<numberOfPoints; i++){
-            Mean += trueMean(pointsVec[i]);
+            Mean += trueMean((*pointsVec)[i]);
         }
         return (float) Mean/((double)numberOfPoints);
     }

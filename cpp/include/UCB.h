@@ -70,9 +70,6 @@ public:
         for(unsigned t = 0; t < numberOfThreads; t++){
             unsigned long armIndexStart = t*chunkSize;
             unsigned long armIndexEnd = (t+1)*chunkSize;
-
-//            std::cout << "Starting thread for arm " << armIndexStart
-//                      << " to " << armIndexEnd << std::endl;
             initThreads[t] = std::thread(&UCB::initialiseFewArm, this,
                                          armIndexStart, armIndexEnd, numberOfInitialPulls);
         }
@@ -116,11 +113,13 @@ public:
                     break;
             }
         }
+        if (bestArmCount!=numberOfBestArms)
+            std::cout<< "UCB Stopped before reaching optimal" << std::endl;
         storeExtraTopArms(); //Storing extra arms
     }
 
     void storeExtraTopArms(){
-        for (unsigned i=0; i<numberOfBestArms*5; i++) {
+        for (unsigned i=0; i<numberOfBestArms*20; i++) {
             topKArms.push_back(arms.top());
             arms.pop();
         }

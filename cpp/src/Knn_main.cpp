@@ -95,7 +95,7 @@ int main(int argc, char *argv[]){
     std::string directoryPath = reader.Get("path", "directory", "");
     std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
-    unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls", 100);
+    unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
 
