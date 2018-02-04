@@ -28,4 +28,19 @@ namespace utils{
 
     void getPathToFile(std::vector<std::string> & pathsToImages, const std::string directoryPath,
     const std::string  fileSuffix);
+
+    template <class templatePoint>
+    void vectorsToPoints(std::vector<templatePoint> &pointsVec,
+                         std::vector<std::string>  &pathsToImages){
+        for  (unsigned long i(0); i < pathsToImages.size(); i++) {
+            std::vector<float> tmpVec;
+            readImageAsVector(pathsToImages[i],tmpVec);
+            templatePoint tmpPoint(tmpVec);
+            pointsVec.push_back(tmpPoint);
+            if (i%10000 == 9999){
+                std::cout << i+1 << " points read." << std::endl;
+            }
+        }
+    }
+
 }

@@ -35,103 +35,54 @@ int main(int argc, char *argv[]){
 
     std::cout << "Running Medoid" << std::endl;
 
+    // Load data
     std::vector<std::string>  pathsToImages;
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
 
-    std::vector<L1Point> pointsVec;
-    std::vector<ArmMedoid<L1Point> > armsVec;
-
     // Points
-    for  (unsigned long i(0); i < pathsToImages.size(); i++) {
-        std::vector<float> tmpVec;
-        utils::readImageAsVector(pathsToImages[i],tmpVec);
-        L1Point tmpPoint(tmpVec);
-        pointsVec.push_back(tmpPoint);
-        if (i%10000 == 9999){
-            std::cout << i+1 << " points read." << std::endl;
-        }
-    }
-    std::cout<<"Data loaded" <<std::endl;
+    std::vector<L1Point> pointsVec;
+    utils::vectorsToPoints(pointsVec, pathsToImages);
+
     //Arms
+    std::vector<ArmMedoid<L1Point> > armsVec;
     for (unsigned i(0); i < pointsVec.size(); i++) {
         ArmMedoid<L1Point> tmpArm(i, pointsVec[i], pointsVec);
         armsVec.push_back(tmpArm);
     }
-
-
-
-
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     std::cout<< "Starting UCB" <<std::endl;
 
     //Running UCB
     unsigned k = 10;
-    UCB<ArmMedoid<L1Point> > UCB1(armsVec, delta, 2);
+    UCB<ArmMedoid<L1Point> > UCB1(armsVec, delta, 3);
     UCB1.initialise(numberOfInitialPulls);
     UCB1.runUCB(20000*pointsVec.size());
 
-    //Result
+    // True Means
+    std::vector<float> topKArmsTrueMean(k);
+    for (unsigned i = 0; i < k*5; i++) {
+        topKArmsTrueMean[i] = UCB1.topKArms[i].trueMean();
+    }
+    std::vector<int> topKArmsArgSort(k);
+    std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
+    auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
+    std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
+
+
+    //Print Result
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
     std::cout << "Average number of pulls " << UCB1.globalNumberOfPulls/UCB1.numberOfArms <<std::endl;
     std::cout << "Average time(ms) UCB "
     << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count() << std::endl;
-    std::cout<<"Id\tEsti\tLCB\tUCB\tNoP"<<std::endl;
+    std::cout<<"Rank\tId\tTr Mean\tEs Mean\tLCB\tUCB\tNoP"<<std::endl;
     for (unsigned i = 0; i < k; i++) {
-        std::cout << UCB1.topKArms[i].id
+        std::cout << topKArmsArgSort[i]+1
+                << "\t" << UCB1.topKArms[i].id
+                << "\t" << topKArmsTrueMean[i]
                 << "\t" << UCB1.topKArms[i].estimateOfMean
                 << "\t" << UCB1.topKArms[i].lowerConfidenceBound
                 << "\t" << UCB1.topKArms[i].upperConfidenceBound
-                << "\t" << UCB1.topKArms[i].numberOfPulls
-                  << std::endl;
-    }
-    std::cout<<std::endl;
-
-//    std::cout<<"The top estimates are";
-//    for (unsigned i = 0; i < k; i++) {
-//        std::cout <<  ;
-//    }
-//    std::cout<<std::endl;
-//    std::cout<<"The top LCB are";
-//    for (unsigned i = 0; i < k; i++) {
-//        std::cout <<  " " << UCB1.topKArms[i].lowerConfidenceBound;
-//    }
-//    std::cout<<std::endl;
-
-
-    // Naive
-    std::vector<float> trueMean;
-    for (unsigned i(0); i < pointsVec.size(); i++) {
-        trueMean.push_back(armsVec[i].trueMean());
+                << "\t" << UCB1.topKArms[i].numberOfPulls << std::endl;
     }
 
-    loopTimeEnd = std::chrono::system_clock::now();
-    std::cout << "Average time(ms) Naive "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count() << std::endl;
-
-    //Stats
-    std::vector<int> trueMeanArgSort(pointsVec.size());
-    std::iota(trueMeanArgSort.begin(), trueMeanArgSort.end(), 0);
-    auto comparator = [&trueMean](int a, int b){ return trueMean[a] < trueMean[b]; };
-    std::sort(trueMeanArgSort.begin(), trueMeanArgSort.end(), comparator);
-
-    std::cout<< "Starting Naive method" <<std::endl;
-    loopTimeStart = std::chrono::system_clock::now();
-
-    std::cout<<"Top true Medoids are";
-    for (unsigned i = 0; i < k; i++) {
-        std::cout <<  " " << trueMeanArgSort[i];
-    }
-    std::cout<<std::endl;
-
-
-
-    std::cout<<"The true means   are";
-    for (unsigned i = 0; i < k; i++) {
-        std::cout <<  " " << trueMean[trueMeanArgSort[i]];
-    }
-    std::cout<<std::endl;
-
-
-    std::cout<<std::endl;
-    return 0;
 }

@@ -103,20 +103,13 @@ int main(int argc, char *argv[]){
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
 
+    // Data
     std::vector<std::string>  pathsToImages;
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
 
     //Points
     std::vector<SquaredEuclideanPoint> pointsVec;
-    for  (unsigned long i(0); i < pathsToImages.size(); i++) {
-        std::vector<float> tmpVec;
-        utils::readImageAsVector(pathsToImages[i],tmpVec);
-        SquaredEuclideanPoint tmpPoint(tmpVec);
-        pointsVec.push_back(tmpPoint);
-        if (i%10000 == 9999){
-            std::cout << i+1 << " points read." << std::endl;
-        }
-    }
+    utils::vectorsToPoints(pointsVec, pathsToImages);
 
     // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
