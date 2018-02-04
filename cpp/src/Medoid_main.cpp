@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
     std::cout<< "Starting UCB" <<std::endl;
 
     //Running UCB
-    unsigned k = 10;
+    unsigned k = 5;
     UCB<ArmMedoid<L1Point> > UCB1(armsVec, delta, 3);
     UCB1.initialise(numberOfInitialPulls);
     UCB1.runUCB(20000*pointsVec.size());

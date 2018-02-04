@@ -26,6 +26,7 @@ public:
     float estimateOfSecondMoment;
     float SumOfSquaresOfPulls;
     unsigned long dimension;
+    unsigned log10Dimension;
     const templatePoint * point;
     unsigned long id;
 
@@ -43,6 +44,7 @@ public:
         id = armNumber;
         point = &p;
         dimension = d;
+        log10Dimension = std::ceil(std::log10(dimension));
 
     }
 
@@ -71,7 +73,7 @@ public:
 
     float pullArm(const templatePoint &p1, float globalSigma,
                   float logDeltaInverse, bool update = true) {
-        float sample;
+        float sample(-INFINITY);
 
         if (numberOfPulls >= dimension){
             sample = trueMean();
@@ -84,18 +86,18 @@ public:
             estimateOfSecondMoment = sample*sample;
         }
         else {
-            sample = point->sampledDistance(p1);
-
-            numberOfPulls++;
-            sumOfPulls += sample;
-            estimateOfMean = sumOfPulls / numberOfPulls;
-            SumOfSquaresOfPulls += sample * sample;
+            for(unsigned t = 0; t < log10Dimension ; t++)
+            {
+                sample = point->sampledDistance(p1);
+                numberOfPulls++;
+                sumOfPulls += sample;
+                SumOfSquaresOfPulls += sample * sample;
+                estimateOfMean = sumOfPulls / numberOfPulls;
+            }
             estimateOfSecondMoment = SumOfSquaresOfPulls / numberOfPulls;
-
             if (update)
                 updateConfidenceIntervals(globalSigma, logDeltaInverse);
         }
-
         return sample;
     }
 
