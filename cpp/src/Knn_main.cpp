@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
     // Arms and UCB
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Knn<SquaredEuclideanPoint> knn( pointsVec, k, numberOfInitialPulls, delta );
+    Knn<SquaredEuclideanPoint> knn( pointsVec, pointsVec, k, numberOfInitialPulls, delta );
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
     std::cout << "Running" <<std::endl;
