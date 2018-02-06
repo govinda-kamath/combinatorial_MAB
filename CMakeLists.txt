@@ -6,6 +6,7 @@ endif()
 
 option(knn "KNN" ON)
 option(medoid "Medoid" ON)
+option(kmeans "Medoid" ON)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
@@ -32,7 +33,8 @@ if(${knn})
         cpp/include/Points.h cpp/include/Arms.h
         cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
         cpp/lib/Points.cpp
-        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp cpp/include/Knn.h)
+        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp cpp/include/Knn.h
+            cpp/include/kmeans.h)
     target_link_libraries(knn dlib::dlib pthread)
 endif()
 
@@ -43,4 +45,14 @@ if(${medoid})
         cpp/lib/Points.cpp
         cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
     target_link_libraries(medoid dlib::dlib pthread)
+endif()
+
+if(${kmeans})
+    add_executable(kmeans cpp/src/Kmeans_main.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+            cpp/lib/Points.cpp
+            cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/kmeans.h)
+    target_link_libraries(kmeans dlib::dlib pthread)
 endif()

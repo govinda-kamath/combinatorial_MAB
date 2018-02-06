@@ -119,7 +119,7 @@ public:
     }
 
     void storeExtraTopArms(){
-        for (unsigned i=0; i<numberOfBestArms*20; i++) {
+        for (unsigned i=0; i < std::min(numberOfBestArms*20, numberOfArms); i++) {
             topKArms.push_back(arms.top());
             arms.pop();
         }

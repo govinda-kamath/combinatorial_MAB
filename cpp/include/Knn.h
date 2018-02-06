@@ -16,81 +16,110 @@
 #include "Arms.h"
 #include "UCB.h"
 #include <stdexcept>
-
 #include "utils.h"
 
 /*
- * Finds the nearest k neighbhours of pointsVecL(eft) in pointsVecR(ight)
+ * Finds the nearest k neighbhours of pointsVectorLeft in pointsVectorRight
  */
 template <class templatePoint>
 class Knn{
 public:
-    std::vector<templatePoint>& pointsVecL;
-    std::vector<templatePoint>& pointsVecR;
+    std::vector<templatePoint> pointsVectorLeft;
+    std::vector<templatePoint> pointsVectorRight;
     unsigned k;
     unsigned numberOfInitialPulls;
     float delta;
 
-    std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighbhours;
-    std::vector<bool> nnEvaluated;
+    std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighbours;
+    std::vector<short int> nearestNeighboursEvaluated;
     std::vector<float> avgNumberOfPulls; //Stat
-    bool LEqualR = false; // True when left and right points are the same
+    bool leftEqualsRight = false; // True when left and right points are the same
 
-    Knn( std::vector<templatePoint>& pVecL, std::vector<templatePoint>& pVecR,
-         unsigned NumberOfNeighbhours, unsigned nOfInitialPulls, float deltaAccuracy )
-            : pointsVecL(pVecL),
-              pointsVecR(pVecR)
-    {
+
+    void initialiseKNN(unsigned NumberOfNeighbhours, unsigned noOfInitialPulls, float deltaAccuracy ){
         k = NumberOfNeighbhours;
-        numberOfInitialPulls = nOfInitialPulls;
+        numberOfInitialPulls = noOfInitialPulls;
         delta = deltaAccuracy;
-        nearestNeighbhours.reserve(pVecL.size());
-        avgNumberOfPulls.reserve(pVecL.size());
-        nnEvaluated.reserve(pVecL.size());
-        for(unsigned long i(0); i<pVecL.size(); i++){
-            nnEvaluated[i] = false;
-            nearestNeighbhours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
+
+        nearestNeighbours.reserve(pointsVectorLeft.size());
+        avgNumberOfPulls.reserve(pointsVectorLeft.size());
+
+        for(unsigned long i(0); i< pointsVectorLeft.size(); i++){
+            nearestNeighboursEvaluated.push_back(false);
+            nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
         }
 
 
+
+    }
+
+
+    Knn( std::vector<templatePoint>& pVecL, std::vector<templatePoint>& pVecR,
+         unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
+        pointsVectorLeft = pVecL;
+        pointsVectorRight = pVecR;
+        initialiseKNN(NumberOfNeighbours, noOfInitialPulls,  deltaAccuracy );
     }
 
     Knn( std::vector<templatePoint>& pVecL,
-         unsigned NumberOfNeighbhours, unsigned nOfInitialPulls, float deltaAccuracy ) :
-            Knn( pVecL, pVecL, NumberOfNeighbhours,  nOfInitialPulls,  deltaAccuracy ) {
-        LEqualR = true;
+         unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
+        pointsVectorLeft = pVecL;
+        pointsVectorRight = pVecL;
+        leftEqualsRight = true;
+        initialiseKNN(NumberOfNeighbours, noOfInitialPulls,  deltaAccuracy );
     }
+
 
 
     void run(std::vector<unsigned long> indices){
 
-        for (unsigned long i = 0; i< indices.size(); i++){
+        for (int index(0); index < 100; index++) {
+            std::cout << nearestNeighboursEvaluated[index] << " ";
+        }
+        std::cout << std::endl << ":done" << std::endl;
+
+        for (int index(0); index < 100; index++)
+            std::cout << nearestNeighboursEvaluated[index] << " ";
+        std::cout << std::endl << ":done" << std::endl;
+
+
+        for (unsigned long i = 0; i < indices.size(); i++){
+            std::cout << i << " "<< indices[i] << " " << indices.size() << std::endl;
             unsigned long index = indices[i];
-            if (nnEvaluated[index])
+            if (nearestNeighboursEvaluated[index])
                 continue;
 
             std::vector<ArmKNN<templatePoint> > armsVec;
-            for (unsigned long j(0); j < pointsVecR.size(); j++) {
-                if ( (j == index) && (LEqualR) ) // Skip the point itself
+            for (unsigned long j(0); j < pointsVectorRight.size(); j++) {
+                if ( (j == index) && (leftEqualsRight) ) // Skip the point itself
                     continue;
-                ArmKNN<templatePoint> tmpArm(j, pointsVecR[j], pointsVecL[index]);
+                ArmKNN<templatePoint> tmpArm(j, pointsVectorRight[j], pointsVectorLeft[index]);
                 armsVec.push_back(tmpArm);
             }
 
+            std::cout << indices[i] << "adf"<< std::endl;
             UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
 
             UCB1.initialise(numberOfInitialPulls);
 
-            UCB1.runUCB(200*pointsVecR.size());
+            std::cout << indices[i] << "adfw" << std::endl;
+            UCB1.runUCB(200*pointsVectorRight.size());
+            std::cout << indices[i] << "adfwdlk" << std::endl;
 
-            avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            nearestNeighbhours[index] = UCB1.topKArms;
-            nnEvaluated[index] = true;
+
+//            avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
+//            nearestNeighbours.push_back(UCB1.topKArms);
+//            nearestNeighboursEvaluated[index] = true;
+            for (int index1(0); index1 < 20; index1++)
+                std::cout << nearestNeighboursEvaluated[index1] << " ";
+            std::cout << std::endl << ":done" << std::endl;
+            std::cout << indices[i] << "adfwdlkadfas" << std::endl;
         }
+//        std::cout  << "adfwdlkadfasasd" << std::endl;
     }
 
     void run(){
-        std::vector<unsigned long> indices(pointsVecL.size());
+        std::vector<unsigned long> indices(pointsVectorLeft.size());
         std::iota(indices.begin(), indices.end(), 0);
         run(indices);
     }
@@ -99,9 +128,9 @@ public:
         std::vector<std::vector<ArmKNN<templatePoint>> > answers;
         for (unsigned long i = 0; i< indices.size(); i++) {
             unsigned long index = indices[i];
-            if (!nnEvaluated[index])
+            if (not nearestNeighboursEvaluated[index])
                 throw std::invalid_argument("Trying to get nearest neighbhour to a point! You have not ran nn on it");
-            answers.push_back(nearestNeighbhours[index]);
+            answers.push_back(nearestNeighbours[index]);
         }
         return answers;
 
@@ -113,8 +142,8 @@ public:
         std::ofstream saveFile;
         saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
 
-        for (unsigned long index = 0; index<pointsVecL.size() ; index++) {
-            std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbhours[index];
+        for (unsigned long index = 0; index<pointsVectorLeft.size() ; index++) {
+            std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours[index];
             std::vector<float> topKArmsTrueMean(k*5);
 
             saveFile << index << "L ";
@@ -135,7 +164,19 @@ public:
             }
             saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
         }
-
     }
-
 };
+
+
+//template <class templatePoint>
+//class Kmeans : public Knn<templatePoint>{
+//public:
+//Kmeans( std::vector<templatePoint>& pVecL, std::vector<templatePoint>& pVecR,
+//unsigned noOfInitialPulls, float deltaAccuracy ):
+//Knn<templatePoint>(pVecL,  pVecR, 1,  noOfInitialPulls,  deltaAccuracy ){}
+//
+//using Knn<templatePoint>::run;
+//
+//using Knn<templatePoint>::saveAnswers;
+//
+//};
