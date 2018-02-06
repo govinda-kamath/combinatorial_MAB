@@ -87,14 +87,12 @@ public:
             }
 
             UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
-
             UCB1.initialise(numberOfInitialPulls);
-
-            UCB1.runUCB(200*pointsVectorRight.size());
+            UCB1.runUCB(2000*pointsVectorRight.size());
 
 
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            std::cout << " i and index " << i << " "<< indices[i] << " Avg Pulls" <<  avgNumberOfPulls[index] << std::endl;
+//            std::cout << " i and index " << i << " "<< indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index] << std::endl;
 
             nearestNeighbours[index] = UCB1.topKArms;
             nearestNeighboursEvaluated[index] = true;

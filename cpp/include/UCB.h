@@ -113,13 +113,14 @@ public:
                     break;
             }
         }
-        if (bestArmCount!=numberOfBestArms)
+        if (bestArmCount!=numberOfBestArms){
             std::cout<< "UCB Stopped before reaching optimal" << std::endl;
+        }
         storeExtraTopArms(); //Storing extra arms
     }
 
     void storeExtraTopArms(){
-        for (unsigned i=0; i < std::min(numberOfBestArms*20, numberOfArms); i++) {
+        for (unsigned i=0; i < std::min(numberOfBestArms*5, numberOfArms - numberOfBestArms); i++) {
             topKArms.push_back(arms.top());
             arms.pop();
         }

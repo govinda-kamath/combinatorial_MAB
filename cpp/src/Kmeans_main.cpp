@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
 
 
 //     For debugging mode in CLion
-    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal1.ini";
+    std::string nameConfig = "nominal.ini";
     long startIndex(0); // Start index
     long endIndex(100); // End index
 
@@ -53,22 +53,36 @@ int main(int argc, char *argv[]){
     std::vector<SquaredEuclideanPoint> centersVec;
     std::vector<SquaredEuclideanPoint> pointsVec;
 
-    for(unsigned long i(0); i < k ; i++)
-        centersVec.push_back(initialPointsVec[i]);
-
+    for(unsigned long i(0); i < k ; i++){
+        unsigned long index = std::rand()%initialPointsVec.size();
+        centersVec.push_back(initialPointsVec[index]);
+    }
     for(unsigned long i(k); i < initialPointsVec.size() ; i++)
         pointsVec.push_back(initialPointsVec[i]);
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Kmeans<SquaredEuclideanPoint> kmeans( pointsVec, centersVec, numberOfInitialPulls, delta);
+    Kmeans<SquaredEuclideanPoint> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta);
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
-    kmeans.run(indices);
-    kmeans.run();
+//    kmeans.run(indices);
+    kMeans.run();
+
+
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                  (endIndex-startIndex) << std::endl;
 
-    return 0;
+    loopTimeStart = std::chrono::system_clock::now();
+    for (unsigned  long i(0); i << centersVec.size(); i++) {
+        for (unsigned long j(0); j << pointsVec.size(); j++) {
+            float die = centersVec[i].distance(pointsVec[j]);
+        }
+    }
+    loopTimeEnd = std::chrono::system_clock::now();
+
+    std::cout << "Average time Naive (ms) "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
+                 (endIndex-startIndex) << std::endl;
+     return 0;
 }

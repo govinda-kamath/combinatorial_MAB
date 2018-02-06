@@ -24,7 +24,7 @@ public:
     float lowerConfidenceBound;
     float estimateOfMean;
     float estimateOfSecondMoment;
-    float SumOfSquaresOfPulls;
+    float sumOfSquaresOfPulls;
     unsigned long dimension;
     unsigned log10Dimension;
     const templatePoint *point;
@@ -35,7 +35,7 @@ public:
         sumOfPulls = 0.0;
         upperConfidenceBound = INFINITY;
         lowerConfidenceBound = -INFINITY;
-        SumOfSquaresOfPulls = 0.0;
+        sumOfSquaresOfPulls = 0.0;
         estimateOfMean = NAN;
         estimateOfSecondMoment = NAN;
     }
@@ -66,6 +66,8 @@ public:
 
         float localSigma, intervalWidth;
         localSigma = globalSigma; //Todo: update sigma to new local value
+        localSigma = std::sqrt((sumOfSquaresOfPulls/numberOfPulls -
+                                std::pow(sumOfPulls/numberOfPulls,2)));
         intervalWidth = std::sqrt((localSigma * localSigma * logDeltaInverse)/numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
@@ -82,7 +84,7 @@ public:
             upperConfidenceBound = estimateOfMean;
             lowerConfidenceBound = estimateOfMean;
             sumOfPulls += sample*dimension;
-            SumOfSquaresOfPulls += std::pow(sample,2)*dimension;
+            sumOfSquaresOfPulls += std::pow(sample,2)*dimension;
             estimateOfSecondMoment = sample*sample;
         }
         else {
@@ -91,10 +93,10 @@ public:
                 sample = point->sampledDistance(p1);
                 numberOfPulls++;
                 sumOfPulls += sample;
-                SumOfSquaresOfPulls += sample * sample;
+                sumOfSquaresOfPulls += sample * sample;
                 estimateOfMean = sumOfPulls / numberOfPulls;
             }
-            estimateOfSecondMoment = SumOfSquaresOfPulls / numberOfPulls;
+            estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
             if (update)
                 updateConfidenceIntervals(globalSigma, logDeltaInverse);
         }
