@@ -49,12 +49,10 @@ public:
             nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
         }
 
-
-
     }
 
 
-    Knn( std::vector<templatePoint>& pVecL, std::vector<templatePoint>& pVecR,
+    Knn( std::vector<templatePoint> pVecL, std::vector<templatePoint> pVecR,
          unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
         pointsVectorLeft = pVecL;
         pointsVectorRight = pVecR;
