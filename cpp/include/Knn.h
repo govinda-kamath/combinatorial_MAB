@@ -49,12 +49,10 @@ public:
             nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
         }
 
-
-
     }
 
 
-    Knn( std::vector<templatePoint>& pVecL, std::vector<templatePoint>& pVecR,
+    Knn( std::vector<templatePoint> pVecL, std::vector<templatePoint> pVecR,
          unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
         pointsVectorLeft = pVecL;
         pointsVectorRight = pVecR;
@@ -107,9 +105,9 @@ public:
             std::cout << indices[i] << "adfwdlk" << std::endl;
 
 
-//            avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
-//            nearestNeighbours.push_back(UCB1.topKArms);
-//            nearestNeighboursEvaluated[index] = true;
+            avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
+            nearestNeighbours.push_back(UCB1.topKArms);
+            nearestNeighboursEvaluated[index] = true;
             for (int index1(0); index1 < 20; index1++)
                 std::cout << nearestNeighboursEvaluated[index1] << " ";
             std::cout << std::endl << ":done" << std::endl;
