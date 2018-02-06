@@ -117,7 +117,11 @@ int main(int argc, char *argv[]){
     Knn<SquaredEuclideanPoint> knn( pointsVec, k, numberOfInitialPulls, delta );
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
+    std::cout << "Running" <<std::endl;
     knn.run(indices);
+    std::cout << "SAving" <<std::endl;
+
+    knn.saveAnswers("del");
 
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
     std::cout << "Average time (ms) "

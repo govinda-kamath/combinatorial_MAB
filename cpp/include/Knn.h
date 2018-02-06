@@ -26,9 +26,9 @@ class Knn{
 public:
     std::vector<templatePoint> pointsVectorLeft;
     std::vector<templatePoint> pointsVectorRight;
-    unsigned k;
-    unsigned numberOfInitialPulls;
-    float delta;
+    unsigned k; // Number of nearest neighbhours
+    unsigned numberOfInitialPulls; // UCB Parameters
+    float delta; // UCB Parameters
 
     std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighbours;
     std::vector<short int> nearestNeighboursEvaluated;
@@ -73,18 +73,7 @@ public:
 
     void run(std::vector<unsigned long> indices){
 
-        for (int index(0); index < 100; index++) {
-            std::cout << nearestNeighboursEvaluated[index] << " ";
-        }
-        std::cout << std::endl << ":done" << std::endl;
-
-        for (int index(0); index < 100; index++)
-            std::cout << nearestNeighboursEvaluated[index] << " ";
-        std::cout << std::endl << ":done" << std::endl;
-
-
         for (unsigned long i = 0; i < indices.size(); i++){
-            std::cout << i << " "<< indices[i] << " " << indices.size() << std::endl;
             unsigned long index = indices[i];
             if (nearestNeighboursEvaluated[index])
                 continue;
@@ -97,25 +86,19 @@ public:
                 armsVec.push_back(tmpArm);
             }
 
-            std::cout << indices[i] << "adf"<< std::endl;
             UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
 
             UCB1.initialise(numberOfInitialPulls);
 
-            std::cout << indices[i] << "adfw" << std::endl;
             UCB1.runUCB(200*pointsVectorRight.size());
-            std::cout << indices[i] << "adfwdlk" << std::endl;
 
 
-//            avgNumberOfPulls.push_back(UCB1.globalNumberOfPulls/UCB1.numberOfArms);
-//            nearestNeighbours.push_back(UCB1.topKArms);
-//            nearestNeighboursEvaluated[index] = true;
-            for (int index1(0); index1 < 20; index1++)
-                std::cout << nearestNeighboursEvaluated[index1] << " ";
-            std::cout << std::endl << ":done" << std::endl;
-            std::cout << indices[i] << "adfwdlkadfas" << std::endl;
+            avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
+            std::cout << " i and index " << i << " "<< indices[i] << " Avg Pulls" <<  avgNumberOfPulls[index] << std::endl;
+
+            nearestNeighbours[index] = UCB1.topKArms;
+            nearestNeighboursEvaluated[index] = true;
         }
-//        std::cout  << "adfwdlkadfasasd" << std::endl;
     }
 
     void run(){
@@ -143,6 +126,8 @@ public:
         saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
 
         for (unsigned long index = 0; index<pointsVectorLeft.size() ; index++) {
+            if (not nearestNeighboursEvaluated[index])
+                continue;
             std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours[index];
             std::vector<float> topKArmsTrueMean(k*5);
 
@@ -159,10 +144,22 @@ public:
             std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
 
             saveFile << index << "A";
+            std::cout << "index" << index ;
             for (unsigned i = 0; i < k*5; i++) {
                 saveFile <<  " " << topKArmsArgSort[i];
+                std::cout <<  " " << topKArmsArgSort[i];
             }
             saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
+            std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
+
+
+            std::cout << "index" << index ;
+            for (unsigned i = 0; i < k*5; i++) {
+                saveFile <<  " " << topKArmsArgSort[i];
+                std::cout <<  " " << topKArms[i].id;
+            }
+            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
+            std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
         }
     }
 };
