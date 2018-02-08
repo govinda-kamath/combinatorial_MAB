@@ -33,5 +33,11 @@ int main() {
         std::cout << i << "  " << numberNonzeros << std::endl;
     }
 
+    std::vector<std::unordered_map<unsigned long, int> > sparseDataMatrix(shapeData[1] );
+    tenXReader::get10xSparseMatrix(fileName, sparseDataMatrix);
+
+    for (int i = 0; i < 10; ++i) {
+        std::cout << i << "  " << sparseDataMatrix[i].size() << std::endl;
+    }
 
 }
