@@ -168,6 +168,11 @@ void tenXReader::get10xSparseMatrix(std::string fileName, std::vector<std::unord
     assert(sparseDataMatrix.size() == shapeData[1]);
 
     for (int i(0); i < indptrData.size() - 1; i++) {
+        sparseDataMatrix[i].reserve(indptrData[i + 1] - indptrData[i]);
+    }
+
+    for (int i(0); i < indptrData.size() - 1; i++) {
+//        sparseDataMatrix[i].reserve(indptrData[i + 1]-indptrData[i]);
         for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
             sparseDataMatrix[i].insert( std::make_pair<unsigned long, int>(
                     (unsigned long) indicesData[j],(int)dataRead[j]));
@@ -188,6 +193,9 @@ void tenXReader::get10xNormalisedMatrix(std::string fileName, std::vector<std::u
 
     assert(sparseNormalisedDataMatrix.size() == shapeData[1]);
 
+    for (int i(0); i < indptrData.size() - 1; i++) {
+        sparseNormalisedDataMatrix[i].reserve(indptrData[i + 1] - indptrData[i]);
+    }
     for (int i(0); i < indptrData.size() - 1; i++) {
         float numberOfMolecules(0.0);
         for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
