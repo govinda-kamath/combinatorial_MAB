@@ -57,7 +57,7 @@ else()
             cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
             cpp/lib/Points.cpp
             cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp cpp/include/Knn.h
-            cpp/include/kmeans.h)
+            cpp/include/kmeans.h )
     target_link_libraries(knn dlib::dlib pthread)
 
     add_executable(medoid cpp/src/Medoid_main.cpp
@@ -76,3 +76,7 @@ else()
     target_link_libraries(kmeans dlib::dlib pthread)
 
 endif()
+
+find_package(HDF5 REQUIRED COMPONENTS C CXX)
+add_executable(readdata cpp/src/readdata.cpp)
+target_link_libraries( readdata hdf5 hdf5_cpp)
