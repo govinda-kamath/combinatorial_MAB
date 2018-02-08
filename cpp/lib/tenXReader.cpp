@@ -174,3 +174,28 @@ void tenXReader::get10xSparseMatrix(std::string fileName, std::vector<std::unord
         }
     }
 }
+
+void tenXReader::get10xNormalisedMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, float> >
+&sparseNormalisedDataMatrix) {
+
+
+    std::vector<int> dataRead;
+    std::vector<int> shapeData;
+    std::vector<int> indicesData;
+    std::vector<int> indptrData;
+
+    tenXReader::get10xDataSet(fileName, dataRead, indicesData, indptrData, shapeData);
+
+    assert(sparseNormalisedDataMatrix.size() == shapeData[1]);
+
+    for (int i(0); i < indptrData.size() - 1; i++) {
+        float numberOfMolecules(0.0);
+        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+            numberOfMolecules += dataRead[j];
+        }
+        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+            sparseNormalisedDataMatrix[i].insert( std::make_pair<unsigned long, float>(
+                    (unsigned long) indicesData[j],((float)dataRead[j])/numberOfMolecules));
+        }
+    }
+}

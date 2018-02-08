@@ -14,4 +14,6 @@ namespace tenXReader{
     void get10xMatrix(std::string fileName, std::vector<std::vector<int> > &denseDataMatrix) ;
     void get10xSparseMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, int> >
     &sparseDataMatrix);
+    void get10xNormalisedMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, float> >
+    &sparseNormalisedDataMatrix);
 }

@@ -50,4 +50,16 @@ int main() {
         std::cout << i << "  " << sparseDataMatrix[i].size() << std::endl;
     }
 
+    std::cout << "Reading normalised data sparsely " << std::endl;
+    dataLoadTimeStart = std::chrono::system_clock::now();
+    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
+    tenXReader::get10xNormalisedMatrix(fileName, sparseNormalisedDataMatrix);
+    dataLoadTimeEnd = std::chrono::system_clock::now();
+    std::cout << "Time to read normalised sparse vector (ms) "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(dataLoadTimeEnd - dataLoadTimeStart).count()
+              << std::endl;
+    for (int i = 0; i < 10; ++i) {
+        std::cout << i << "  " << sparseDataMatrix[i].size() << std::endl;
+    }
+
 }
