@@ -25,7 +25,7 @@ void tenXReader::get10xMatrixSize(std::string fileName, std::vector<int> &sizeVe
     hsize_t dimsShape[2];
 
     rankShape = dspaceShape.getSimpleExtentDims(dimsShape, NULL);
-    std::cout << "ShapeSize: " << dimsShape[0] << " rank " << rankShape << std::endl;
+//    std::cout << "ShapeSize: " << dimsShape[0] << " rank " << rankShape << std::endl;
 
     std::vector<int> shapeData;
     shapeData.resize(dimsShape[0]);
@@ -65,7 +65,7 @@ void tenXReader::get10xMatrix(std::string fileName, std::vector<std::vector<int>
         std::cout << " Dataset is not found." << std::endl;
     }
 
-    std::cout << " Dataset is found." << std::endl;
+//    std::cout << " Dataset is found." << std::endl;
 
     DataSpace dspace = dataset->getSpace();
     H5T_class_t type_class = dataset->getTypeClass();
@@ -88,14 +88,14 @@ void tenXReader::get10xMatrix(std::string fileName, std::vector<std::vector<int>
     rankIndptr = dspaceIndptr.getSimpleExtentDims(dimsIndptr, NULL);
     rankShape = dspaceShape.getSimpleExtentDims(dimsShape, NULL);
 
-    std::cout << "Datasize: " << dimsData[0] << " rank " << rankData << std::endl;
-    std::cout << "Indexsize: " << dimsIndices[0] << " rank " << rankIndices << std::endl;
-    std::cout << "IndPtrSize: " << dimsIndptr[0] << " rank " << rankIndptr << std::endl;
-    std::cout << "ShapeSize: " << dimsShape[0] << " rank " << rankShape << std::endl;
+//    std::cout << "Datasize: " << dimsData[0] << " rank " << rankData << std::endl;
+//    std::cout << "Indexsize: " << dimsIndices[0] << " rank " << rankIndices << std::endl;
+//    std::cout << "IndPtrSize: " << dimsIndptr[0] << " rank " << rankIndptr << std::endl;
+//    std::cout << "ShapeSize: " << dimsShape[0] << " rank " << rankShape << std::endl;
 
     std::vector<int> dataRead;
     dataRead.resize(dimsData[0]);
-    std::cout << "Vectsize: " << dataRead.size() << std::endl;
+//    std::cout << "Vectsize: " << dataRead.size() << std::endl;
 
     std::vector<int> shapeData;
     shapeData.resize(dimsShape[0]);
@@ -121,10 +121,10 @@ void tenXReader::get10xMatrix(std::string fileName, std::vector<std::vector<int>
 
     dataIndptr->read(indptrData.data(), PredType::NATIVE_INT, memspaceIndptr, dspaceIndptr);
 
-    for (int i = 0; i < shapeData.size(); i++) {
-        std::cout << shapeData[i] << " ";
-    }
-    std::cout << std::endl;
+//    for (int i = 0; i < shapeData.size(); i++) {
+//        std::cout << shapeData[i] << " ";
+//    }
+//    std::cout << std::endl;
 
     hsize_t dimsmData[1];
     dimsmData[0] = dimsData[0];
