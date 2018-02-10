@@ -3,11 +3,29 @@
 //
 #include <vector>
 #include <iostream>
+#include <unordered_map>
+
 #ifndef COMBINATORIAL_MAB_POINTS_H
 #define COMBINATORIAL_MAB_POINTS_H
 
+class BasePoint{
+public:
+    unsigned long vecSize;
 
-class Point {
+    virtual float distance(const BasePoint& p1) const;
+    virtual float sampledDistance(const BasePoint& p1) const;
+    unsigned long getVecSize() const;
+
+};
+class Point: public BasePoint {
+
+public:
+    std::vector <float> point;
+    explicit Point(std::vector <float> p);
+};
+
+
+class SparsePoint: public BasePoint {
 /*A point is the base class that defines a point.
  * It has a vector that stores the representation of
  * the point in some high dimensional space.
@@ -17,20 +35,27 @@ class Point {
  * from this class.
  * */
 public:
-    std::vector <float> point;
-    unsigned long vecSize;
-    Point(std::vector <float> p);
+    std::unordered_map <unsigned long, int>  sparsePoint;
+    std::vector<unsigned long> keys;
 
-    virtual float distance(const Point& p1) const;
-    virtual float sampledDistance(const Point& p1) const;
-    unsigned long getVecSize() const;
+    explicit SparsePoint(std::unordered_map <unsigned long, int> sp);
+};
+
+class SparseL1Point : public SparsePoint {
+
+public:
+
+    explicit SparseL1Point(std::unordered_map <unsigned long, int> sp);
+
+    virtual float distance(const SparseL1Point& p1) const;
+    virtual float sampledDistance(const SparseL1Point& p1) const;
 };
 
 class SquaredEuclideanPoint : public Point{
 /* Points in Squared Euclidean space
  * */
 public:
-    SquaredEuclideanPoint(std::vector<float> p);
+    explicit SquaredEuclideanPoint(std::vector<float> p);
 
     /*Computes the exact distance between two points.
      * Used only for debug purposes*/
@@ -46,7 +71,7 @@ class L1Point : public Point{
 /* Points in Squared Euclidean space
  * */
 public:
-    L1Point(std::vector<float> p);
+    explicit L1Point(std::vector<float> p);
 
     /*Computes the exact distance between two points.
      * Used only for debug purposes*/
