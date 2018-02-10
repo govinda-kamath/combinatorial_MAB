@@ -3,6 +3,7 @@
 //
 
 #include <vector>
+#include <algorithm>
 #include <queue>
 #include <string>
 
@@ -42,6 +43,28 @@ namespace utils{
         }
     }
 
+    template <class templatePoint, class dataType>
+    void vectorsToPoints(std::vector<templatePoint> &pointsVec, std::vector<std::vector<dataType> > &dataMatrix) {
+        //Each row in the data-matrix is a point
 
+        for (unsigned long i(0); i < dataMatrix.size(); i++) {
+
+            std::vector<float> tmpVec;
+            float tmp = 0;
+            for (unsigned long j(0); j < dataMatrix[0].size(); j++) {
+                tmp += (float)dataMatrix[i][j];
+                tmpVec.push_back((float)dataMatrix[i][j]);
+            }
+
+            templatePoint tmpPoint(tmpVec);
+//            std::cout << "i = " << i << tmpVec.vecSize << std::endl ;
+//            std::cout << "tmp point i = " << i << " size " << tmpPoint.point.size() << std::endl ;
+
+            pointsVec.push_back(tmpPoint);
+            if (i % 10000 == 9999) {
+                std::cout << i + 1 << " points read." << std::endl;
+            }
+        }
+    }
 }
 #endif //COMBINATORIAL_MAB_UTILS_H

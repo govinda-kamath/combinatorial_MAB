@@ -17,7 +17,7 @@ int main() {
     tenXReader::get10xMatrixSize(fileName, shapeData);
 
     std::chrono::system_clock::time_point dataLoadTimeStart = std::chrono::system_clock::now();
-    std::vector<std::vector<int> > denseDataMatrix(shapeData[0], std::vector<int>(shapeData[1]));
+    std::vector<std::vector<int> > denseDataMatrix(shapeData[1], std::vector<int>(shapeData[0]));
     std::cout << denseDataMatrix.size() << std::endl;
     std::cout << denseDataMatrix[0].size() << std::endl;
     std::cout << denseDataMatrix[0][100] << std::endl;
@@ -30,8 +30,31 @@ int main() {
 
     for (int i = 0; i < 10; ++i) {
         int numberNonzeros(0);
-        for (int j = 0; j < denseDataMatrix.size(); ++j){
-            if (denseDataMatrix[j][i] != 0){
+        for (int j = 0; j < denseDataMatrix[0].size(); ++j){
+            if (denseDataMatrix[i][j] != 0){
+                numberNonzeros++;
+            }
+        }
+        std::cout << i << "  " << numberNonzeros << std::endl;
+    }
+
+    std::cout << "Reading data normalisec " << std::endl;
+    dataLoadTimeStart = std::chrono::system_clock::now();
+    std::vector<std::vector<float> > denseNormalisedDataMatrix(shapeData[1], std::vector<float>(shapeData[0]));
+    std::cout << denseNormalisedDataMatrix.size() << std::endl;
+    std::cout << denseNormalisedDataMatrix[0].size() << std::endl;
+    std::cout << denseNormalisedDataMatrix[0][100] << std::endl;
+
+    tenXReader::get10xNormalisedDenseMatrix(fileName, denseNormalisedDataMatrix);
+    dataLoadTimeEnd = std::chrono::system_clock::now();
+    std::cout << "Time to read normalised dense vector (ms) "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(dataLoadTimeEnd - dataLoadTimeStart).count()
+              << std::endl;
+
+    for (int i = 0; i < 10; ++i) {
+        int numberNonzeros(0);
+        for (int j = 0; j < denseNormalisedDataMatrix[0].size(); ++j){
+            if (denseNormalisedDataMatrix[i][j] != 0){
                 numberNonzeros++;
             }
         }

@@ -144,12 +144,36 @@ void tenXReader::get10xMatrix(std::string fileName, std::vector<std::vector<int>
 
     tenXReader::get10xDataSet(fileName, dataRead, indicesData, indptrData, shapeData);
 
-    assert(denseDataMatrix.size() == shapeData[0]);
-    assert(denseDataMatrix[0].size() == shapeData[1]);
+    assert(denseDataMatrix.size() == shapeData[1]);
+    assert(denseDataMatrix[0].size() == shapeData[0]);
 
     for (int i(0); i < indptrData.size() - 1; i++) {
         for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
-            denseDataMatrix[indicesData[j]][i] = dataRead[j];
+            denseDataMatrix[i][indicesData[j]] = dataRead[j];
+        }
+    }
+}
+
+
+void tenXReader::get10xNormalisedDenseMatrix(std::string fileName, std::vector<std::vector<float> > &denseDataMatrix) {
+
+    std::vector<int> dataRead;
+    std::vector<int> shapeData;
+    std::vector<int> indicesData;
+    std::vector<int> indptrData;
+
+    tenXReader::get10xDataSet(fileName, dataRead, indicesData, indptrData, shapeData);
+
+    assert(denseDataMatrix.size() == shapeData[1]);
+    assert(denseDataMatrix[0].size() == shapeData[0]);
+
+    for (int i(0); i < indptrData.size() - 1; i++) {
+        float numberOfMolecules(0.0);
+        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+            numberOfMolecules += dataRead[j];
+        }
+        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+            denseDataMatrix[i][indicesData[j]] = ((float)dataRead[j])/numberOfMolecules;
         }
     }
 }

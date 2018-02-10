@@ -53,7 +53,7 @@ public:
     }
 
     void printArm(){
-        std::cout << "Number of pulls" << numberOfPulls
+        std::cout << "Number of pulls" << numberOfPulls*log10Dimension
                   << std::endl;
     }
 
@@ -65,9 +65,9 @@ public:
     void updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
 
         float localSigma, intervalWidth;
-        localSigma = globalSigma; //Todo: update sigma to new local value
-        localSigma = std::sqrt((sumOfSquaresOfPulls/numberOfPulls -
-                                std::pow(sumOfPulls/numberOfPulls,2)));
+        localSigma = globalSigma*100; //Todo: update sigma to new local value
+//        localSigma = std::sqrt((sumOfSquaresOfPulls/numberOfPulls -
+//                                std::pow(sumOfPulls/numberOfPulls,2)));
         intervalWidth = std::sqrt((localSigma * localSigma * logDeltaInverse)/numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
@@ -88,14 +88,14 @@ public:
             estimateOfSecondMoment = sample*sample;
         }
         else {
-            for(unsigned t = 0; t < log10Dimension ; t++)
+            for(unsigned t = 0; t < log10Dimension*1000000 ; t++)
             {
                 sample = point->sampledDistance(p1);
                 numberOfPulls++;
                 sumOfPulls += sample;
                 sumOfSquaresOfPulls += sample * sample;
-                estimateOfMean = sumOfPulls / numberOfPulls;
             }
+            estimateOfMean = sumOfPulls / numberOfPulls;
             estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
             if (update)
                 updateConfidenceIntervals(globalSigma, logDeltaInverse);

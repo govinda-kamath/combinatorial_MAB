@@ -12,6 +12,7 @@ namespace tenXReader{
     void get10xDataSet(std::string fileName, std::vector<int> &dataRead, std::vector<int> &indicesData,
                                    std::vector<int> &indptrData, std::vector<int> &shapeData);
     void get10xMatrix(std::string fileName, std::vector<std::vector<int> > &denseDataMatrix) ;
+    void get10xNormalisedDenseMatrix(std::string fileName, std::vector<std::vector<float> > &denseDataMatrix) ;
     void get10xSparseMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, int> >
     &sparseDataMatrix);
     void get10xNormalisedMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, float> >

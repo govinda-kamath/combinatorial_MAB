@@ -39,6 +39,7 @@ public:
 
     void initialiseFewArm(unsigned long armIndexStart, unsigned long armIndexEnd, unsigned numberOfInitialPulls){
 
+        std::cout << "num initial pulls "<< numberOfInitialPulls << std::endl;
         float localSumOfPulls, localSumOfSquaresOfPulls;
         localSumOfPulls = 0;
         localSumOfSquaresOfPulls = 0;
@@ -102,13 +103,40 @@ public:
 
     void runUCB(unsigned long maxIterations){
         unsigned bestArmCount = 0;
-        for (unsigned long i(0); i < maxIterations; i++){
+        unsigned long i(0);
+        for (; i < maxIterations; i++){
+
+//            if ( armsContainer[7374].lowerConfidenceBound < arms.top().lowerConfidenceBound ){
+//                std::vector<templateArm> tmp;
+//                std::cout << std::setprecision (15) << "i=" << i << std::endl;
+//                std::cout << " p size" << arms.size() << std::endl;
+//
+//
+//                for (unsigned j(0); j < 20000; j++){
+//
+//                    std::cout << " j = " << j
+//                            << "UCB= " <<    arms.top().upperConfidenceBound
+//                            << "LCB= " <<    arms.top().lowerConfidenceBound
+//                              << std::endl;
+//                    if ( arms.top().id == 7374){
+//                        break;
+//                    }
+//                    arms.pop();
+//                }
+//
+//                std::cout << std::endl;
+//                std::cout << "7374 = " << armsContainer[7374].lowerConfidenceBound << std::endl ;
+//                break;
+//            }
+
             bool bestArmFound;
             bestArmFound = iterationOfUCB();
             if (bestArmFound){
                 topKArms.push_back(arms.top());
                 arms.pop();
                 bestArmCount++;
+                std::cout << " Best arm number " << bestArmCount << " Position " << i <<std::endl;
+
                 if (bestArmCount==numberOfBestArms)
                     break;
             }
@@ -116,6 +144,7 @@ public:
         if (bestArmCount!=numberOfBestArms){
             std::cout<< "UCB Stopped before reaching optimal" << std::endl;
         }
+        std::cout << " Best arm number " << bestArmCount << " Position" << i<< " Max iter" << maxIterations << std::endl;
         storeExtraTopArms(); //Storing extra arms
     }
 
@@ -138,10 +167,17 @@ public:
         if (UCBofBestArm < LCBofSecondBestArm){
             //Checking if UCB should stop
             arms.push(bestArm);
-#ifdef DEBUG
-            std::cout << "stopping UCB "<< UCBofBestArm << std::endl;
-            std::cout << "stopping LCB "<< LCBofSecondBestArm << std::endl;
-#endif
+//#ifdef DEBUG
+            std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
+            std::cout << "stopping LCB "<< std::setprecision (15) <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
+            std::cout << "best "<< std::setprecision (15) <<  armsContainer[7374].lowerConfidenceBound
+                    << " " << armsContainer[7374].estimateOfMean
+                    << " " << armsContainer[7374].upperConfidenceBound
+                    << " " << armsContainer[7374].numberOfPulls
+                    << " p size" << arms.size()
+                    << std::endl;
+
+//#endif
             return true;
         } else {
             float sample;
