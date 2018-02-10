@@ -47,6 +47,7 @@ public:
         for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
+
 //                std::this_thread::sleep_for(700);
                 observedSample = armsContainer[armIndex].pullArm(0, 0, false);
                 localSumOfPulls += observedSample;

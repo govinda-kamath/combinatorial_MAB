@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_medoid", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.01);
 
-    std::string fileName("/Users/govinda/Code/combinatorial_MAB/test_dataset/1M_neurons_neuron20k.h5");
+    std::string fileName = reader.Get("path", "h5path", "test_dataset/1M_neurons_neuron20k.h5");
 
     std::vector<int> shapeData(2);
     tenXReader::get10xMatrixSize(fileName, shapeData);
