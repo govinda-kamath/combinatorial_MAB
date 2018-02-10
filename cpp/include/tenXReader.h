@@ -5,7 +5,7 @@
 #ifndef COMBINATORIAL_MAB_TENXREADER_H
 #define COMBINATORIAL_MAB_TENXREADER_H
 
-#endif //COMBINATORIAL_MAB_TENXREADER_H
+
 #include <unordered_map>
 namespace tenXReader{
     void get10xMatrixSize(std::string fileName, std::vector<int> &sizeVect) ;
@@ -17,3 +17,4 @@ namespace tenXReader{
     void get10xNormalisedMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, float> >
     &sparseNormalisedDataMatrix);
 }
+#endif //COMBINATORIAL_MAB_TENXREADER_H

@@ -77,6 +77,21 @@ else()
 
 endif()
 
-find_package(HDF5 REQUIRED COMPONENTS C CXX)
+
+
+
+find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
+#link_directories( ${HDF5_LIBRARY_DIRS} )
+#include_directories( ${HDF5_INCLUDE_DIRS} )
+
+#find_package(HDF5 REQUIRED COMPONENTS C CXX)
 add_executable(readdata cpp/src/readdata.cpp cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
 target_link_libraries( readdata hdf5 hdf5_cpp)
+
+add_executable(medoid10x cpp/src/Medoid_10x.cpp
+        cpp/include/Points.h cpp/include/Arms.h
+        cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+        cpp/lib/Points.cpp
+        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+        cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+target_link_libraries( medoid10x dlib::dlib ${HDF5_CXX_LIBRARIES})
