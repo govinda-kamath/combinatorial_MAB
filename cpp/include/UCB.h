@@ -47,8 +47,6 @@ public:
         for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
-
-//                std::this_thread::sleep_for(700);
                 observedSample = armsContainer[armIndex].pullArm(0, 0, false);
                 localSumOfPulls += observedSample;
                 localSumOfSquaresOfPulls += observedSample * observedSample;
@@ -201,6 +199,19 @@ public:
             arms.push(bestArm);
         }
         return  false;
+    }
+
+    templateArm bestArm(){
+        unsigned long bIndex = 0;
+        float minTrueMean = armsContainer[0].trueMean();
+        for (unsigned long i(1); i< armsContainer.size(); i++){
+            float tmpTrueMean = armsContainer[i].trueMean();
+            if ( tmpTrueMean < minTrueMean){
+                minTrueMean = tmpTrueMean;
+                bIndex = i;
+            }
+        }
+        return armsContainer[bIndex];
     }
 };
 

@@ -29,6 +29,7 @@ public:
     unsigned log10Dimension;
     const templatePoint *point;
     unsigned long id;
+    float trueMeanValue;
 
     Arm(){
         numberOfPulls = 0;
@@ -38,6 +39,7 @@ public:
         sumOfSquaresOfPulls = 0.0;
         estimateOfMean = NAN;
         estimateOfSecondMoment = NAN;
+        trueMeanValue = NAN;
     }
 
     Arm(unsigned long armNumber, const templatePoint &p, unsigned long d) : Arm() {
@@ -104,7 +106,10 @@ public:
     }
 
     float trueMean(const templatePoint &p1){
-        return point->distance(p1)/p1.getVecSize();
+        if (trueMeanValue != NAN){
+            trueMeanValue = point->distance(p1)/p1.getVecSize();
+        }
+        return trueMeanValue;
     }
 
     // The child class will has to extend this
@@ -169,11 +174,11 @@ public:
 
     using Arm<templatePoint>::trueMean;
     float trueMean(){
-        double Mean = 0;
+        float mean = 0;
         for(unsigned long i = 0; i<numberOfPoints; i++){
-            Mean += trueMean((*pointsVec)[i]);
+            mean += trueMean((*pointsVec)[i]);
         }
-        return (float) Mean/((double)numberOfPoints);
+        return mean/((float)numberOfPoints);
     }
 };
 

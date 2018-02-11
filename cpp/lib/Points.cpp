@@ -16,7 +16,7 @@ unsigned long BasePoint::getVecSize() const {
     return vecSize;
 }
 
-//Point
+/*Point*/
 Point::Point(std::vector <float> p){
     point = p;
     vecSize = p.size();
@@ -25,9 +25,12 @@ Point::Point(std::vector <float> p){
 SparsePoint::SparsePoint(std::unordered_map <unsigned long, int>  sp){
     sparsePoint = sp;
     vecSize = sp.size();
+    for(auto kv : sp) {
+        keys.push_back(kv.first);
+    }
 }
 
-// SquaredEuclideanPoint
+/*SquaredEuclideanPoint*/
 SquaredEuclideanPoint::SquaredEuclideanPoint(std::vector<float> p) : Point(p){}
 /*Computes the exact distance between two points.
  * Used only for debug purposes*/
@@ -54,7 +57,7 @@ float SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint& p1) co
            *(point[randomCoOrdinate] - p1.point[randomCoOrdinate]);
 }
 
-// L1Point
+/* L1Point */
 L1Point::L1Point(std::vector<float> p) : Point(p){}
 /*Computes the exact distance between two points.
  * Used only for debug purposes*/
@@ -81,26 +84,23 @@ float L1Point::sampledDistance(const L1Point& p1) const {
 
 }
 
+/* Sparse L1Point */
+SparseL1Point::SparseL1Point(std::unordered_map <unsigned long, int> sp): SparsePoint(sp){}
 
-SparseL1Point::SparseL1Point(std::unordered_map <unsigned long, int> sp): SparsePoint(sp){
-    sparsePoint = sp;
-    for(auto kv : sp) {
-        keys.push_back(kv.first);
-    }
-}
 /*Computes the exact distance between two points.
  * Used only for debug purposes*/
 float SparseL1Point::distance(const SparseL1Point& p1) const {
-    assert(("Sizes do not match", sparsePoint.size() == p1.sparsePoint.size()));
+//    assert(("Sizes do not match", sparsePoint.size() == p1.sparsePoint.size()));
 
     float result(0);
 
     for(unsigned long i(0); i < sparsePoint.size(); i++){
+        // Finding two points
         auto search1 = sparsePoint.find(i);
         auto search2 = p1.sparsePoint.find(i);
 
         // If both the points have the index i
-        if ( (search1 != sparsePoint.end()) && (search2 != p1.sparsePoint.end() )){
+        if ( (search1 != sparsePoint.end()) && (search2 != p1.sparsePoint.end()) ){
             result += std::abs(search1->second - search2->second);
         }
         // If only first point has the index i
@@ -133,22 +133,22 @@ float SparseL1Point::sampledDistance(const SparseL1Point& p1) const {
         auto search1 = sparsePoint.find(index);
         auto search2 = p1.sparsePoint.find(index);
         if (search1 != p1.sparsePoint.end() )
-            return (float) 0.5*std::abs(search1->second - search2->second);
+            return (float) 0.5*std::abs(search1->second - search2->second)*keys.size();
         else
-            return std::abs(search1->second);
+            return std::abs(search1->second)*keys.size();
     }
     else{
         // pick a random index from the current point
         unsigned long randomCoOrdinate = std::rand() % p1.keys.size();
         unsigned long index = p1.keys[randomCoOrdinate];
 
-        // Check if the index exists in the other point
+        // Check if the index exists in the first point
         auto search1 = sparsePoint.find(index);
         auto search2 = p1.sparsePoint.find(index);
         if (search2 != sparsePoint.end() )
-            return (float) 0.5*std::abs(search1->second - search2->second);
+            return (float) 0.5*std::abs(search1->second - search2->second)*p1.keys.size();
         else
-            return std::abs(search2->second);
+            return std::abs(search2->second)*p1.keys.size();
     }
 
 }

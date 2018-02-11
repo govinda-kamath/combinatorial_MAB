@@ -12,7 +12,7 @@
 
 using namespace H5;
 
-void tenXReader::get10xMatrixSize(std::string fileName, std::vector<int> &sizeVect) {
+void tenXReader::get10xMatrixSize(std::string fileName, std::vector<unsigned long> &sizeVect) {
     H5File *file = new H5File(fileName.c_str(), H5F_ACC_RDWR);
     Group *group = new Group(file->openGroup("mm10"));
 
@@ -58,7 +58,7 @@ void tenXReader::get10xDataSet(std::string fileName, std::vector<int> &dataRead,
     DataSet *dataShape;
 
     try {  // to determine if the dataset exists in the group
-        dataset = new DataSet(group->openDataSet("data"));
+        dataset = new DataSet   (group->openDataSet("data"));
         dataIndices = new DataSet(group->openDataSet("indices"));
         dataIndptr = new DataSet(group->openDataSet("indptr"));
         dataShape = new DataSet(group->openDataSet("shape"));
