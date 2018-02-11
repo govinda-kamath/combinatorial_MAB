@@ -48,9 +48,9 @@ int main(int argc, char *argv[]){
     std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
 
     // Loading Dense matrix
-    std::vector<std::vector<float> > denseDataMatrix(shapeData[1], std::vector<float>(shapeData[0]));
-    std::cout << "The dense matrix is " << denseDataMatrix.size() << " x " << denseDataMatrix[0].size() << std::endl;
-    tenXReader::get10xNormalisedDenseMatrix(fileName, denseDataMatrix);
+//    std::vector<std::vector<float> > denseDataMatrix(shapeData[1], std::vector<float>(shapeData[0]));
+//    std::cout << "The dense matrix is " << denseDataMatrix.size() << " x " << denseDataMatrix[0].size() << std::endl;
+//    tenXReader::get10xNormalisedDenseMatrix(fileName, denseDataMatrix);
 
 //     Loading Sparse matrix
     std::cout << "Reading normalised data sparsely " << std::endl;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
     //Arms
 //
     std::vector<SparseL1Point> pointsVec;
-    utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, denseDataMatrix[0].size());
+    utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0]);
     std::vector<ArmMedoid<SparseL1Point> > armsVec;
 
 //    std::vector<L1Point> pointsVec;
