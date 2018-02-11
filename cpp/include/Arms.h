@@ -70,7 +70,7 @@ public:
         float localSigma, intervalWidth;
         localSigma = globalSigma; //Todo: update sigma to new local value
         float tmp = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
-        localSigma += tmp;
+        localSigma = tmp;
 //        std::cout << globalSigma << "\t" << tmp << std::endl;
         intervalWidth = std::sqrt((localSigma * localSigma * logDeltaInverse)/numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;

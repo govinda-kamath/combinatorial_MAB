@@ -108,7 +108,7 @@ public:
         unsigned long i(0);
         for (; i < maxIterations; i++){
 
-            if (i%((int)maxIterations/1000) == 0){
+            if (i%((int)maxIterations/200) == 0){
                 templateArm bestArm = arms.top();
                 arms.pop();
                 templateArm secondBestArm = arms.top();
