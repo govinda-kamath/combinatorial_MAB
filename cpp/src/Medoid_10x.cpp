@@ -126,7 +126,7 @@ int main(int argc, char *argv[]){
     std::cout << "Total number of pulls " << UCB1.globalNumberOfPulls <<std::endl;
     std::cout << "Number of points " << UCB1.numberOfArms << std::endl;
     std::cout << "Dimension of each point" << denseDataMatrix[0].size() << std::endl;
-    std::cout << "Average" << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*denseDataMatrix[0].size()) <<std::endl;
+    std::cout << "Average " << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*denseDataMatrix[0].size()) <<std::endl;
     std::cout << "Global Sigma = " << UCB1.globalSigma <<std::endl;
     std::cout << "Average time(ms) UCB "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count() << std::endl;

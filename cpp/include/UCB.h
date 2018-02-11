@@ -14,7 +14,7 @@ public:
     float logDeltaInverse;
 
     float globalSigma;
-    float globalNumberOfPulls;
+    unsigned long long  globalNumberOfPulls;
     float globalSumOfPulls;
     float globalSumOfSquaresOfPulls;
     unsigned numberOfBestArms;
@@ -45,7 +45,7 @@ public:
         // Pulling an arm numberOfInitialPulls times
         for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
             if (armIndex%((int)(armIndexEnd-armIndexStart)/20) == 0){
-                std::cout << "Initialized " << armIndex << " out of " << armIndexEnd - armIndexStart
+                std::cout << "Initialized " << std::setprecision (15) << armIndex << " out of " << armIndexEnd - armIndexStart
                           << std::endl;
             }
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
@@ -58,7 +58,7 @@ public:
         }
         // locking the global variables which have to be updated
         {
-            std::lock_guard<std::mutex> guard(initializeMutex);
+//            std::lock_guard<std::mutex> guard(initializeMutex);
             globalSumOfPulls += localSumOfPulls;
             globalSumOfSquaresOfPulls += localSumOfSquaresOfPulls;
         }
@@ -107,7 +107,8 @@ public:
         unsigned bestArmCount = 0;
         unsigned long i(0);
         for (; i < maxIterations; i++){
-            if (i%((int)maxIterations/250) == 0){
+
+            if (i%((int)maxIterations/1000) == 0){
                 templateArm bestArm = arms.top();
                 arms.pop();
                 templateArm secondBestArm = arms.top();
@@ -116,7 +117,7 @@ public:
                 float UCBofBestArm, LCBofBestArm;
                 UCBofBestArm = bestArm.upperConfidenceBound;
                 LCBofBestArm = bestArm.lowerConfidenceBound;
-                std::cout << "Iteration " << i << " out of " << maxIterations
+                std::cout << "NumberOfPulls " << globalNumberOfPulls << " out of " << maxIterations
                         << ". Best arm = " << bestArm.id
                         << ". Best arm UCB = " << UCBofBestArm
                           << ". LCB of second best arm  = " << LCBofBestArm
@@ -170,18 +171,10 @@ public:
         if (UCBofBestArm < LCBofSecondBestArm){
             //Checking if UCB should stop
             arms.push(bestArm);
-//#ifdef DEBUG
             std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
             std::cout << "stopping LCB "<< std::setprecision (15) <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
-//            std::cout << "best "<< std::setprecision (15) <<  armsContainer[7374].lowerConfidenceBound
-//                    << " " << armsContainer[7374].estimateOfMean
-//                    << " " << armsContainer[7374].upperConfidenceBound
-//                    << " " << armsContainer[7374].numberOfPulls
-//                    << std::endl;
-
-//#endif
             return true;
-        } else {
+        }else {
             float sample;
             sample = bestArm.pullArm(globalSigma, logDeltaInverse);
             if (UCBofBestArm == LCBofBestArm){
