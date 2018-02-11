@@ -65,19 +65,27 @@ public:
         return l.lowerConfidenceBound > r.lowerConfidenceBound;
     }
 
-    void updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
+    void updateConfidenceIntervals(unsigned long long globalNumberOfPulls, float globalSigma, float logDeltaInverse){
 
-        float localSigma, intervalWidth;
-        localSigma = globalSigma; //Todo: update sigma to new local value
-        float tmp = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
-        localSigma = tmp;
-//        std::cout << globalSigma << "\t" << tmp << std::endl;
-        intervalWidth = std::sqrt((localSigma * localSigma * logDeltaInverse)/numberOfPulls);
+        float compositeSigma, intervalWidth;
+        compositeSigma = globalSigma; //Todo: update sigma to new local value
+        float localVar = estimateOfSecondMoment - std::pow(estimateOfMean,2);
+        compositeSigma = std::sqrt( localVar*numberOfPulls/globalNumberOfPulls +
+                                globalSigma*globalSigma*(globalNumberOfPulls-numberOfPulls)/globalNumberOfPulls );
+//        if (globalSigma>0){
+//            std::cout << "LS " << std::sqrt(localVar)<< "\t"
+//                      << "GS " << globalSigma << "\t"
+//                      << "CS " << compositeSigma << "\t"
+//                      << "gNP " << globalNumberOfPulls << "\t"
+//                      << "NP " << numberOfPulls << "\t"
+//                      << std::endl;
+//        }
+        intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
     }
 
-    float pullArm(const templatePoint &p1, float globalSigma,
+    float pullArm(const templatePoint &p1, unsigned long long globalNumberOfPulls, float globalSigma,
                   float logDeltaInverse, bool update = true) {
         float sample(-INFINITY);
 
@@ -99,7 +107,7 @@ public:
             estimateOfMean = sumOfPulls / numberOfPulls;
             estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
             if (update)
-                updateConfidenceIntervals(globalSigma, logDeltaInverse);
+                updateConfidenceIntervals(globalNumberOfPulls, globalSigma, logDeltaInverse);
         }
         return sample;
     }
@@ -135,8 +143,8 @@ public:
     }
 
     using Arm<templatePoint>::pullArm;
-    float pullArm(float globalSigma, float logDeltaInverse, bool update = true){
-        return pullArm(*fixedPoint, globalSigma, logDeltaInverse, update);
+    float pullArm(float globalSigma, unsigned long long globalNumberOfPulls, float logDeltaInverse, bool update = true){
+        return pullArm(*fixedPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update);
     }
 
     using Arm<templatePoint>::trueMean;
@@ -165,11 +173,11 @@ public:
     }
 
     using Arm<templatePoint>::pullArm;
-    float pullArm(float globalSigma, float logDeltaInverse, bool update = true){
+    float pullArm(float globalSigma, unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update = true){
         //Choose a random point
         unsigned long randomCoOrdinate;
         randomCoOrdinate = std::rand() % numberOfPoints;
-        return pullArm((*pointsVec)[randomCoOrdinate], globalSigma, logDeltaInverse, update);
+        return pullArm((*pointsVec)[randomCoOrdinate], globalNumberOfPulls,  globalSigma, logDeltaInverse, update);
     }
 
     using Arm<templatePoint>::trueMean;

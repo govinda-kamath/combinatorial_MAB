@@ -96,7 +96,7 @@ public:
 #endif
 
         for (unsigned long index = 0; index < numberOfArms; index++){
-            armsContainer[index].updateConfidenceIntervals(globalSigma, logDeltaInverse);
+            armsContainer[index].updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
             arms.push(armsContainer[index]);
         }
 
@@ -176,7 +176,7 @@ public:
             return true;
         }else {
             float sample;
-            sample = bestArm.pullArm(globalSigma, logDeltaInverse);
+            sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse);
             if (UCBofBestArm == LCBofBestArm){
                 //Checking if the best arm is being computed in full and updating
                 //things accordingly.
