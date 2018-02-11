@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_medoid", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.01);
     std::string fileName = reader.Get("path", "h5path", "test_dataset/1M_neurons_neuron20k.h5");
-    unsigned k = 5;
+    unsigned k = 3;
 
     // Loading 10x data shape
     std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
@@ -84,8 +84,9 @@ int main(int argc, char *argv[]){
 
 //    std::cout << "best arm = " << UCB1.bestArm().id <<std::endl;
     // UCB: Initialization
+    std::cout << "UCB: Initializing with " << numberOfInitialPulls << " points" << std::endl;
     UCB1.initialise(numberOfInitialPulls);
-    std::cout<< "Finished initialising" <<std::endl;
+    std::cout<< "UCB: Finished initialising" <<std::endl;
 //    std::vector<float> v(numberOfPoints);
 //    float localvaravg(0);
 //    for(int i(0); i < numberOfPoints ; i++){
@@ -122,7 +123,10 @@ int main(int argc, char *argv[]){
     std::cout << "Iterating done" << std::endl;
     //Print Result
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-    std::cout << "Average number of pulls " << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*denseDataMatrix[0].size()) <<std::endl;
+    std::cout << "Total number of pulls " << UCB1.globalNumberOfPulls <<std::endl;
+    std::cout << "Number of points " << UCB1.numberOfArms << std::endl;
+    std::cout << "Dimension of each point" << denseDataMatrix[0].size() << std::endl;
+    std::cout << "Average" << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*denseDataMatrix[0].size()) <<std::endl;
     std::cout << "Global Sigma = " << UCB1.globalSigma <<std::endl;
     std::cout << "Average time(ms) UCB "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count() << std::endl;

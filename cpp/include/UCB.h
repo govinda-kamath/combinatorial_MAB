@@ -44,6 +44,10 @@ public:
         localSumOfSquaresOfPulls = 0;
         // Pulling an arm numberOfInitialPulls times
         for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
+            if (armIndex%((int)(armIndexEnd-armIndexStart)/20) == 0){
+                std::cout << "Initialized " << armIndex << " out of " << armIndexEnd - armIndexStart
+                          << std::endl;
+            }
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
                 observedSample = armsContainer[armIndex].pullArm(0, 0, false);
@@ -128,7 +132,7 @@ public:
                 bestArmCount++;
 
 //#ifdef DEBUG
-                std::cout << " Best arm number " << bestArmCount
+                std::cout << "Best arm number " << bestArmCount
                           << " Position " << i <<std::endl;
 //#endif
                 if (bestArmCount==numberOfBestArms)
