@@ -133,8 +133,8 @@ int main(int argc, char *argv[]){
     //Print Result
     std::cout << "Total number of pulls " << UCB1.globalNumberOfPulls <<std::endl;
     std::cout << "Number of points " << UCB1.numberOfArms << std::endl;
-    std::cout << "Dimension of each point" << denseDataMatrix[0].size() << std::endl;
-    std::cout << "Average " << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*denseDataMatrix[0].size()*0.07) <<std::endl; //0.07 is the sparsity
+    std::cout << "Dimension of each point" << shapeData[0] << std::endl;
+    std::cout << "Average " << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*shapeData[0]*0.07) <<std::endl;//0.07=sparsity
     std::cout << "Global Sigma = " << UCB1.globalSigma <<std::endl;
 
     // True Means
