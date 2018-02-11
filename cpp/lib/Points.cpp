@@ -76,7 +76,6 @@ float L1Point::sampledDistance(const L1Point& p1) const {
     assert(("Sizes do not match", point.size() == p1.point.size()));
     unsigned randomCoOrdinate;
     randomCoOrdinate = std::rand() % getVecSize();
-//    std::cout << std::abs(point[randomCoOrdinate] - p1.point[randomCoOrdinate]) << " ";
     return std::abs(point[randomCoOrdinate] - p1.point[randomCoOrdinate]);
 
 }

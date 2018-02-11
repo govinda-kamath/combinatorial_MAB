@@ -57,8 +57,6 @@ namespace utils{
             }
 
             templatePoint tmpPoint(tmpVec);
-//            std::cout << "i = " << i << tmpVec.vecSize << std::endl ;
-//            std::cout << "tmp point i = " << i << " size " << tmpPoint.point.size() << std::endl ;
 
             pointsVec.push_back(tmpPoint);
             if (i % 10000 == 9999) {

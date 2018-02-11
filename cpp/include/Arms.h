@@ -65,7 +65,7 @@ public:
     void updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
 
         float localSigma, intervalWidth;
-        localSigma = globalSigma*100; //Todo: update sigma to new local value
+        localSigma = globalSigma; //Todo: update sigma to new local value
 //        localSigma = std::sqrt((sumOfSquaresOfPulls/numberOfPulls -
 //                                std::pow(sumOfPulls/numberOfPulls,2)));
         intervalWidth = std::sqrt((localSigma * localSigma * logDeltaInverse)/numberOfPulls);
@@ -88,7 +88,7 @@ public:
             estimateOfSecondMoment = sample*sample;
         }
         else {
-            for(unsigned t = 0; t < log10Dimension*1000000 ; t++)
+            for(unsigned t = 0; t < log10Dimension ; t++)
             {
                 sample = point->sampledDistance(p1);
                 numberOfPulls++;
