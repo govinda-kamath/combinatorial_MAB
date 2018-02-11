@@ -61,16 +61,16 @@ namespace utils{
         }
     }
 
-    template <class templatePoint, class dataType>
-    void vectorsToPoints(std::vector<templatePoint> &pointsVec,
-                         std::vector<std::unordered_map<unsigned long, int> > &sparseDataMatrix) {
+    template <class templatePoint>
+    void unorderedMapToPoints(std::vector<templatePoint> &pointsVec,
+                         std::vector<std::unordered_map<unsigned long, float> > &sparseDataMatrix,
+                              unsigned long dimension) {
+
         //Each row in the data-matrix is a point
 
         for (unsigned long i(0); i < sparseDataMatrix.size(); i++) {
-
-            templatePoint tmpPoint(sparseDataMatrix[i]);
+            templatePoint tmpPoint(sparseDataMatrix[i], dimension);
             pointsVec.push_back(tmpPoint);
-
         }
     }
 }

@@ -104,6 +104,22 @@ public:
         unsigned bestArmCount = 0;
         unsigned long i(0);
         for (; i < maxIterations; i++){
+            if (i%((int)maxIterations/250) == 0){
+                templateArm bestArm = arms.top();
+                arms.pop();
+                templateArm secondBestArm = arms.top();
+                arms.push(bestArm);
+
+                float UCBofBestArm, LCBofBestArm;
+                UCBofBestArm = bestArm.upperConfidenceBound;
+                LCBofBestArm = bestArm.lowerConfidenceBound;
+                std::cout << "Iteration " << i << " out of " << maxIterations
+                        << ". Best arm = " << bestArm.id
+                        << ". Best arm UCB = " << UCBofBestArm
+                          << ". LCB of second best arm  = " << LCBofBestArm
+                          << ". globalSigma = " << globalSigma
+                          << std::endl;
+            }
 
 //            if ( armsContainer[7374].lowerConfidenceBound < arms.top().lowerConfidenceBound ){
 //                std::vector<templateArm> tmp;
@@ -134,7 +150,7 @@ public:
                 topKArms.push_back(arms.top());
                 arms.pop();
                 bestArmCount++;
-                std::cout << " Best arm number " << bestArmCount << " Position " << i <<std::endl;
+                std::cout << "Best arm number " << bestArmCount << " Position " << i <<std::endl;
 
                 if (bestArmCount==numberOfBestArms)
                     break;
@@ -143,7 +159,7 @@ public:
         if (bestArmCount!=numberOfBestArms){
             std::cout<< "UCB Stopped before reaching optimal" << std::endl;
         }
-        std::cout << " Best arm number " << bestArmCount << " Position" << i<< " Max iter" << maxIterations << std::endl;
+        std::cout << "Best arm number " << bestArmCount << " Position" << i<< " Max iter" << maxIterations << std::endl;
         storeExtraTopArms(); //Storing extra arms
     }
 
@@ -169,12 +185,11 @@ public:
 //#ifdef DEBUG
             std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
             std::cout << "stopping LCB "<< std::setprecision (15) <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
-            std::cout << "best "<< std::setprecision (15) <<  armsContainer[7374].lowerConfidenceBound
-                    << " " << armsContainer[7374].estimateOfMean
-                    << " " << armsContainer[7374].upperConfidenceBound
-                    << " " << armsContainer[7374].numberOfPulls
-                    << " p size" << arms.size()
-                    << std::endl;
+//            std::cout << "best "<< std::setprecision (15) <<  armsContainer[7374].lowerConfidenceBound
+//                    << " " << armsContainer[7374].estimateOfMean
+//                    << " " << armsContainer[7374].upperConfidenceBound
+//                    << " " << armsContainer[7374].numberOfPulls
+//                    << std::endl;
 
 //#endif
             return true;
@@ -204,8 +219,9 @@ public:
     templateArm bestArm(){
         unsigned long bIndex = 0;
         float minTrueMean = armsContainer[0].trueMean();
-        for (unsigned long i(1); i< armsContainer.size(); i++){
+        for (unsigned long i(0); i< armsContainer.size(); i++){
             float tmpTrueMean = armsContainer[i].trueMean();
+            std::cout << i << " " << tmpTrueMean << std::endl;
             if ( tmpTrueMean < minTrueMean){
                 minTrueMean = tmpTrueMean;
                 bIndex = i;

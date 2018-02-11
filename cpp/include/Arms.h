@@ -47,6 +47,7 @@ public:
         point = &p;
         dimension = d;
         log10Dimension = (unsigned) std::ceil(std::log10(dimension));
+//        std::cout << "log10D " << log10Dimension << std::endl;
 
     }
 
@@ -67,9 +68,10 @@ public:
     void updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
 
         float localSigma, intervalWidth;
-        localSigma = globalSigma*100; //Todo: update sigma to new local value
-//        localSigma = std::sqrt((sumOfSquaresOfPulls/numberOfPulls -
-//                                std::pow(sumOfPulls/numberOfPulls,2)));
+        localSigma = globalSigma; //Todo: update sigma to new local value
+        float tmp = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
+        localSigma += tmp;
+//        std::cout << globalSigma << "\t" << tmp << std::endl;
         intervalWidth = std::sqrt((localSigma * localSigma * logDeltaInverse)/numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
@@ -90,13 +92,10 @@ public:
             estimateOfSecondMoment = sample*sample;
         }
         else {
-            for(unsigned t = 0; t < log10Dimension*100000 ; t++)
-            {
-                sample = point->sampledDistance(p1);
-                numberOfPulls++;
-                sumOfPulls += sample;
-                sumOfSquaresOfPulls += sample * sample;
-            }
+            sample = point->sampledDistance(p1);
+            numberOfPulls++;
+            sumOfPulls += sample;
+            sumOfSquaresOfPulls += sample * sample;
             estimateOfMean = sumOfPulls / numberOfPulls;
             estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
             if (update)
@@ -162,6 +161,7 @@ public:
             Arm<templatePoint>(id, p, p.vecSize*pVec.size()) {
         pointsVec = &pVec;
         numberOfPoints = pVec.size();
+//        std::cout << "Number of points = " << numberOfPoints << std::endl;
     }
 
     using Arm<templatePoint>::pullArm;
@@ -176,8 +176,13 @@ public:
     float trueMean(){
         float mean = 0;
         for(unsigned long i = 0; i<numberOfPoints; i++){
-            mean += trueMean((*pointsVec)[i]);
+            float tmp = trueMean((*pointsVec)[i]);
+//            if (i < 100)
+//                std::cout << "Point =  " << i << ". Mean = " << tmp << std::endl;
+            mean += tmp;
         }
+//        std::cout << "Mean = " << mean << " with NOP = " << numberOfPoints <<  std::endl;
+
         return mean/((float)numberOfPoints);
     }
 };

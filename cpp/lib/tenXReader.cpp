@@ -12,7 +12,7 @@
 
 using namespace H5;
 
-void tenXReader::get10xMatrixSize(std::string fileName, std::vector<unsigned long> &sizeVect) {
+std::vector<unsigned> tenXReader::get10xMatrixSize(std::string &fileName) {
     H5File *file = new H5File(fileName.c_str(), H5F_ACC_RDWR);
     Group *group = new Group(file->openGroup("mm10"));
 
@@ -20,7 +20,6 @@ void tenXReader::get10xMatrixSize(std::string fileName, std::vector<unsigned lon
     dataShape = new DataSet(group->openDataSet("shape"));
 
     DataSpace dspaceShape = dataShape->getSpace();
-    H5T_class_t type_classShape = dataShape->getTypeClass();
 
     hsize_t rankShape;
     hsize_t dimsShape[2];
@@ -28,7 +27,7 @@ void tenXReader::get10xMatrixSize(std::string fileName, std::vector<unsigned lon
     rankShape = dspaceShape.getSimpleExtentDims(dimsShape, NULL);
 //    std::cout << "ShapeSize: " << dimsShape[0] << " rank " << rankShape << std::endl;
 
-    std::vector<int> shapeData;
+    std::vector<unsigned> shapeData;
     shapeData.resize(dimsShape[0]);
     hsize_t dimsmShape[1];
     dimsmShape[0] = dimsShape[0];
@@ -36,18 +35,12 @@ void tenXReader::get10xMatrixSize(std::string fileName, std::vector<unsigned lon
 
     dataShape->read(shapeData.data(), PredType::NATIVE_INT, memspaceShape, dspaceShape);
 
-    std::cout << "Shape : ";
-    for (int i = 0; i < shapeData.size(); i++) {
-        std::cout << shapeData[i] << " ";
-    }
-    std::cout << std::endl;
+    return shapeData;
 
-    sizeVect[0] = shapeData[0];
-    sizeVect[1] = shapeData[1];
 }
 
-void tenXReader::get10xDataSet(std::string fileName, std::vector<int> &dataRead, std::vector<int> &indicesData,
-                               std::vector<int> &indptrData, std::vector<int> &shapeData){
+void tenXReader::get10xDataSet(std::string &fileName, std::vector<int> &dataRead, std::vector<int> &indicesData,
+                               std::vector<int> &indptrData, std::vector<unsigned> &shapeData){
 
     H5File *file = new H5File(fileName.c_str(), H5F_ACC_RDWR);
     Group *group = new Group(file->openGroup("mm10"));
@@ -67,19 +60,10 @@ void tenXReader::get10xDataSet(std::string fileName, std::vector<int> &dataRead,
         std::cout << " Dataset is not found." << std::endl;
     }
 
-//    std::cout << " Dataset is found." << std::endl;
-
     DataSpace dspace = dataset->getSpace();
-    H5T_class_t type_class = dataset->getTypeClass();
-
     DataSpace dspaceIndices = dataIndices->getSpace();
-    H5T_class_t type_classIndices = dataIndices->getTypeClass();
-
     DataSpace dspaceIndptr = dataIndptr->getSpace();
-    H5T_class_t type_classIndptr = dataIndptr->getTypeClass();
-
     DataSpace dspaceShape = dataShape->getSpace();
-    H5T_class_t type_classShape = dataShape->getTypeClass();
 
 
     hsize_t rankData, rankIndices, rankIndptr, rankShape;
@@ -98,7 +82,6 @@ void tenXReader::get10xDataSet(std::string fileName, std::vector<int> &dataRead,
 
     dataRead.resize(dimsData[0]);
 //    std::cout << "Vectsize: " << dataRead.size() << std::endl;
-
     shapeData.resize(dimsShape[0]);
     hsize_t dimsmShape[1];
     dimsmShape[0] = dimsShape[0];
@@ -135,10 +118,10 @@ void tenXReader::get10xDataSet(std::string fileName, std::vector<int> &dataRead,
 
 }
 
-void tenXReader::get10xMatrix(std::string fileName, std::vector<std::vector<int> > &denseDataMatrix) {
+void tenXReader::get10xMatrix(std::string &fileName, std::vector<std::vector<int> > &denseDataMatrix) {
 
     std::vector<int> dataRead;
-    std::vector<int> shapeData;
+    std::vector<unsigned> shapeData;
     std::vector<int> indicesData;
     std::vector<int> indptrData;
 
@@ -147,43 +130,42 @@ void tenXReader::get10xMatrix(std::string fileName, std::vector<std::vector<int>
     assert(denseDataMatrix.size() == shapeData[1]);
     assert(denseDataMatrix[0].size() == shapeData[0]);
 
-    for (int i(0); i < indptrData.size() - 1; i++) {
-        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+    for (unsigned i(0); i < indptrData.size() - 1; i++) {
+        for (unsigned j(indptrData[i]); j < indptrData[i + 1]; j++) {
             denseDataMatrix[i][indicesData[j]] = dataRead[j];
         }
     }
 }
 
 
-void tenXReader::get10xNormalisedDenseMatrix(std::string fileName, std::vector<std::vector<float> > &denseDataMatrix) {
+void tenXReader::get10xNormalisedDenseMatrix(std::string &fileName, std::vector<std::vector<float> > &denseDataMatrix) {
 
     std::vector<int> dataRead;
-    std::vector<int> shapeData;
+    std::vector<unsigned> shapeData;
     std::vector<int> indicesData;
     std::vector<int> indptrData;
 
     tenXReader::get10xDataSet(fileName, dataRead, indicesData, indptrData, shapeData);
-
     assert(denseDataMatrix.size() == shapeData[1]);
     assert(denseDataMatrix[0].size() == shapeData[0]);
 
-    for (int i(0); i < indptrData.size() - 1; i++) {
+    for (unsigned long i(0); i < indptrData.size() - 1; i++) {
         float numberOfMolecules(0.0);
-        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+        for (unsigned long j(indptrData[i]); j < indptrData[i + 1]; j++)
             numberOfMolecules += dataRead[j];
-        }
-        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+
+        for (unsigned long j(indptrData[i]); j < indptrData[i + 1]; j++)
             denseDataMatrix[i][indicesData[j]] = ((float)dataRead[j])/numberOfMolecules;
-        }
+
     }
 }
 
-void tenXReader::get10xSparseMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, int> >
+void tenXReader::get10xSparseMatrix(std::string &fileName, std::vector<std::unordered_map<unsigned long, int> >
 &sparseDataMatrix) {
 
 
     std::vector<int> dataRead;
-    std::vector<int> shapeData;
+    std::vector<unsigned > shapeData;
     std::vector<int> indicesData;
     std::vector<int> indptrData;
 
@@ -191,25 +173,25 @@ void tenXReader::get10xSparseMatrix(std::string fileName, std::vector<std::unord
 
     assert(sparseDataMatrix.size() == shapeData[1]);
 
-    for (int i(0); i < indptrData.size() - 1; i++) {
+    for (unsigned long i(0); i < indptrData.size() - 1; i++) {
         sparseDataMatrix[i].reserve(indptrData[i + 1] - indptrData[i]);
     }
 
-    for (int i(0); i < indptrData.size() - 1; i++) {
+    for (unsigned long i(0); i < indptrData.size() - 1; i++) {
 //        sparseDataMatrix[i].reserve(indptrData[i + 1]-indptrData[i]);
-        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+        for (unsigned long j(indptrData[i]); j < indptrData[i + 1]; j++) {
             sparseDataMatrix[i].insert( std::make_pair<unsigned long, int>(
                     (unsigned long) indicesData[j],(int)dataRead[j]));
         }
     }
 }
 
-void tenXReader::get10xNormalisedMatrix(std::string fileName, std::vector<std::unordered_map<unsigned long, float> >
+void tenXReader::get10xNormalisedSparseMatrix(std::string &fileName, std::vector<std::unordered_map<unsigned long, float> >
 &sparseNormalisedDataMatrix) {
 
 
     std::vector<int> dataRead;
-    std::vector<int> shapeData;
+    std::vector<unsigned> shapeData;
     std::vector<int> indicesData;
     std::vector<int> indptrData;
 
@@ -217,15 +199,15 @@ void tenXReader::get10xNormalisedMatrix(std::string fileName, std::vector<std::u
 
     assert(sparseNormalisedDataMatrix.size() == shapeData[1]);
 
-    for (int i(0); i < indptrData.size() - 1; i++) {
+    for (unsigned i(0); i < indptrData.size() - 1; i++) {
         sparseNormalisedDataMatrix[i].reserve(indptrData[i + 1] - indptrData[i]);
     }
-    for (int i(0); i < indptrData.size() - 1; i++) {
+    for (unsigned long i(0); i < indptrData.size() - 1; i++) {
         float numberOfMolecules(0.0);
-        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+        for (unsigned long j(indptrData[i]); j < indptrData[i + 1]; j++) {
             numberOfMolecules += dataRead[j];
         }
-        for (int j(indptrData[i]); j < indptrData[i + 1]; j++) {
+        for (unsigned long j(indptrData[i]); j < indptrData[i + 1]; j++) {
             sparseNormalisedDataMatrix[i].insert( std::make_pair<unsigned long, float>(
                     (unsigned long) indicesData[j],((float)dataRead[j])/numberOfMolecules));
         }

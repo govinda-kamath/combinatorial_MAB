@@ -35,17 +35,17 @@ class SparsePoint: public BasePoint {
  * from this class.
  * */
 public:
-    std::unordered_map <unsigned long, int>  sparsePoint;
+    std::unordered_map <unsigned long, float>  sparsePoint;
     std::vector<unsigned long> keys;
 
-    explicit SparsePoint(std::unordered_map <unsigned long, int> sp);
+    explicit SparsePoint(std::unordered_map <unsigned long, float> sp, unsigned long d);
 };
 
 class SparseL1Point : public SparsePoint {
 
 public:
 
-    explicit SparseL1Point(std::unordered_map <unsigned long, int> sp);
+    explicit SparseL1Point(std::unordered_map <unsigned long, float> sp, unsigned long d);
 
     virtual float distance(const SparseL1Point& p1) const;
     virtual float sampledDistance(const SparseL1Point& p1) const;

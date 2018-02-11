@@ -13,8 +13,7 @@ int main() {
 
     std::string fileName("/Users/govinda/Code/combinatorial_MAB/test_dataset/1M_neurons_neuron20k.h5");
 
-    std::vector<int> shapeData(2);
-    tenXReader::get10xMatrixSize(fileName, shapeData);
+    std::vector<unsigned> shapeData = tenXReader::get10xMatrixSize(fileName);
 
     std::chrono::system_clock::time_point dataLoadTimeStart = std::chrono::system_clock::now();
     std::vector<std::vector<int> > denseDataMatrix(shapeData[1], std::vector<int>(shapeData[0]));
@@ -77,7 +76,7 @@ int main() {
     std::cout << "Reading normalised data sparsely " << std::endl;
     dataLoadTimeStart = std::chrono::system_clock::now();
     std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
-    tenXReader::get10xNormalisedMatrix(fileName, sparseNormalisedDataMatrix);
+    tenXReader::get10xNormalisedSparseMatrix(fileName, sparseNormalisedDataMatrix);
     dataLoadTimeEnd = std::chrono::system_clock::now();
     std::cout << "Time to read normalised sparse vector (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(dataLoadTimeEnd - dataLoadTimeStart).count()
