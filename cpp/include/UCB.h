@@ -170,6 +170,10 @@ public:
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         if (UCBofBestArm < LCBofSecondBestArm){
 
+
+            std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
+            std::cout << "stopping LCB " <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
+
             // Evaluating true mean of best arm
             std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
             bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
@@ -178,14 +182,15 @@ public:
             globalNumberOfPulls += result["effectiveDimension"];
             globalSumOfPulls += result["sumOfPulls"];
             globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
+
             if (bestArm.estimateOfMean > LCBofSecondBestArm){
-                std::cout<< "Got triggered" << std::endl;
+                std::cout<< "False trigger by " << bestArm.id << std::endl;
+                arms.push(bestArm);
                 return false;
             }
 
             arms.push(bestArm);
-            std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
-            std::cout << "stopping LCB "<< std::setprecision (15) <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
+            std::cout << "best estimate"<< std::setprecision (15)<< bestArm.estimateOfMean << std::endl;
             return true;
         }else {
             float sample;

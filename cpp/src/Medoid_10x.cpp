@@ -134,7 +134,7 @@ int main(int argc, char *argv[]){
     std::cout << "Total number of pulls " << UCB1.globalNumberOfPulls <<std::endl;
     std::cout << "Number of points " << UCB1.numberOfArms << std::endl;
     std::cout << "Dimension of each point" << shapeData[0] << std::endl;
-    std::cout << "Average " << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*shapeData[0]*0.07) <<std::endl;//0.07=sparsity
+    std::cout << "Average " << UCB1.globalNumberOfPulls/(UCB1.numberOfArms*shapeData[0]*0.1) <<std::endl;//0.1=sparsity
     std::cout << "Global Sigma = " << UCB1.globalSigma <<std::endl;
 
     // True Means
