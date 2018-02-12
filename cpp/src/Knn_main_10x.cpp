@@ -35,8 +35,7 @@ int main(int argc, char *argv[]){
         std::cout << "Can't load "<< nameConfig << std::endl;
         return 1;
     }
-    std::string directoryPath = reader.Get("path", "directory", "");
-    std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
+    std::string saveFilePath = reader.Get("path", "saveFilePath", "test.output");
     std::string fileName = reader.Get("path", "h5path", "test_dataset/1M_neurons_neuron20k.h5");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
@@ -48,36 +47,27 @@ int main(int argc, char *argv[]){
 
     // Loading Sparse matrix
     std::cout << "Reading normalised data sparsely" << std::endl;
-    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
+    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1]);
     tenXReader::get10xNormalisedSparseMatrix(fileName, sparseNormalisedDataMatrix);
 
-    //Arms
+    //Points
     std::vector<SparseL1Point> pointsVec;
     utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0]);
-    std::vector<ArmKNN<SparseL1Point> > armsVec;
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
-    std::cout << numberOfInitialPulls << std::endl;
+    std::cout << "Initial number of pulls = " << numberOfInitialPulls << std::endl;
 
-    // Data
-    std::vector<std::string>  pathsToImages;
-    utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
 
-    //Points
-    std::vector<SquaredEuclideanPoint> pointsVec;
-    utils::vectorsToPoints(pointsVec, pathsToImages);
-
-    // Arms and UCB
-
+    //Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     Knn<SquaredEuclideanPoint> knn( pointsVec, pointsVec, k, numberOfInitialPulls, delta );
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
     std::cout << "Running" <<std::endl;
     knn.run(indices);
-    std::cout << "SAving" <<std::endl;
+    std::cout << "Saving" <<std::endl;
 
-    knn.saveAnswers("del");
+    knn.saveAnswers(saveFilePath);
 
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
     std::cout << "Average time (ms) "
