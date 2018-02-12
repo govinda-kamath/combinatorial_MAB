@@ -35,14 +35,14 @@ public:
     std::vector<float> avgNumberOfPulls; //Stat
     bool leftEqualsRight = false; // True when left and right points are the same
 
-    Knn( std::vector<templatePoint> pVecL, std::vector<templatePoint> pVecR,
+    Knn( const std::vector<templatePoint> &pVecL, const std::vector<templatePoint> &pVecR,
          unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
         pointsVectorLeft = pVecL;
         pointsVectorRight = pVecR;
         initialiseKNN(NumberOfNeighbours, noOfInitialPulls,  deltaAccuracy );
     }
 
-    Knn( std::vector<templatePoint>& pVecL,
+    Knn( const std::vector<templatePoint> &pVecL,
          unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
         pointsVectorLeft = pVecL;
         pointsVectorRight = pVecL;
@@ -67,7 +67,7 @@ public:
 
     }
 
-    void run(std::vector<unsigned long> indices){
+    void run(const std::vector<unsigned long> &indices){
 
         for (unsigned long i = 0; i < indices.size(); i++){
             unsigned long index = indices[i];

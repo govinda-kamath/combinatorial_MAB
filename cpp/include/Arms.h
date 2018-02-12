@@ -55,7 +55,7 @@ public:
 //        delete point; //no clue why this errors out
     }
 
-    friend bool operator> (const Arm& l, const Arm& r)
+    friend bool operator> (const Arm &l, const Arm &r)
     {
         return l.lowerConfidenceBound > r.lowerConfidenceBound;
     }

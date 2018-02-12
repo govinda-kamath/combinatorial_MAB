@@ -12,7 +12,7 @@
 #include "Points.h"
 #include "Arms.h"
 #include "UCB.h"
-#include "INIReader.h"
+#include "../utilities/INIReader.h"
 #include "Knn.h"
 #define DEBUG
 

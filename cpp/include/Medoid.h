@@ -33,7 +33,7 @@ public:
     unsigned numberOfInitialPulls; // UCB Parameters
     float delta; // UCB Parameters
 
-    Medoid( std::vector<templatePoint> pVec, unsigned noOfTopMedoids, unsigned noOfInitialPulls, float deltaAccuracy ) {
+    Medoid( const std::vector<templatePoint> &pVec, unsigned noOfTopMedoids, unsigned noOfInitialPulls, float deltaAccuracy ) {
         pointsVector = pVec;
         numberOfTopMedoids = noOfTopMedoids;
         numberOfInitialPulls = noOfInitialPulls;
@@ -42,7 +42,7 @@ public:
 
     void run(){
         unsigned numberOfPoints = pointsVector.size();
-        std::vector<ArmMedoid<SparseL1Point> > armsVec;
+        std::vector<ArmMedoid<templatePoint> > armsVec;
 
         // Creating Arms from points
         for (unsigned i(0); i < numberOfPoints; i++) {

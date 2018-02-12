@@ -119,7 +119,7 @@ public:
                 float UCBofBestArm, LCBofBestArm;
                 UCBofBestArm = bestArm.upperConfidenceBound;
                 LCBofBestArm = bestArm.lowerConfidenceBound;
-#define DEBUG_RUN
+//#define DEBUG_RUN
 #ifdef DEBUG_RUN
                 std::cout << "NumberOfPulls " << globalNumberOfPulls << " out of " << maxIterations
                           << ". Best arm = " << bestArm.id

@@ -78,7 +78,6 @@ void utils::getPathToFile(std::vector<std::string> & pathsToImages, const std::s
 
 
     std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
-    std::cout << glob_result.gl_pathv[0] << std::endl;
 
     pathsToImages.reserve(glob_result.gl_pathc);
     for (unsigned long i(0); i < glob_result.gl_pathc; i ++){
