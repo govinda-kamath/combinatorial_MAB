@@ -13,6 +13,7 @@
 #include "Arms.h"
 #include "UCB.h"
 #include "INIReader.h"
+#include "tenXReader.h"
 #include "Knn.h"
 #define DEBUG
 
@@ -22,12 +23,6 @@ int main(int argc, char *argv[]){
     long startIndex(atol(argv[2])); // Start index
     long endIndex(atol(argv[3])); // End index
     std::srand(std::time(nullptr));
-
-    INIReader reader(nameConfig);
-    if (reader.ParseError() < 0) {
-        std::cout << "Can't load "<< nameConfig << std::endl;
-        return 1;
-    }
 
 
     INIReader reader(nameConfig);
@@ -54,23 +49,14 @@ int main(int argc, char *argv[]){
     //Arms
     std::vector<SparseL1Point> pointsVec;
     utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0]);
-    std::vector<ArmKNN<SparseL1Point> > armsVec;
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
 
-    // Data
-    std::vector<std::string>  pathsToImages;
-    utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
-
-    //Points
-    std::vector<SquaredEuclideanPoint> pointsVec;
-    utils::vectorsToPoints(pointsVec, pathsToImages);
-
     // Arms and UCB
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Knn<SquaredEuclideanPoint> knn( pointsVec, pointsVec, k, numberOfInitialPulls, delta );
+    Knn<SparseL1Point> knn( pointsVec, pointsVec, k, numberOfInitialPulls, delta );
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
     std::cout << "Running" <<std::endl;

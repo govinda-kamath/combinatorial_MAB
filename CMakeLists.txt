@@ -10,7 +10,7 @@ option(kmeans "Kmeans" OFF)
 option(med10x "Medoid10x" OFF)
 option(knn10x "Knn10x" OFF)
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
