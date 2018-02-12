@@ -81,22 +81,38 @@ public:
     float sampledDistance(const L1Point &p1) const;
 };
 
-//template <class templatePoint>
-//class GroupPoint: public BasePoint {
-///*A point is the base class that defines a point.
-// * It has a vector that stores the representation of
-// * the point in some high dimensional space.
-// * This class also defines a distance function which
-// * defines distances.
-// * Points in different hilbert spaces are inherited
-// * from this class.
-// * */
-//public:
-//    std::vector<templatePoint>  groupPoint;
-//    std::vector<unsigned long> noOfPoints;
-//
-//    explicit GroupPoint(std::unordered_map <unsigned long, float> sp, unsigned long d);
-//};
+template <class templatePoint>
+class GroupPoint: public BasePoint {
+/*
+ * */
+public:
+    std::vector<templatePoint>  groupPoint;
+    unsigned long noOfPoints;
+
+    explicit GroupPoint(const std::vector<templatePoint> &gp, unsigned d){
+        groupPoint = gp;
+        noOfPoints = gp.size();
+        vecSize = d;
+    }
+
+    float distance(const GroupPoint &gp1) const {
+        float result(0);
+        for(unsigned long i(0); i< noOfPoints; i++){
+            for(unsigned long j(0); j< gp1.noOfPoints; j++){
+                result += groupPoint[i].distance(gp1.groupPoint[j]);
+            }
+        }
+        return result; // /(noOfPoints*gp1.noOfPoints);
+    };
+
+    float sampledDistance(const GroupPoint &gp1) const {
+        unsigned long i,j;
+        i = std::rand() % noOfPoints;
+        j = std::rand() % gp1.noOfPoints;
+        float result = groupPoint[i].sampleDistance(gp1.groupPoint[j]);
+        return result;
+    };
+};
 
 
 #endif //COMBINATORIAL_MAB_POINTS_H
