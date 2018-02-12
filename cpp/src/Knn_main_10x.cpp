@@ -21,8 +21,6 @@ int main(int argc, char *argv[]){
     std::string nameConfig = argv[1];
     long startIndex(atol(argv[2])); // Start index
     long endIndex(atol(argv[3])); // End index
-
-
     std::srand(std::time(nullptr));
 
     INIReader reader(nameConfig);
