@@ -24,7 +24,6 @@ int main(int argc, char *argv[]){
     long endIndex(atol(argv[3])); // End index
     std::srand(std::time(nullptr));
 
-
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
         std::cout << "Can't load "<< nameConfig << std::endl;
@@ -36,7 +35,6 @@ int main(int argc, char *argv[]){
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
-
 
     // Loading 10x data shape
     std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
@@ -54,7 +52,6 @@ int main(int argc, char *argv[]){
     std::cout << numberOfInitialPulls << std::endl;
 
     // Arms and UCB
-
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     Knn<SparseL1Point> knn( pointsVec, k, numberOfInitialPulls, delta );
     std::vector<unsigned long> indices(endIndex-startIndex);
@@ -69,7 +66,6 @@ int main(int argc, char *argv[]){
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                       (endIndex-startIndex) << std::endl;
-
     return 0;
 }
 

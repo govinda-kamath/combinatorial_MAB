@@ -27,27 +27,27 @@ template <class templatePoint>
 class Medoid{
 public:
     std::vector<templatePoint> pointsVector;
-    std::vector<ArmMedoid> topMedoids;
+    std::vector<ArmMedoid<templatePoint> > topMedoids;
     unsigned numberOfTopMedoids;
 
     unsigned numberOfInitialPulls; // UCB Parameters
     float delta; // UCB Parameters
 
     Medoid( std::vector<templatePoint> pVec, unsigned noOfTopMedoids, unsigned noOfInitialPulls, float deltaAccuracy ) {
-        pointsVectorLeft = pVec;
+        pointsVector = pVec;
         numberOfTopMedoids = noOfTopMedoids;
         numberOfInitialPulls = noOfInitialPulls;
         delta = deltaAccuracy;
     };
 
-    run(){
+    void run(){
         unsigned numberOfPoints = pointsVector.size();
-        std::vector<ArmMedoid<SparseL1Point> > armsVec(numberOfPoints);
+        std::vector<ArmMedoid<SparseL1Point> > armsVec;
 
         // Creating Arms from points
         for (unsigned i(0); i < numberOfPoints; i++) {
             ArmMedoid<templatePoint> tmpArm(i, pointsVector[i], pointsVector);
-            .push_back(tmpArm);
+            armsVec.push_back(tmpArm);
         }
 
         std::cout << "Total points = " << numberOfPoints << " Dimension = " << armsVec[0].point->vecSize << std::endl;
@@ -76,34 +76,34 @@ public:
         //Print Result
         std::cout << "Total number of pulls " << UCB1.globalNumberOfPulls << std::endl;
         std::cout << "Number of points " << UCB1.numberOfArms << std::endl;
-        std::cout << "Dimension of each point" << shapeData[0] << std::endl;
-        std::cout << "Average (taking sparsity into account)" <<
-                  UCB1.globalNumberOfPulls/(UCB1.numberOfArms*shapeData[0]*0.1) << std::endl;//0.1=sparsity
+//        std::cout << "Dimension of each point" << shapeData[0] << std::endl;
+        std::cout << "Average number of paired distance evaluated (taking sparsity into account)" <<
+                  UCB1.globalNumberOfPulls/(UCB1.numberOfArms*armsVec[0].point->vecSize*0.1) << std::endl;//0.1=sparsity
         std::cout << "Global Sigma = " << UCB1.globalSigma << std::endl;
 
-        topMedoids = (ArmMedoid) UCB1.topKArms;
+        topMedoids = UCB1.topKArms;
     }
 
-    printOrder(){
+    void printOrder(){
 
         // True Means
-        std::vector<float> topKArmsTrueMean(numberOfTopMedoids*2);
-        std::vector<int> topKArmsArgSort(numberOfTopMedoids*2);
-        std::cout << "Calculating true mean of top " << numberOfTopMedoids*2 << " medoids." << std::endl;
-        for (unsigned i = 0; i < std::min(k*2, numberOfPoints); i++) {
+        std::vector<float> topKArmsTrueMean(numberOfTopMedoids*3);
+        std::vector<int> topKArmsArgSort(numberOfTopMedoids*3);
+        std::cout << "Calculating true mean of top " << numberOfTopMedoids*3 << " medoids." << std::endl;
+        for (unsigned i = 0; i < numberOfTopMedoids*3; i++)
             topKArmsTrueMean[i] = topMedoids[i].trueMean();
-        }
+
         std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
         auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
         std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
 
         std::cout<<"Rank\tId\tTr Mean\t\tEs Mean\t\tLCB\t\t\tUCB\t\t\tNoP"<<std::endl;
-        for (unsigned i = 0; i < std::min(k*2, numberOfPoints); i++) {
+        for (unsigned i = 0; i < numberOfTopMedoids*3; i++) {
             std::cout << std::setprecision (15) << topKArmsArgSort[i]+1
-                      << "\t\t" << topMedoids[i].id
+                      << "\t" << topMedoids[i].id
                       << "\t" << topKArmsTrueMean[i]
                       << "\t" << topMedoids[i].estimateOfMean
-                      << "\t" << topMedoidsi].lowerConfidenceBound
+                      << "\t" << topMedoids[i].lowerConfidenceBound
                       << "\t" << topMedoids[i].upperConfidenceBound
                       << "\t" << topMedoids[i].numberOfPulls << std::endl;
         }
