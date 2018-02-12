@@ -116,7 +116,7 @@ public:
     }
 
 
-    void saveAnswers( std::string saveFilePath){
+    void saveAnswers(std::string saveFilePath){
 
         std::ofstream saveFile;
         saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);

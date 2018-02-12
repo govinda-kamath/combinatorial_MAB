@@ -66,7 +66,6 @@ public:
     void initialise(unsigned numberOfInitialPulls = 100){
 
         unsigned numberOfThreads = 1 ;//std::thread::hardware_concurrency();
-//        std::cout << numberOfThreads << " number of threads used in each batch of initialization.\n";
         std::vector<std::thread> initThreads(numberOfThreads);
 
         unsigned long chunkSize = (numberOfArms/numberOfThreads);
@@ -78,7 +77,6 @@ public:
         }
 
         for(unsigned t = 0; t < numberOfThreads; t++){
-//            std::cout << "Joining thread for group " << t << std::endl;
             initThreads[t].join();
         }
 
@@ -118,8 +116,8 @@ public:
                 UCBofBestArm = bestArm.upperConfidenceBound;
                 LCBofBestArm = bestArm.lowerConfidenceBound;
                 std::cout << "NumberOfPulls " << globalNumberOfPulls << " out of " << maxIterations
-                        << ". Best arm = " << bestArm.id
-                        << ". Best arm UCB = " << UCBofBestArm
+                          << ". Best arm = " << bestArm.id
+                          << ". Best arm UCB = " << UCBofBestArm
                           << ". LCB of second best arm  = " << LCBofBestArm
                           << ". globalSigma = " << globalSigma
                           << std::endl;
@@ -144,7 +142,7 @@ public:
             std::cout<< "UCB Stopped before reaching optimal" << std::endl;
         }
 //#ifdef DEBUG
-        std::cout << " Best arm number "
+        std::cout << "Best arm number "
                   << bestArmCount << " Position" << i
                   << " Max iter" << maxIterations
                   << std::endl;
