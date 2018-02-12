@@ -68,7 +68,7 @@ int main(int argc, char *argv[]){
 //    utils::vectorsToPoints(pointsVec, denseDataMatrix);
 //    std::vector<ArmMedoid<L1Point> > armsVec;
 
-    unsigned numberOfPoints = 20000;
+    unsigned numberOfPoints = pointsVec.size();
     for (unsigned i(0); i < numberOfPoints; i++) {
         ArmMedoid<SparseL1Point> tmpArm(i, pointsVec[i], pointsVec);
         armsVec.push_back(tmpArm);

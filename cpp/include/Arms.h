@@ -125,6 +125,10 @@ public:
         return -1;
     };
 
+    unsigned long getDimension(){
+        return dimension;
+    }
+
 };
 
 
@@ -150,6 +154,10 @@ public:
     using Arm<templatePoint>::trueMean;
     float trueMean(){
         return trueMean(*fixedPoint);
+    }
+
+    std::unordered_map<std::string, float> trueMeanUpdate(){
+        assert( ("No trueMeanUpdate defined for KNN", false));
     }
 };
 
@@ -185,13 +193,26 @@ public:
         float mean = 0;
         for(unsigned long i = 0; i<numberOfPoints; i++){
             float tmp = trueMean((*pointsVec)[i]);
-//            if (i < 100)
-//                std::cout << "Point =  " << i << ". Mean = " << tmp << std::endl;
             mean += tmp;
         }
-//        std::cout << "Mean = " << mean << " with NOP = " << numberOfPoints <<  std::endl;
-
         return mean/((float)numberOfPoints);
+    }
+
+    std::unordered_map<std::string, float> trueMeanUpdate(){
+        float localSumOfPulls = 0;
+        float localSumOfSquaresOfPulls = 0;
+        for(unsigned long i = 0; i<numberOfPoints; i++){
+            float colMean = trueMean((*pointsVec)[i]);
+            localSumOfPulls += colMean;
+            localSumOfSquaresOfPulls += colMean*colMean;
+        }
+        std::unordered_map<std::string, float> result;
+        unsigned  long d = 4000;
+        result.insert( std::make_pair<std::string, float>("sumOfPulls", localSumOfPulls*d));
+        result.insert( std::make_pair<std::string, float>("sumOfSquaresPulls", localSumOfSquaresOfPulls*d));
+        result.insert( std::make_pair<std::string, float>("effectiveDimension", (float) d*numberOfPoints));
+        return result;
+
     }
 };
 

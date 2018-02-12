@@ -128,7 +128,6 @@ float SparseL1Point::distance(const SparseL1Point& p1) const {
 float SparseL1Point::sampledDistance(const SparseL1Point& p1) const {
 
     //coin flip
-    bool coinFlip = (bool) std::rand() % 2;
     float result(0);
     {
         // pick a random index from the current point
@@ -140,7 +139,7 @@ float SparseL1Point::sampledDistance(const SparseL1Point& p1) const {
         auto search2 = p1.sparsePoint.find(index);
 //        std::cout << "index = " << index << "\t" << search1->first << "\t" << search1->second << std::endl;
         if (search2 != p1.sparsePoint.end() )
-            result =  (float) std::abs(search1->second - search2->second)*keys.size()/getVecSize();
+            result =  std::abs(search1->second - search2->second)*keys.size()/getVecSize();
         else
             result =  2*std::abs(search1->second)*keys.size()/getVecSize();
     }
@@ -153,7 +152,7 @@ float SparseL1Point::sampledDistance(const SparseL1Point& p1) const {
         auto search1 = sparsePoint.find(index);
         auto search2 = p1.sparsePoint.find(index);
         if (search1 != sparsePoint.end() )
-            result += (float) std::abs(search1->second - search2->second)*p1.keys.size()/getVecSize();
+            result += std::abs(search1->second - search2->second)*p1.keys.size()/getVecSize();
         else
             result += 2*std::abs(search2->second)*p1.keys.size()/getVecSize();
     }

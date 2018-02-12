@@ -169,7 +169,20 @@ public:
         LCBofBestArm = bestArm.lowerConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         if (UCBofBestArm < LCBofSecondBestArm){
-            //Checking if UCB should stop
+
+            // Evaluating true mean of best arm
+            std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
+            bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
+            bestArm.upperConfidenceBound = bestArm.estimateOfMean;
+            bestArm.lowerConfidenceBound = bestArm.estimateOfMean;
+            globalNumberOfPulls += result["effectiveDimension"];
+            globalSumOfPulls += result["sumOfPulls"];
+            globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
+            if (bestArm.estimateOfMean > LCBofSecondBestArm){
+                std::cout<< "Got triggered" << std::endl;
+                return false;
+            }
+
             arms.push(bestArm);
             std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
             std::cout << "stopping LCB "<< std::setprecision (15) <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
