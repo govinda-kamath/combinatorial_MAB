@@ -28,7 +28,7 @@ template <class templatePoint>
 class Kmeans : public Knn<templatePoint>{
 public:
     Kmeans( std::vector<templatePoint>& pVecL, std::vector<templatePoint>& pVecR,
-     unsigned noOfInitialPulls, float deltaAccuracy ):
+            unsigned noOfInitialPulls, float deltaAccuracy ):
             Knn<templatePoint>(pVecL,  pVecR, 1,  noOfInitialPulls,  deltaAccuracy ){}
 
     using Knn<templatePoint>::run;

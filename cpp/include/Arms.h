@@ -55,11 +55,6 @@ public:
 //        delete point; //no clue why this errors out
     }
 
-    void printArm(){
-        std::cout << "Number of pulls" << numberOfPulls*log10Dimension
-                  << std::endl;
-    }
-
     friend bool operator> (const Arm& l, const Arm& r)
     {
         return l.lowerConfidenceBound > r.lowerConfidenceBound;
@@ -69,7 +64,7 @@ public:
 
 
         float compositeSigma, intervalWidth;
-        compositeSigma = globalSigma; //Todo: update sigma to new local value
+//        compositeSigma = globalSigma; //Todo: update sigma to new local value
         float localVar = estimateOfSecondMoment - std::pow(estimateOfMean,2);
         compositeSigma = std::sqrt( localVar*numberOfPulls/globalNumberOfPulls +
                                 globalSigma*globalSigma*(globalNumberOfPulls-numberOfPulls)/globalNumberOfPulls );
@@ -89,8 +84,8 @@ public:
 
     float pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
                   float logDeltaInverse, bool update) {
-        float sample(-INFINITY);
 
+        float sample(-INFINITY);
         if (numberOfPulls >= dimension){
             sample = trueMean();
             numberOfPulls += dimension;
@@ -103,12 +98,11 @@ public:
         }
         else {
             sample = point->sampledDistance(p1);
-//            std::cout << sample << " sample" <<std::endl;
             numberOfPulls++;
             sumOfPulls += sample;
             sumOfSquaresOfPulls += sample * sample;
             estimateOfMean = sumOfPulls / numberOfPulls;
-            estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
+            estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
             if (update)
                 updateConfidenceIntervals( globalSigma, globalNumberOfPulls, logDeltaInverse);
         }
@@ -124,14 +118,9 @@ public:
 
     // The child class will has to extend this
     virtual float trueMean(){
-        std::cout<<"True mean should not be calculated here!!" <<std::endl;
+        std::cout << "True mean should not be calculated here!!" << std::endl;
         return -1;
     };
-
-    unsigned long getDimension(){
-        return dimension;
-    }
-
 };
 
 
@@ -164,7 +153,7 @@ public:
         float localSumOfSquaresOfPulls = localSumOfPulls*localSumOfPulls;
 
         std::unordered_map<std::string, float> result;
-        unsigned  long d = 4000;
+        unsigned  long d = 4000; //ToDo: Change this
         result.insert( std::make_pair<std::string, float>("sumOfPulls", localSumOfPulls*d));
         result.insert( std::make_pair<std::string, float>("sumOfSquaresPulls", localSumOfSquaresOfPulls*d));
         result.insert( std::make_pair<std::string, float>("effectiveDimension", (float) d));
@@ -188,7 +177,6 @@ public:
             Arm<templatePoint>(id, p, p.vecSize*pVec.size()) {
         pointsVec = &pVec;
         numberOfPoints = pVec.size();
-//        std::cout << "Number of points = " << numberOfPoints << std::endl;
     }
 
     using Arm<templatePoint>::pullArm;
@@ -223,7 +211,6 @@ public:
         result.insert( std::make_pair<std::string, float>("sumOfSquaresPulls", localSumOfSquaresOfPulls*d));
         result.insert( std::make_pair<std::string, float>("effectiveDimension", (float) d*numberOfPoints));
         return result;
-
     }
 };
 

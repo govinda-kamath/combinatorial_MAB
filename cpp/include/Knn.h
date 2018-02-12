@@ -35,23 +35,6 @@ public:
     std::vector<float> avgNumberOfPulls; //Stat
     bool leftEqualsRight = false; // True when left and right points are the same
 
-
-    void initialiseKNN(unsigned NumberOfNeighbhours, unsigned noOfInitialPulls, float deltaAccuracy ){
-        k = NumberOfNeighbhours;
-        numberOfInitialPulls = noOfInitialPulls;
-        delta = deltaAccuracy;
-
-        nearestNeighbours.reserve(pointsVectorLeft.size());
-        avgNumberOfPulls.reserve(pointsVectorLeft.size());
-
-        for(unsigned long i(0); i< pointsVectorLeft.size(); i++){
-            nearestNeighboursEvaluated.push_back(false);
-            nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
-        }
-
-    }
-
-
     Knn( std::vector<templatePoint> pVecL, std::vector<templatePoint> pVecR,
          unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
         pointsVectorLeft = pVecL;
@@ -68,6 +51,21 @@ public:
     }
 
 
+
+    void initialiseKNN(unsigned NumberOfNeighbhours, unsigned noOfInitialPulls, float deltaAccuracy ){
+        k = NumberOfNeighbhours;
+        numberOfInitialPulls = noOfInitialPulls;
+        delta = deltaAccuracy;
+
+        nearestNeighbours.reserve(pointsVectorLeft.size());
+        avgNumberOfPulls.reserve(pointsVectorLeft.size());
+
+        for(unsigned long i(0); i< pointsVectorLeft.size(); i++){
+            nearestNeighboursEvaluated.push_back(false);
+            nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
+        }
+
+    }
 
     void run(std::vector<unsigned long> indices){
 
@@ -105,7 +103,7 @@ public:
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
             std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                       << " init time " << initTime << " ms"
-                    << " run time " << runTime << " ms"
+                      << " run time " << runTime << " ms"
 //                    << " true mean time " << trueMeanTime << " ms"
                       << std::endl;
 
@@ -176,17 +174,3 @@ public:
         }
     }
 };
-
-
-//template <class templatePoint>
-//class Kmeans : public Knn<templatePoint>{
-//public:
-//Kmeans( std::vector<templatePoint>& pVecL, std::vector<templatePoint>& pVecR,
-//unsigned noOfInitialPulls, float deltaAccuracy ):
-//Knn<templatePoint>(pVecL,  pVecR, 1,  noOfInitialPulls,  deltaAccuracy ){}
-//
-//using Knn<templatePoint>::run;
-//
-//using Knn<templatePoint>::saveAnswers;
-//
-//};
