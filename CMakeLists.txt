@@ -7,6 +7,8 @@ endif()
 option(knn "KNN" OFF)
 option(medoid "Medoid" OFF)
 option(kmeans "Kmeans" OFF)
+option(med10x "Medoid10x" OFF)
+option(knn10x "Knn10x" OFF)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
@@ -22,8 +24,18 @@ include_directories(cpp/include)
 add_subdirectory(dlib/dlib dlib_build)
 add_subdirectory(cpp/lib lib)
 
+find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
+#link_directories( ${HDF5_LIBRARY_DIRS} )
+#include_directories( ${HDF5_INCLUDE_DIRS} )
+
+
 file(GLOB INCLUDE "cpp/include/*.h")
 file(GLOB LIBRARIES "cpp/lib/*.cpp")
+
+#find_package(HDF5 REQUIRED COMPONENTS C CXX)
+add_executable(readdata cpp/src/readdata.cpp cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+target_link_libraries( readdata hdf5 hdf5_cpp)
+
 
 #However, the file(GLOB...) allows for wildcard additions:
 #file(GLOB SOURCES "cpp/src/*.cpp")
@@ -51,6 +63,22 @@ elseif(${kmeans})
             cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
             cpp/include/kmeans.h)
     target_link_libraries(kmeans dlib::dlib pthread)
+elseif(${med10x})
+    add_executable(medoid10x cpp/src/Medoid_10x.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+            cpp/lib/Points.cpp
+            cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+    target_link_libraries( medoid10x dlib::dlib ${HDF5_CXX_LIBRARIES})
+elseif(${knn10x})
+    add_executable(knn10x cpp/src/Knn_main_10x.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+            cpp/lib/Points.cpp
+            cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES})
 else()
     add_executable(knn cpp/src/Knn_main.cpp
             cpp/include/Points.h cpp/include/Arms.h
@@ -75,23 +103,29 @@ else()
             cpp/include/kmeans.h )
     target_link_libraries(kmeans dlib::dlib pthread)
 
+    add_executable(medoid10x cpp/src/Medoid_10x.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+            cpp/lib/Points.cpp
+            cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+    target_link_libraries( medoid10x dlib::dlib ${HDF5_CXX_LIBRARIES})
+
+    add_executable(knn10x cpp/src/Knn_main_10x.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
+            cpp/lib/Points.cpp
+            cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES})
+
+
 endif()
 
 
 
 
-find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
-#link_directories( ${HDF5_LIBRARY_DIRS} )
-#include_directories( ${HDF5_INCLUDE_DIRS} )
 
-#find_package(HDF5 REQUIRED COMPONENTS C CXX)
-add_executable(readdata cpp/src/readdata.cpp cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
-target_link_libraries( readdata hdf5 hdf5_cpp)
 
-add_executable(medoid10x cpp/src/Medoid_10x.cpp
-        cpp/include/Points.h cpp/include/Arms.h
-        cpp/include/ini.h cpp/include/INIReader.h cpp/lib/ini.c
-        cpp/lib/Points.cpp
-        cpp/lib/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-        cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
-target_link_libraries( medoid10x dlib::dlib ${HDF5_CXX_LIBRARIES})
+
+
