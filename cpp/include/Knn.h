@@ -85,12 +85,29 @@ public:
             }
 
             UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
+
+            std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
             UCB1.initialise(numberOfInitialPulls);
-            UCB1.runUCB(2000*pointsVectorRight.size());
+            std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
+            UCB1.runUCB(20000*pointsVectorRight.size());
+            std::chrono::system_clock::time_point timeRunEnd = std::chrono::system_clock::now();
+//            ArmKNN<templatePoint> tmp = UCB1.bestArm();
+//            std::chrono::system_clock::time_point timeTrueMeanEnd = std::chrono::system_clock::now();
+
+            long long int initTime = std::chrono::duration_cast<std::chrono::milliseconds>
+                    (timeRunStart - timeStart).count();
+            long long int runTime = std::chrono::duration_cast<std::chrono::milliseconds>
+                    (timeRunEnd - timeRunStart).count();
+//            long long int trueMeanTime = std::chrono::duration_cast<std::chrono::milliseconds>
+//                    (timeTrueMeanEnd - timeRunEnd).count();
 
 
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-//            std::cout << " i and index " << i << " "<< indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index] << std::endl;
+            std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
+                      << " init time " << initTime << " ms"
+                    << " run time " << runTime << " ms"
+//                    << " true mean time " << trueMeanTime << " ms"
+                      << std::endl;
 
             nearestNeighbours[index] = UCB1.topKArms;
             nearestNeighboursEvaluated[index] = true;
@@ -139,8 +156,8 @@ public:
             auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
             std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
 
-            saveFile << index << "A";
-            std::cout << "index" << index ;
+            saveFile << index << "A" << ": ";
+            std::cout << "index " << index << ": ";
             for (unsigned i = 0; i < k*5; i++) {
                 saveFile <<  " " << topKArmsArgSort[i];
                 std::cout <<  " " << topKArmsArgSort[i];
@@ -149,7 +166,7 @@ public:
             std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
 
 
-            std::cout << "index" << index ;
+            std::cout << "index " << index << ": " ;
             for (unsigned i = 0; i < k*5; i++) {
                 saveFile <<  " " << topKArmsArgSort[i];
                 std::cout <<  " " << topKArms[i].id;

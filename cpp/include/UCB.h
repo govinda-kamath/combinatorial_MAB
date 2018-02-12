@@ -44,13 +44,15 @@ public:
         localSumOfSquaresOfPulls = 0;
         // Pulling an arm numberOfInitialPulls times
         for (unsigned long armIndex = armIndexStart; armIndex< armIndexEnd; armIndex++) {
+#ifdef DEBUG_INIT
             if (armIndex%((int)(armIndexEnd-armIndexStart)/20) == 0){
                 std::cout << "Initialized " << std::setprecision (15) << armIndex << " out of " << armIndexEnd - armIndexStart
                           << std::endl;
             }
+#endif
             for (unsigned i = 0; i < numberOfInitialPulls; i++) {
                 float observedSample(0);
-                observedSample = armsContainer[armIndex].pullArm(0, 0, false);
+                observedSample = armsContainer[armIndex].pullArm(0, globalNumberOfPulls, 0, false);
                 localSumOfPulls += observedSample;
                 localSumOfSquaresOfPulls += observedSample * observedSample;
 
@@ -83,14 +85,16 @@ public:
         globalNumberOfPulls = numberOfInitialPulls*numberOfArms;
         globalSigma = std::sqrt((globalSumOfSquaresOfPulls/globalNumberOfPulls -
                                  std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
-#ifdef DEBUG
+#ifdef DEBUG_INIT
         std::cout << "Sigma after initialization " << globalSigma <<std::endl;
         std::cout << "Mean after initialization "
                   << globalSumOfPulls/globalNumberOfPulls <<std::endl;
         std::cout << "Mean Squared after initialization "
                   << std::pow(globalSumOfPulls/globalNumberOfPulls,2) <<std::endl;
         std::cout << "Second Moment after initialization "
-                  << globalSumOfSquaresOfPulls/globalNumberOfPulls <<std::endl;
+                  << globalSumOfSquaresOfPulls/globalNumberOfPulls
+                  << " No of pulls " << globalNumberOfPulls
+                    <<std::endl;
 #endif
 
         for (unsigned long index = 0; index < numberOfArms; index++){
@@ -115,12 +119,16 @@ public:
                 float UCBofBestArm, LCBofBestArm;
                 UCBofBestArm = bestArm.upperConfidenceBound;
                 LCBofBestArm = bestArm.lowerConfidenceBound;
+#ifdef DEBUG_RUN
                 std::cout << "NumberOfPulls " << globalNumberOfPulls << " out of " << maxIterations
                           << ". Best arm = " << bestArm.id
                           << ". Best arm UCB = " << UCBofBestArm
                           << ". LCB of second best arm  = " << LCBofBestArm
+                          << ". No. pulls  = " <<  bestArm.numberOfPulls
+                          << ". Estimate  = " <<  bestArm.estimateOfMean
                           << ". globalSigma = " << globalSigma
                           << std::endl;
+#endif
             }
 
             bool bestArmFound;
@@ -130,10 +138,10 @@ public:
                 arms.pop();
                 bestArmCount++;
 
-//#ifdef DEBUG
+#ifdef DEBUG_RUN
                 std::cout << "Best arm number " << bestArmCount
                           << " Position " << i <<std::endl;
-//#endif
+#endif
                 if (bestArmCount==numberOfBestArms)
                     break;
             }
@@ -141,12 +149,12 @@ public:
         if (bestArmCount!=numberOfBestArms){
             std::cout<< "UCB Stopped before reaching optimal" << std::endl;
         }
-//#ifdef DEBUG
+#ifdef DEBUG_RUN
         std::cout << "Best arm number "
                   << bestArmCount << " Position" << i
                   << " Max iter" << maxIterations
                   << std::endl;
-//#endif
+#endif
         storeExtraTopArms(); //Storing extra arms
     }
 
@@ -168,9 +176,10 @@ public:
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         if (UCBofBestArm < LCBofSecondBestArm){
 
-
+#ifdef DEBUG_RUN
             std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
             std::cout << "stopping LCB " <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
+#endif
 
             // Evaluating true mean of best arm
             std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
@@ -188,11 +197,13 @@ public:
             }
 
             arms.push(bestArm);
+#ifdef DEBUG_RUN
             std::cout << "best estimate"<< std::setprecision (15)<< bestArm.estimateOfMean << std::endl;
+#endif
             return true;
         }else {
             float sample;
-            sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse);
+            sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true);
             if (UCBofBestArm == LCBofBestArm){
                 //Checking if the best arm is being computed in full and updating
                 //things accordingly.
@@ -218,7 +229,7 @@ public:
         float minTrueMean = armsContainer[0].trueMean();
         for (unsigned long i(0); i< armsContainer.size(); i++){
             float tmpTrueMean = armsContainer[i].trueMean();
-            std::cout << i << " " << tmpTrueMean << std::endl;
+//            std::cout << i << " " << tmpTrueMean << std::endl;
             if ( tmpTrueMean < minTrueMean){
                 minTrueMean = tmpTrueMean;
                 bIndex = i;

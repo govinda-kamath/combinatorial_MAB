@@ -65,28 +65,30 @@ public:
         return l.lowerConfidenceBound > r.lowerConfidenceBound;
     }
 
-    void updateConfidenceIntervals(unsigned long long globalNumberOfPulls, float globalSigma, float logDeltaInverse){
+    void updateConfidenceIntervals(float globalSigma, unsigned long long globalNumberOfPulls, float logDeltaInverse){
+
 
         float compositeSigma, intervalWidth;
         compositeSigma = globalSigma; //Todo: update sigma to new local value
         float localVar = estimateOfSecondMoment - std::pow(estimateOfMean,2);
         compositeSigma = std::sqrt( localVar*numberOfPulls/globalNumberOfPulls +
                                 globalSigma*globalSigma*(globalNumberOfPulls-numberOfPulls)/globalNumberOfPulls );
-//        if (globalSigma>0){
-//            std::cout << "LS " << std::sqrt(localVar)<< "\t"
-//                      << "GS " << globalSigma << "\t"
-//                      << "CS " << compositeSigma << "\t"
-//                      << "gNP " << globalNumberOfPulls << "\t"
-//                      << "NP " << numberOfPulls << "\t"
-//                      << std::endl;
-//        }
-        intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/numberOfPulls);
+
+        intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/(float)numberOfPulls);
+//        std::cout << "Interval Width"  << intervalWidth
+//                  << " ID " << id
+//                  <<  " pulls " << numberOfPulls
+//                  << " glob number pulls "<< globalNumberOfPulls
+//                  << " glob sigma " << globalSigma
+//                  << " delta inverse " << logDeltaInverse
+//                  << " comp sigma " << compositeSigma
+//                  << std::endl;
         upperConfidenceBound = estimateOfMean + intervalWidth;
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
     }
 
-    float pullArm(const templatePoint &p1, unsigned long long globalNumberOfPulls, float globalSigma,
-                  float logDeltaInverse, bool update = true) {
+    float pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
+                  float logDeltaInverse, bool update) {
         float sample(-INFINITY);
 
         if (numberOfPulls >= dimension){
@@ -101,13 +103,14 @@ public:
         }
         else {
             sample = point->sampledDistance(p1);
+//            std::cout << sample << " sample" <<std::endl;
             numberOfPulls++;
             sumOfPulls += sample;
             sumOfSquaresOfPulls += sample * sample;
             estimateOfMean = sumOfPulls / numberOfPulls;
             estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
             if (update)
-                updateConfidenceIntervals(globalNumberOfPulls, globalSigma, logDeltaInverse);
+                updateConfidenceIntervals( globalSigma, globalNumberOfPulls, logDeltaInverse);
         }
         return sample;
     }
@@ -157,7 +160,15 @@ public:
     }
 
     std::unordered_map<std::string, float> trueMeanUpdate(){
-        assert( ("No trueMeanUpdate defined for KNN", false));
+        float localSumOfPulls = trueMean(*fixedPoint);
+        float localSumOfSquaresOfPulls = localSumOfPulls*localSumOfPulls;
+
+        std::unordered_map<std::string, float> result;
+        unsigned  long d = 4000;
+        result.insert( std::make_pair<std::string, float>("sumOfPulls", localSumOfPulls*d));
+        result.insert( std::make_pair<std::string, float>("sumOfSquaresPulls", localSumOfSquaresOfPulls*d));
+        result.insert( std::make_pair<std::string, float>("effectiveDimension", (float) d));
+        return result;
     }
 };
 
@@ -185,7 +196,7 @@ public:
         //Choose a random point
         unsigned long randomCoOrdinate;
         randomCoOrdinate = std::rand() % numberOfPoints;
-        return pullArm((*pointsVec)[randomCoOrdinate], globalNumberOfPulls,  globalSigma, logDeltaInverse, update);
+        return pullArm((*pointsVec)[randomCoOrdinate],  globalSigma, globalNumberOfPulls, logDeltaInverse, update);
     }
 
     using Arm<templatePoint>::trueMean;
