@@ -18,6 +18,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 #Bring the headers, such as Student.h into the project
 include_directories(cpp/include)
+include_directories(cpp/utilities)
 
 #Can manually add the sources using the set command as follows:
 #set(SOURCES src/mainapp.cpp src/Student.cpp)
