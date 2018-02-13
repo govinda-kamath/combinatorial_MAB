@@ -33,9 +33,17 @@ find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
 file(GLOB INCLUDE "cpp/include/*.h")
 file(GLOB LIBRARIES "cpp/lib/*.cpp")
 
+set(Boost_USE_STATIC_LIBS   ON)
+
+FIND_PACKAGE(Boost)
+#FIND_PACKAGE ( Boost COMPONENTS container REQUIRED)
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+
+
+
 #find_package(HDF5 REQUIRED COMPONENTS C CXX)
-add_executable(readdata cpp/deprecated/readdata.cpp cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
-target_link_libraries( readdata hdf5 hdf5_cpp)
+#add_executable(readdata cpp/deprecated/readdata.cpp cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+#target_link_libraries( readdata hdf5 hdf5_cpp)
 
 
 #However, the file(GLOB...) allows for wildcard additions:
@@ -121,6 +129,8 @@ target_link_libraries( readdata hdf5 hdf5_cpp)
             cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
     target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES})
 
+add_executable(heirarchical cpp/src/Heirarchical_clustering.cpp)
+target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 
 #endif()
 
