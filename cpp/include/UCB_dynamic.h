@@ -56,6 +56,7 @@ public:
     void initialise(unsigned numberOfInitialPulls = 100){
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
+
 //#define DEBUG_INIT
 #ifdef DEBUG_INIT
             if (armIndex%((int)(numberOfArms)/20) == 0){
@@ -193,7 +194,7 @@ public:
 
             if ((*handleBestArm).estimateOfMean > LCBofSecondBestArm){
                 std::cout<< "False trigger by " << (*handleBestArm).id << std::endl;
-                arms.update(handleBestArm);
+                arms.update_lazy(handleBestArm);
                 return false;
             }
 
@@ -211,7 +212,7 @@ public:
             globalNumberOfPulls++;
             globalSigma = std::sqrt((globalSumOfSquaresOfPulls / globalNumberOfPulls -
                                      std::pow(globalSumOfPulls / globalNumberOfPulls, 2)));
-            arms.update(handleBestArm);
+            arms.update_lazy(handleBestArm);
             return  false;
         }
     }
