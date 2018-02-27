@@ -5,6 +5,16 @@
 #ifndef COMBINATORIAL_MAB_UCB_DYNAMIC_H
 #define COMBINATORIAL_MAB_UCB_DYNAMIC_H
 #include <boost/heap/fibonacci_heap.hpp>
+
+template <class templateArm>
+struct compare_arms
+{
+    bool operator()(const templateArm &l, const templateArm &r) const
+    {
+        return r > l;
+    }
+};
+
 template <class templateArm>
 class UCBDynamic{
     /* UCB for the general case*/
@@ -18,12 +28,12 @@ public:
     float globalSumOfSquaresOfPulls;
     unsigned numberOfBestArms;
 
-    typedef typename boost::heap::fibonacci_heap<templateArm, std::vector<templateArm>, std::greater<templateArm> > fib_heap_ucb;
+    typedef typename boost::heap::fibonacci_heap<templateArm, boost::heap::compare< compare_arms<templateArm> > > fib_heap_ucb;
 
     std::vector<templateArm> armsContainer;
-    boost::heap::fibonacci_heap <templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
+    fib_heap_ucb arms;
     std::vector<templateArm> topKArms;
-    std::unordered_map < unsigned long, typename  boost::heap::fibonacci_heap<templateArm, std::vector<templateArm>, std::greater<templateArm> >::handle_type > handlesVec;
+    std::unordered_map < unsigned long, typename fib_heap_ucb::handle_type > handlesVec;
 
 
 
@@ -153,10 +163,16 @@ public:
     bool iterationOfUCB(){
         /*An iteration of UCB*/
         auto iter = arms.ordered_begin();
-        auto handleBestArm = fib_heap_ucb::s_handle_from_iterator(iter);
-
+        unsigned long bestArmId = ((templateArm) (*iter)).id;//typecasting
         iter++;
-        auto handleSecondBestArm = fib_heap_ucb::s_handle_from_iterator(iter);
+        unsigned long secondBestArmId = ((templateArm) (*iter)).id;//typecasting
+
+        auto handleBestArm = handlesVec[bestArmId];
+        auto handleSecondBestArm = handlesVec[secondBestArmId];
+
+//        auto handleBestArm = fib_heap_ucb::s_handle_from_iterator(iter);
+//        iter++;
+//        auto handleSecondBestArm = fib_heap_ucb::s_handle_from_iterator(iter);
 
         float UCBofBestArm, LCBofSecondBestArm;
         UCBofBestArm = (*handleBestArm).upperConfidenceBound;
