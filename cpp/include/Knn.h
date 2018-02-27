@@ -83,12 +83,14 @@ public:
                 armsVec.push_back(tmpArm);
             }
 
-            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
+//            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
+            UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
 
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
             UCB1.initialise(numberOfInitialPulls);
             std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
-            UCB1.runUCB(20000*pointsVectorRight.size());
+//            std::cout<< "Initialized and now running" << std::endl;
+            UCB1.runUCB(2000*pointsVectorRight.size());
             std::chrono::system_clock::time_point timeRunEnd = std::chrono::system_clock::now();
 //            ArmKNN<templatePoint> tmp = UCB1.bestArm();
 //            std::chrono::system_clock::time_point timeTrueMeanEnd = std::chrono::system_clock::now();

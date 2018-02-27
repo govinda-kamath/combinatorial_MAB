@@ -11,7 +11,7 @@ struct compare_arms
 {
     bool operator()(const templateArm &l, const templateArm &r) const
     {
-        return r > l;
+        return l >r;
     }
 };
 
@@ -36,9 +36,6 @@ public:
     std::unordered_map < unsigned long, typename fib_heap_ucb::handle_type > handlesVec;
 
 
-
-
-
     UCBDynamic(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms){
         armsContainer = armsVec;
         numberOfArms = armsContainer.size();
@@ -57,15 +54,21 @@ public:
 
     void initialise(unsigned numberOfInitialPulls = 100){
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
+            initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
+//#define DEBUG_INIT
 #ifdef DEBUG_INIT
             if (armIndex%((int)(numberOfArms)/20) == 0){
                 std::cout << "Initialized " << std::setprecision (15) << armIndex << " out of " << numberOfArms
-                          << std::endl;
+                          << " Value: " << armsContainer[armIndex].estimateOfMean << std::endl;
             }
+
 #endif
-            initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
         }
         updateGlobalSigma();
+
+        for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
+            addSingleArm(armsContainer[armIndex]);
+        }
 #ifdef DEBUG_INIT
         std::cout << "Sigma after initialization " << globalSigma <<std::endl;
         std::cout << "Mean after initialization "
@@ -77,13 +80,9 @@ public:
                   << " No of pulls " << globalNumberOfPulls
                     <<std::endl;
 #endif
-
-        for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
-            addSingleArm(armsContainer[armIndex]);
-        }
     }
 
-    void initialiseSingleArm( templateArm singleArm, unsigned numberOfInitialPulls = 100){
+    void initialiseSingleArm( templateArm &singleArm, unsigned numberOfInitialPulls = 100){
         for (unsigned i = 0; i < numberOfInitialPulls; i++) {
             float observedSample(0);
             observedSample = singleArm.pullArm(0, globalNumberOfPulls, 0, false);
@@ -94,7 +93,7 @@ public:
 
     }
 
-    void addSingleArm( templateArm singleArm){
+    void addSingleArm( templateArm &singleArm){
         singleArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
         unsigned long armID;
         armID = singleArm.id;
@@ -102,7 +101,7 @@ public:
     }
 
 
-    void initialiseAndAddNewArm( templateArm newArm, unsigned numberOfInitialPulls = 100){
+    void initialiseAndAddNewArm( templateArm &newArm, unsigned numberOfInitialPulls = 100){
         initialiseSingleArm(newArm, numberOfInitialPulls);
         updateGlobalSigma();
         addSingleArm(newArm);
@@ -117,22 +116,27 @@ public:
 
 //#define DEBUG_RUN
 #ifdef DEBUG_RUN
-            if (i%((int)maxIterations/200) == 0){
-                templateArm bestArm = arms.top();
-                arms.pop();
-                templateArm secondBestArm = arms.top();
-                arms.push(bestArm);
+            if (i%((int)maxIterations/20) == 0){
+                auto iter = arms.ordered_begin();
+                unsigned long bestArmId = ((templateArm) (*iter)).id;//typecasting
+                iter++;
+                unsigned long secondBestArmId = ((templateArm) (*iter)).id;//typecasting
+
+                auto handleBestArm = handlesVec[bestArmId];
+                auto handleSecondBestArm = handlesVec[secondBestArmId];
 
                 float UCBofBestArm, LCBofBestArm;
-                UCBofBestArm = bestArm.upperConfidenceBound;
-                LCBofBestArm = bestArm.lowerConfidenceBound;
+                UCBofBestArm = (*handleBestArm).upperConfidenceBound;
+                LCBofBestArm = (*handleBestArm).lowerConfidenceBound;
 
-                std::cout << "NumberOfPulls " << globalNumberOfPulls << " out of " << maxIterations
-                          << ". Best arm = " << bestArm.id
+                std::cout << "\nNumberOfPulls " << globalNumberOfPulls << " out of " << maxIterations
+                          << ". Best arm id = " << (*handleBestArm).id
                           << ". Best arm UCB = " << UCBofBestArm
-                          << ". LCB of second best arm  = " << LCBofBestArm
-                          << ". No. pulls  = " <<  bestArm.numberOfPulls
-                          << ". Estimate  = " <<  bestArm.estimateOfMean
+                          << ". Best arm Est  = " << (*handleBestArm).estimateOfMean
+                          << ". Best arm LCB  = " << LCBofBestArm
+                          << ". UCB of second best arm  = " << (*handleSecondBestArm).upperConfidenceBound
+                          << ". LCB of second best arm  = " << (*handleSecondBestArm).lowerConfidenceBound
+                          << ". No. pulls  = " <<  (*handleBestArm).numberOfPulls
                           << ". globalSigma = " << globalSigma
                           << std::endl;
             }
@@ -151,7 +155,7 @@ public:
             }
         }
         if (bestArmCount!=numberOfBestArms){
-            std::cout<< "UCB Stopped before reaching optimal" << std::endl;
+            std::cout<< "UCB STOPPED before reaching optimal" << std::endl;
         }
 #ifdef DEBUG_RUN
         std::cout << "Best arm number " << bestArmCount << " Position" << i
@@ -169,7 +173,7 @@ public:
 
         auto handleBestArm = handlesVec[bestArmId];
         auto handleSecondBestArm = handlesVec[secondBestArmId];
-
+//        std::cout<< bestArmId<< " " << secondBestArmId << "\t" ;
 //        auto handleBestArm = fib_heap_ucb::s_handle_from_iterator(iter);
 //        iter++;
 //        auto handleSecondBestArm = fib_heap_ucb::s_handle_from_iterator(iter);
@@ -193,9 +197,9 @@ public:
             }
 
 #ifdef DEBUG_RUN
-            std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
-            std::cout << "stopping LCB " <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
-            std::cout << "best estimate"<< std::setprecision (15)<< bestArm.estimateOfMean << std::endl;
+            std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArmId <<  std::endl;
+            std::cout << "stopping LCB " <<  LCBofSecondBestArm << "id " << secondBestArmId << std::endl;
+            std::cout << "best estimate"<< std::setprecision (15)<< (*handleBestArm).estimateOfMean << std::endl;
 #endif
             return true;
         }else {
