@@ -76,21 +76,18 @@ public:
                                 globalSigma*globalSigma*(globalNumberOfPulls-numberOfPulls)/globalNumberOfPulls );
 
         intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/(float)numberOfPulls);
-//        std::cout << "Interval Width"  << intervalWidth
-//                  << " ID " << id
-//                  <<  " pulls " << numberOfPulls
-//                  << " glob number pulls "<< globalNumberOfPulls
-//                  << " glob sigma " << globalSigma
-//                  << " delta inverse " << logDeltaInverse
-//                  << " comp sigma " << compositeSigma
-//                  << std::endl;
         upperConfidenceBound = estimateOfMean + intervalWidth;
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
     }
 
     float pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
                   float logDeltaInverse, bool update) {
+        return pullArm(p1, *point,  globalSigma,globalNumberOfPulls, logDeltaInverse, update);
 
+    }
+
+    float pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma, unsigned long long globalNumberOfPulls,
+                  float logDeltaInverse, bool update){
         float sample(-INFINITY);
         if (numberOfPulls >= dimension){
             sample = trueMean();
@@ -103,7 +100,7 @@ public:
             estimateOfSecondMoment = sample*sample;
         }
         else {
-            sample = point->sampledDistance(p1);
+            sample = p2.sampledDistance(p1);
             numberOfPulls++;
             sumOfPulls += sample;
             sumOfSquaresOfPulls += sample * sample;
@@ -113,7 +110,11 @@ public:
                 updateConfidenceIntervals( globalSigma, globalNumberOfPulls, logDeltaInverse);
         }
         return sample;
+
     }
+
+
+
 
     float trueMean(const templatePoint &p1){
         if (trueMeanValue != NAN){
