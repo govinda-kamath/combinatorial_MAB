@@ -22,6 +22,8 @@ int main(int argc, char *argv[]){
     long startIndex(atol(argv[2])); // Start index
     long endIndex(atol(argv[3])); // End index
 
+    int tmp(0);
+
 //     For debugging mode in CLion
 //    std::string nameConfig = "nominal.ini";
 //    long startIndex(0); // Start index

@@ -24,7 +24,6 @@
 
 int main(int argc, char *argv[]) {
 
-
     std::string nameConfig = argv[1];
     std::srand(std::time(nullptr));
 
