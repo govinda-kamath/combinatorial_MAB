@@ -15,6 +15,7 @@
 #include "Points.h"
 #include "Arms.h"
 #include "UCB.h"
+#include "UCB_dynamic.h"
 #include <stdexcept>
 #include "utils.h"
 
@@ -82,7 +83,7 @@ public:
                 armsVec.push_back(tmpArm);
             }
 
-            UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
+            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
 
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
             UCB1.initialise(numberOfInitialPulls);

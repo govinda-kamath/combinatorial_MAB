@@ -88,11 +88,13 @@ class GroupPoint: public BasePoint {
 public:
     std::vector<templatePoint>  groupPoint;
     unsigned long noOfPoints;
+    unsigned long groupID;
 
-    explicit GroupPoint(const std::vector<templatePoint> &gp, unsigned d){
+    explicit GroupPoint(const std::vector<templatePoint> &gp, unsigned d, unsigned long gid){
         groupPoint = gp;
         noOfPoints = gp.size();
         vecSize = d;
+        groupID = gid;
     }
 
     float distance(const GroupPoint &gp1) const {
@@ -102,7 +104,7 @@ public:
                 result += groupPoint[i].distance(gp1.groupPoint[j]);
             }
         }
-        return result; // /(noOfPoints*gp1.noOfPoints);
+        return result/(noOfPoints*gp1.noOfPoints);
     };
 
     float sampledDistance(const GroupPoint &gp1) const {

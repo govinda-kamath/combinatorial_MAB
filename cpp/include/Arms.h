@@ -86,7 +86,8 @@ public:
 
     }
 
-    float pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma, unsigned long long globalNumberOfPulls,
+    float pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
+                  unsigned long long globalNumberOfPulls,
                   float logDeltaInverse, bool update){
         float sample(-INFINITY);
         if (numberOfPulls >= dimension){
@@ -112,7 +113,6 @@ public:
         return sample;
 
     }
-
 
 
 
@@ -155,15 +155,22 @@ public:
         return trueMean(*fixedPoint);
     }
 
+    using Arm<templatePoint>::estimateOfMean;
+    using Arm<templatePoint>::upperConfidenceBound;
+    using Arm<templatePoint>::lowerConfidenceBound;
     std::unordered_map<std::string, float> trueMeanUpdate(){
         float localSumOfPulls = trueMean(*fixedPoint);
         float localSumOfSquaresOfPulls = localSumOfPulls*localSumOfPulls;
 
         std::unordered_map<std::string, float> result;
         unsigned  long d = 4000; //ToDo: Change this
+
         result.insert( std::make_pair<std::string, float>("sumOfPulls", localSumOfPulls*d));
         result.insert( std::make_pair<std::string, float>("sumOfSquaresPulls", localSumOfSquaresOfPulls*d));
         result.insert( std::make_pair<std::string, float>("effectiveDimension", (float) d));
+        estimateOfMean = localSumOfPulls;
+        upperConfidenceBound = estimateOfMean;
+        lowerConfidenceBound = estimateOfMean;
         return result;
     }
 };
@@ -204,6 +211,9 @@ public:
         return mean/((float)numberOfPoints);
     }
 
+    using Arm<templatePoint>::estimateOfMean;
+    using Arm<templatePoint>::upperConfidenceBound;
+    using Arm<templatePoint>::lowerConfidenceBound;
     std::unordered_map<std::string, float> trueMeanUpdate(){
         float localSumOfPulls = 0;
         float localSumOfSquaresOfPulls = 0;
@@ -217,6 +227,9 @@ public:
         result.insert( std::make_pair<std::string, float>("sumOfPulls", localSumOfPulls*d));
         result.insert( std::make_pair<std::string, float>("sumOfSquaresPulls", localSumOfSquaresOfPulls*d));
         result.insert( std::make_pair<std::string, float>("effectiveDimension", (float) d*numberOfPoints));
+        estimateOfMean = localSumOfPulls;
+        upperConfidenceBound = estimateOfMean;
+        lowerConfidenceBound = estimateOfMean;
         return result;
     }
 };
@@ -226,13 +239,30 @@ class ArmHeirarchical : public Arm<templatePoint> {
 /*
      * Arms for Heirarchical Clustering */
 public:
-    GroupPoint<templatePoint> point1, point2;
+    GroupPoint<templatePoint> pointLeft, pointRight;
+    unsigned long leftGroupID, rightGroupID;
 
     ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
-            Arm(id, p1.vecSize){
-
+            Arm<templatePoint>(id, p1.vecSize){
+        pointLeft = p1;
+        pointRight = p2;
+        leftGroupID = p1.groupID;
+        rightGroupID = p2.groupID;
     }
 
+    using Arm<templatePoint>::pullArm;
+    float pullArm(float globalSigma, unsigned long long globalNumberOfPulls, float logDeltaInverse, bool update = true){
+        return pullArm(pointLeft, pointRight, globalSigma, globalNumberOfPulls, logDeltaInverse, update);
+    }
+
+    using Arm<templatePoint>::trueMeanValue;
+    using Arm<templatePoint>::dimension;
+    float trueMean(){
+        if (trueMeanValue != NAN){
+            trueMeanValue = pointLeft.distance(pointRight)/(dimension);
+        }
+        return trueMeanValue;
+    }
 };
 
 #endif //COMBINATORIAL_MAB_ARMS_H
