@@ -5,6 +5,7 @@
 #ifndef COMBINATORIAL_MAB_UCB_DYNAMIC_H
 #define COMBINATORIAL_MAB_UCB_DYNAMIC_H
 #include <boost/heap/fibonacci_heap.hpp>
+#include <boost/heap/binomial_heap.hpp>
 
 template <class templateArm>
 struct compare_arms
@@ -28,7 +29,7 @@ public:
     float globalSumOfSquaresOfPulls;
     unsigned numberOfBestArms;
 
-    typedef typename boost::heap::fibonacci_heap<templateArm, boost::heap::compare< compare_arms<templateArm> > > fib_heap_ucb;
+    typedef typename boost::heap::binomial_heap<templateArm, boost::heap::compare< compare_arms<templateArm> > > fib_heap_ucb;
 
     std::vector<templateArm> armsContainer;
     fib_heap_ucb arms;
@@ -45,7 +46,7 @@ public:
         globalSumOfPulls = 0;
         globalSumOfSquaresOfPulls = 0;
         numberOfBestArms = nOfBestArms;
-        std::cout<< "Fibanocci Heap" << std::endl;
+        std::cout<< "binomial_heap" << std::endl;
     }
 
     void updateGlobalSigma(){
@@ -194,7 +195,7 @@ public:
 
             if ((*handleBestArm).estimateOfMean > LCBofSecondBestArm){
                 std::cout<< "False trigger by " << (*handleBestArm).id << std::endl;
-                arms.update_lazy(handleBestArm);
+                arms.update(handleBestArm);
                 return false;
             }
 
@@ -212,7 +213,7 @@ public:
             globalNumberOfPulls++;
             globalSigma = std::sqrt((globalSumOfSquaresOfPulls / globalNumberOfPulls -
                                      std::pow(globalSumOfPulls / globalNumberOfPulls, 2)));
-            arms.update_lazy(handleBestArm);
+            arms.update(handleBestArm);
             return  false;
         }
     }
