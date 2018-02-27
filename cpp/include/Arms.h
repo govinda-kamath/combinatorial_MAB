@@ -42,6 +42,12 @@ public:
         trueMeanValue = NAN;
     }
 
+    Arm(unsigned long armNumber, unsigned long d) : Arm() {
+        id = armNumber;
+        dimension = d;
+        log10Dimension = (unsigned) std::ceil(std::log10(dimension));
+    }
+
     Arm(unsigned long armNumber, const templatePoint &p, unsigned long d) : Arm() {
         id = armNumber;
         point = &p;
@@ -171,7 +177,7 @@ public:
     const std::vector<templatePoint> *pointsVec;
     unsigned long numberOfPoints;
 
-    ArmMedoid(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
+//    ArmMedoid(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
     ArmMedoid(unsigned long id, const templatePoint &p, const std::vector<templatePoint> &pVec) :
             Arm<templatePoint>(id, p, p.vecSize*pVec.size()) {
@@ -212,6 +218,20 @@ public:
         result.insert( std::make_pair<std::string, float>("effectiveDimension", (float) d*numberOfPoints));
         return result;
     }
+};
+
+template <class templatePoint>
+class ArmHeirarchical : public Arm<templatePoint> {
+/*
+     * Arms for Heirarchical Clustering */
+public:
+    GroupPoint<templatePoint> point1, point2;
+
+    ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
+            Arm(id, p1.vecSize){
+
+    }
+
 };
 
 #endif //COMBINATORIAL_MAB_ARMS_H

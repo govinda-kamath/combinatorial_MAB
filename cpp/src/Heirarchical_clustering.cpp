@@ -4,19 +4,21 @@
 
 #include <boost/heap/priority_queue.hpp>
 #include <vector>
-#include <boost/heap/binomial_heap.hpp>
+#include <boost/heap/fibonacci_heap.hpp>
 #include <iostream>
 
 using namespace boost::heap;
 
+
 int main()
 {
-    binomial_heap<int> bh;
-    auto handle = bh.push(2);
-    bh.push(3);
-    bh.push(1);
+    fibonacci_heap<int> fh;
+    auto handle = fh.push(2);
+    fh.push(3);
+    fh.push(1);
 
-    bh.update(handle, 4);
+    std::cout << fh.top() << '\n';
+    fh.update(handle, 4);
 
-    std::cout << bh.top() << '\n';
+    std::cout << fh.top() << '\n';
 }
