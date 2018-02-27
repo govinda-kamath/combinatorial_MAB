@@ -31,6 +31,8 @@ public:
         globalSumOfPulls = 0;
         globalSumOfSquaresOfPulls = 0;
         numberOfBestArms = nOfBestArms;
+        std::cout<< "Priority Queue" << std::endl;
+
     }
 
     void initialise(unsigned numberOfInitialPulls = 100){

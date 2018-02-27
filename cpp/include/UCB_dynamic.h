@@ -45,6 +45,7 @@ public:
         globalSumOfPulls = 0;
         globalSumOfSquaresOfPulls = 0;
         numberOfBestArms = nOfBestArms;
+        std::cout<< "Fibanocci Heap" << std::endl;
     }
 
     void updateGlobalSigma(){
