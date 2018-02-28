@@ -3,6 +3,7 @@
 //
 #include <vector>
 #include <iostream>
+#include <memory>
 #include <unordered_map>
 
 #ifndef COMBINATORIAL_MAB_POINTS_H
@@ -86,11 +87,11 @@ class GroupPoint: public BasePoint {
 /*
  * */
 public:
-    std::vector<templatePoint>  groupPoint;
+    const std::vector<std::shared_ptr<templatePoint> >  groupPoint;
     unsigned long noOfPoints;
     unsigned long groupID;
 
-    explicit GroupPoint(const std::vector<templatePoint> &gp, unsigned d, unsigned long gid){
+    explicit GroupPoint(const std::vector<std::shared_ptr<templatePoint> > &gp, unsigned d, unsigned long gid){
         groupPoint = gp;
         noOfPoints = gp.size();
         vecSize = d;
