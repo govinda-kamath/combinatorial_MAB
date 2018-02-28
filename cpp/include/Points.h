@@ -85,6 +85,7 @@ public:
 template <class templatePoint>
 class GroupPoint: public BasePoint {
 /*
+ *
  * */
 public:
     const std::vector<std::shared_ptr<templatePoint> >  groupPoint;

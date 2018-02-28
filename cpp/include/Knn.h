@@ -15,7 +15,7 @@
 #include "Points.h"
 #include "Arms.h"
 #include "UCB.h"
-#include "UCB_dynamic.h"
+#include "UCB_dynamic_boost.h"
 #include <stdexcept>
 #include "utils.h"
 
