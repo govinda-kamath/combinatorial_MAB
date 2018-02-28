@@ -14,8 +14,7 @@
 #include <dlib/image_transforms.h>
 #include "Points.h"
 #include "Arms.h"
-#include "UCB.h"
-#include "UCB_dynamic_boost.h"
+#include "UCB_dynamic.h"
 #include <stdexcept>
 #include "utils.h"
 
@@ -83,8 +82,8 @@ public:
                 armsVec.push_back(tmpArm);
             }
 
-//            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
-            UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
+            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k);
+//            UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
 
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
             UCB1.initialise(numberOfInitialPulls);
@@ -169,10 +168,10 @@ public:
 
             std::cout << "index " << index << ": " ;
             for (unsigned i = 0; i < k*5; i++) {
-                saveFile <<  " " << topKArmsArgSort[i];
+//                saveFile <<  " " << topKArmsArgSort[i];
                 std::cout <<  " " << topKArms[i].id;
             }
-            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
+//            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
             std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
         }
     }

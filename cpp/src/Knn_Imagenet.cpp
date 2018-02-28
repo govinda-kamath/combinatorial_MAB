@@ -18,16 +18,16 @@
 
 
 int main(int argc, char *argv[]){
-    std::string nameConfig = argv[1];
-    long startIndex(atol(argv[2])); // Start index
-    long endIndex(atol(argv[3])); // End index
-
-    int tmp(0);
+//    std::string nameConfig = argv[1];
+//    long startIndex(atol(argv[2])); // Start index
+//    long endIndex(atol(argv[3])); // End index
+//
+//    int tmp(0);
 
 //     For debugging mode in CLion
-//    std::string nameConfig = "nominal.ini";
-//    long startIndex(0); // Start index
-//    long endIndex(100); // End index
+    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal1.ini";
+    long startIndex(0); // Start index
+    long endIndex(10); // End index
 
     // Parameters
     INIReader reader(nameConfig);
@@ -59,8 +59,8 @@ int main(int argc, char *argv[]){
     std::cout << "Running" << std::endl;
     knn.run(indices);
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-    std::cout << "Saving" <<std::endl;
-    knn.saveAnswers(saveFilePath);
+    std::cout << "Saving onw" <<std::endl;
+    knn.saveAnswers("./test1.out");
 
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/

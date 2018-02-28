@@ -5,6 +5,7 @@
 #ifndef COMBINATORIAL_MAB_UCB_DYNAMIC_H
 #define COMBINATORIAL_MAB_UCB_DYNAMIC_H
 
+#include <unordered_set>
 template <class templateArm>
 class UCBDynamic{
     /* UCB for the general case*/
@@ -108,7 +109,7 @@ public:
     templateArm topValidArm(){
         bool topValidArmFound(false);
         do {
-            topArmID = arms.top().id;
+            unsigned  long topArmID = arms.top().id;
             if (armsToKeep.find(topArmID) != armsToKeep.end())
                 topValidArmFound=true;
             else{
