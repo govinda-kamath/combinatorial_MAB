@@ -239,29 +239,29 @@ class ArmHeirarchical : public Arm<GroupPoint<templatePoint> >{
 /*
      * Arms for Heirarchical Clustering */
 public:
-    GroupPoint<templatePoint> *pointLeft, *pointRight;
+    GroupPoint<templatePoint> *leftGroupPoint, *rightGroupPoint;
     unsigned long leftGroupID, rightGroupID;
 
     ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
             Arm<GroupPoint<templatePoint> >(id, p1.getVecSize()){
-        pointLeft = &p1;
-        pointRight = &p2;
+        leftGroupPoint = &p1;
+        rightGroupPoint = &p2;
         leftGroupID = p1.groupID;
         rightGroupID = p2.groupID;
     }
 
     using Arm<GroupPoint<templatePoint> >::pullArm;
     float pullArm(float globalSigma, unsigned long long globalNumberOfPulls, float logDeltaInverse, bool update = true){
-        return pullArm(*pointLeft, *pointRight, globalSigma, globalNumberOfPulls, logDeltaInverse, update);
+        return pullArm(*leftGroupPoint, *rightGroupPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update);
     }
 
     using Arm<GroupPoint<templatePoint> >::trueMeanValue;
     using Arm<GroupPoint<templatePoint> >::dimension;
     float trueMean(){
         if (trueMeanValue != NAN){
-            trueMeanValue = pointLeft->distance(*pointRight)/(dimension);
+            trueMeanValue = leftGroupPoint->distance(*rightGroupPoint)/(dimension);
         }
-        std::cout<< leftGroupID << " " << rightGroupID << " " << trueMeanValue << std::endl;
+//        std::cout<< leftGroupID << " " << rightGroupID << " " << trueMeanValue << std::endl;
         return trueMeanValue;
     }
 };

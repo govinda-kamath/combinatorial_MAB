@@ -103,6 +103,11 @@ public:
         armsContainer.push_back(newArm);
     }
 
+    void armsKeepFromArmsContainerBrute(){
+        for (unsigned long index(0); index < armsContainer.size(); index++){
+            armsToKeep.insert(armsContainer[index].id);
+        }
+    }
 
 
     void markForRemoval(unsigned long armID){
@@ -250,11 +255,7 @@ public:
         return armsContainer[bIndex];
     }
 
-    void armsKeepFromArmsContainerBrute(){
-        for (unsigned long index(0); index < armsContainer.size(); index++){
-            armsToKeep.insert(armsContainer[index].id);
-        }
-    }
+
 };
 
 

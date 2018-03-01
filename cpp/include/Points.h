@@ -105,7 +105,7 @@ public:
         float result(0);
         for(unsigned long i(0); i< noOfPoints; i++){
             for(unsigned long j(0); j< gp1.noOfPoints; j++){
-                std::cout << groupPoint.size() << std::endl;
+//                std::cout << groupPoint.size() << std::endl;
                 result += groupPoint[i]->distance((templatePoint)*gp1.groupPoint[j]);
             }
         }

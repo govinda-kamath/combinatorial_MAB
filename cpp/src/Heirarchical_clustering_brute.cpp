@@ -25,7 +25,7 @@ int main()
 //    long endIndex(atol(argv[3])); // End index
 
 //     For debugging mode in CLion
-    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal1.ini";
     long startIndex(0); // Start index
     long endIndex(10); // End index
 
@@ -52,6 +52,10 @@ int main()
     // Stores map from group id to arm id. Used to removes "irrelevant" arms
     std::unordered_map<std::pair<unsigned long, unsigned long >, unsigned long, utils::pair_hash> groupIDtoArmID;
 
+    //Maintains the valid group points currently.
+    //Used while creating new arms
+    std::unordered_set<unsigned  long > groupPointsInPlay;
+
 
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
     utils::vectorsToPoints(pointsVec, pathsToImages);
@@ -61,13 +65,17 @@ int main()
     unsigned long armID = 0;
     unsigned long n = pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
+    unsigned long maxGroupPointId (0);
 
     for (unsigned long i(0); i < n; i++) {
         sharedPtrPointsVec.push_back(std::make_shared<SquaredEuclideanPoint>(pointsVec[i]));
         std::vector<std::shared_ptr<SquaredEuclideanPoint> > groupPointTmp1;
         groupPointTmp1.push_back(sharedPtrPointsVec[i]);
-        GroupPoint<SquaredEuclideanPoint> gpTmp1(groupPointTmp1, d, i);
+        GroupPoint<SquaredEuclideanPoint> gpTmp1(groupPointTmp1, d, maxGroupPointId);
         groupPoints.push_back(gpTmp1);
+        groupPointsInPlay.insert(maxGroupPointId);
+        maxGroupPointId++;
+
     }
 
     for (unsigned long i(0); i < n; i++) {
@@ -79,26 +87,63 @@ int main()
         }
     }
 
-    std::vector<std::shared_ptr<SquaredEuclideanPoint> > groupPointTmp1;
-    std::vector<std::shared_ptr<SquaredEuclideanPoint> > groupPointTmp2;
-    groupPointTmp1.push_back(sharedPtrPointsVec[1]);
-    groupPointTmp2.push_back(sharedPtrPointsVec[0]);
-    GroupPoint<SquaredEuclideanPoint> gpTmp1(groupPointTmp1, d, 1);
-    GroupPoint<SquaredEuclideanPoint> gpTmp2(groupPointTmp2, d, 0);
-    ArmHeirarchical<SquaredEuclideanPoint> tmpArm(0, gpTmp1, gpTmp2);
-    groupIDtoArmID[std::make_pair(1,0)] = armID;
-    armsVec.push_back(tmpArm);
-
     UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0);
 
     //Brute Only
     UCB1.armsKeepFromArmsContainerBrute();
     // Step 2: Run clustering
-    for(unsigned long i(0); i < 1; i++){
+    for(unsigned long i(0); i < n; i++){
 
         //Find the best group points to join
         ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
 //        UCB1.runUCB(1000);
-        std::cout << bestArm.leftGroupID<< " " << bestArm.rightGroupID << std::endl;
+        std::cout << "Step " << i <<
+                                " " << bestArm.leftGroupID<< " " << bestArm.rightGroupID << std::endl;
+        auto left = bestArm.leftGroupID;
+        auto right = bestArm.rightGroupID;
+        for(unsigned long index(0); index < maxGroupPointId ; index++){
+            if(groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()){
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
+            }
+            if(groupIDtoArmID.find(std::make_pair(index, left)) != groupIDtoArmID.end()){
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(index, left)]);
+            }
+            if(groupIDtoArmID.find(std::make_pair(right, index)) != groupIDtoArmID.end()){
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(right, index)]);
+            }
+            if(groupIDtoArmID.find(std::make_pair(index, right)) != groupIDtoArmID.end()){
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(index, right)]);
+            }
+        }
+
+        groupPointsInPlay.erase(left);
+        groupPointsInPlay.erase(right);
+
+
+        //Create the vector of pointers to the points in the new group point
+        std::vector<std::shared_ptr<SquaredEuclideanPoint > > newGroupPoint;
+        newGroupPoint = bestArm.leftGroupPoint->groupPoint;
+        newGroupPoint.insert(newGroupPoint.end(), bestArm.rightGroupPoint->groupPoint.begin(),
+                                                bestArm.rightGroupPoint->groupPoint.end());
+
+
+        //create a new group point
+        GroupPoint<SquaredEuclideanPoint> gpTmp(newGroupPoint, d, maxGroupPointId);
+        groupPoints.push_back(gpTmp);
+
+        unsigned  long idOfInsertedPoint = maxGroupPointId;
+        maxGroupPointId++;
+
+        //Add and initialise best arm
+        for (const auto& pointID: groupPointsInPlay) {
+            ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[idOfInsertedPoint], groupPoints[pointID]);
+            groupIDtoArmID[std::make_pair(idOfInsertedPoint, pointID)] = armID;
+            UCB1.initialiseAndAddNewArmBrute(tmpArm);
+            armID ++;
+        }
+
+        //Adding inserted point to points in play
+        groupPointsInPlay.insert(idOfInsertedPoint);
+
     }
 }
