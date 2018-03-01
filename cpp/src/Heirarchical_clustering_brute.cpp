@@ -16,6 +16,7 @@
 #include "../utilities/INIReader.h"
 #include "Knn.h"
 
+#define  UCB
 
 int main()
 {
@@ -25,7 +26,7 @@ int main()
 //    long endIndex(atol(argv[3])); // End index
 
 //     For debugging mode in CLion
-    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal1.ini";
 
     // Parameters
     INIReader reader(nameConfig);
@@ -56,7 +57,7 @@ int main()
     utils::vectorsToPoints(pointsVec, pathsToImages);
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = 1000; //pointsVec.size();
+    unsigned long n = pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long maxGroupPointId (0);
     std::cout << "Running Hierarchical clustering for " << n << " points" << std::endl;
@@ -100,14 +101,11 @@ int main()
     for(unsigned long i(0); i < n-2; i++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         //Find the best group points to join
-#define BRUTEm
+#define UCB
 #ifdef BRUTE
         ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
-#endif
-#ifdef UCB
-        UCB1.runUCB(n*n*d);
-        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
-#endif
+
+
         std::cout << "Step " << i
                 << " Arm ID " << bestArm.id;
 #ifdef BRUTE
@@ -164,12 +162,7 @@ int main()
             ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[idOfInsertedPoint], groupPoints[pointID]);
             groupIDtoArmID[std::make_pair(idOfInsertedPoint, pointID)] = armID;
 
-#ifdef BRUTE
             UCB1.initialiseAndAddNewArmBrute(tmpArm); //Brute method
-#endif
-#ifdef UCB
-            UCB1.initialiseAndAddNewArm(tmpArm, 100);
-#endif
             armID ++;
         }
 

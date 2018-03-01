@@ -75,6 +75,21 @@ namespace utils{
         }
     }
 
+    struct ArmConditions{
+        unsigned long numberOfPulls;
+        float sumOfPulls;
+        float sumOfSquaresOfPulls;
+        ArmConditions () : numberOfPulls(0), sumOfPulls(0.0), sumOfSquaresOfPulls(0.0){}
+        ArmConditions (unsigned long nP, float sumPulls, float sumSquare) : numberOfPulls(nP),
+                                                                            sumOfPulls(sumPulls),
+                                                                            sumOfSquaresOfPulls(sumSquare){}
+        void update (unsigned long nP, float sumPulls, float sumSquare){
+            numberOfPulls = nP;
+            sumOfPulls = sumPulls;
+            sumOfSquaresOfPulls = sumSquare;
+        }
+    };
+
     // Copied it from
     // https://stackoverflow.com/a/32685618/803072
     struct pair_hash {

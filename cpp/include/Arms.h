@@ -81,6 +81,17 @@ public:
     }
 
 
+    void updateMeanAndSecondMoment(){
+        estimateOfMean = sumOfPulls / numberOfPulls;
+        estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
+    }
+
+    void warmInitialise(unsigned long numArmPulls, float armSumOfPulls, float armSumOfSquaresOfPulls){
+        numberOfPulls = numArmPulls;
+        sumOfPulls = armSumOfPulls;
+        sumOfSquaresOfPulls = armSumOfSquaresOfPulls;
+        updateMeanAndSecondMoment();
+    }
 
     float pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
                   unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update){

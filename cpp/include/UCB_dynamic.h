@@ -5,7 +5,9 @@
 #ifndef COMBINATORIAL_MAB_UCB_DYNAMIC_H
 #define COMBINATORIAL_MAB_UCB_DYNAMIC_H
 
+#include "utils.h"
 #include <unordered_set>
+#include <unordered_map>
 template <class templateArm>
 class UCBDynamic{
     /* UCB for the general case*/
@@ -24,6 +26,8 @@ public:
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
     std::vector<templateArm> topKArms;
     std::unordered_set <unsigned long > armsToKeep;
+    std::unordered_map<unsigned long, utils::ArmConditions> armStates;
+
 
     UCBDynamic(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms, unsigned nOfExtraArms){
         armsContainer = armsVec;
@@ -35,6 +39,7 @@ public:
         globalSumOfSquaresOfPulls = 0;
         numberOfBestArms = nOfBestArms;
         numberOfExtraArms = nOfExtraArms;
+        armStates.reserve(armsContainer.size()*2);
     }
 
     void updateGlobalSigma(){
@@ -86,6 +91,12 @@ public:
 
     void addSingleArm( templateArm &singleArm){
         singleArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+        unsigned long numArmPulls = singleArm.numberOfPulls;
+        float armSumOfPulls = singleArm.sumOfPulls;
+        float armSumOfSquaresOfPulls = singleArm.sumOfSquaresOfPulls;
+        utils::ArmConditions * singleArmCondition = new utils::ArmConditions(numArmPulls,armSumOfPulls,
+                                                                             armSumOfSquaresOfPulls);
+        armStates[singleArm.id] = * singleArmCondition;
         armsToKeep.insert(singleArm.id);
         arms.push(singleArm);
     }
@@ -95,6 +106,30 @@ public:
         initialiseSingleArm(newArm, numberOfInitialPulls);
         updateGlobalSigma();
         addSingleArm(newArm);
+    }
+
+    void initialiseAndAddNewArm( templateArm &newArm, unsigned long firstArmId, unsigned long secondArmId,
+                                 unsigned numberOfInitialPulls = 100){
+        if((armStates.find(firstArmId)!= armStates.end()) and
+                (armStates.find(secondArmId)!= armStates.end()))
+        {
+            unsigned long numArmPulls = armStates[firstArmId].numberOfPulls + armStates[secondArmId].numberOfPulls;
+            float armSumOfPulls = armStates[firstArmId].sumOfPulls + armStates[secondArmId].sumOfPulls;
+            float armSumOfSquaresOfPulls = armStates[firstArmId].sumOfSquaresOfPulls
+                                           + armStates[secondArmId].sumOfSquaresOfPulls;
+            newArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls);
+
+            initialiseSingleArm( newArm, numberOfInitialPulls);
+            newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+            utils::ArmConditions * singleArmCondition = new utils::ArmConditions(numArmPulls,armSumOfPulls,
+                                                                                 armSumOfSquaresOfPulls);
+            armStates[newArm.id] = * singleArmCondition;
+            armsToKeep.insert(newArm.id);
+            arms.push(newArm);
+        }
+        else{
+            throw std::runtime_error("[Unexpected behaviour]: Deleted arm's state not found.");
+        }
     }
 
     // For brute force only
@@ -225,6 +260,17 @@ public:
             globalSigma = std::sqrt((globalSumOfSquaresOfPulls / globalNumberOfPulls -
                                      std::pow(globalSumOfPulls / globalNumberOfPulls, 2)));
             arms.push(bestArm);
+            //Update arm status
+            unsigned long numArmPulls = bestArm.numberOfPulls;
+            float armSumOfPulls = bestArm.sumOfPulls;
+            float armSumOfSquaresOfPulls = bestArm.sumOfSquaresOfPulls;
+            if(armStates.find(bestArm.id)!= armStates.end()){
+                armStates[bestArm.id].update(numArmPulls, armSumOfPulls,armSumOfSquaresOfPulls);
+            }
+            else{
+                throw std::runtime_error("[Unexpected behaviour]: Best arm's state not found.");
+            }
+
             return  false;
         }
     }
