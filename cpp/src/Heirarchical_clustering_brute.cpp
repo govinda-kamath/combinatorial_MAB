@@ -38,9 +38,6 @@ int main()
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
-
-    std::cout << numberOfInitialPulls << std::endl;
-
     std::vector<std::string>  pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
     std::vector<std::shared_ptr<SquaredEuclideanPoint>> sharedPtrPointsVec;
@@ -103,7 +100,7 @@ int main()
     for(unsigned long i(0); i < n-2; i++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         //Find the best group points to join
-#define BRUTE
+#define BRUTEm
 #ifdef BRUTE
         ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
 #endif
@@ -113,7 +110,13 @@ int main()
 #endif
         std::cout << "Step " << i
                 << " Arm ID " << bestArm.id;
+#ifdef BRUTE
+        std::cout << " Avg Pulls" << d;
+#endif
+#ifdef UCB
+        std::cout << " Avg Pulls" << UCB1.globalNumberOfPulls/(n*n*.5);
 
+#endif
         auto left  = bestArm.leftGroupID;
         auto right = bestArm.rightGroupID;
 //        if(i<10){
