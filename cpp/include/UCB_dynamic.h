@@ -113,7 +113,6 @@ public:
                                  unsigned numberOfInitialPulls = 100){
 
         newArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls);
-
         initialiseSingleArm( newArm, numberOfInitialPulls);
         newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
         utils::ArmConditions * singleArmCondition = new utils::ArmConditions(numArmPulls,armSumOfPulls,

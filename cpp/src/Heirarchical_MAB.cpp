@@ -25,7 +25,7 @@ int main()
 //    long endIndex(atol(argv[3])); // End index
 
 //     For debugging mode in CLion
-    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal1.ini";
+    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     // Parameters
     INIReader reader(nameConfig);
@@ -38,9 +38,6 @@ int main()
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
-
-    std::cout << numberOfInitialPulls << std::endl;
-
     std::vector<std::string>  pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
     std::vector<std::shared_ptr<SquaredEuclideanPoint>> sharedPtrPointsVec;
@@ -59,7 +56,7 @@ int main()
     utils::vectorsToPoints(pointsVec, pathsToImages);
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = pointsVec.size();
+    unsigned long n = 1000; // pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long maxGroupPointId (0);
     std::cout << "Running Hierarchical clustering for " << n << " points" << std::endl;
@@ -201,7 +198,7 @@ int main()
                 throw std::runtime_error("[Unexpected behaviour]: Marked right arm's state not found.");
             }
 
-            UCB1.initialiseAndAddNewArm(tmpArm, numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, 100);
+            UCB1.initialiseAndAddNewArm(tmpArm, numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, 0);
 #else
             UCB1.initialiseAndAddNewArm(tmpArm, 100);
 #endif
