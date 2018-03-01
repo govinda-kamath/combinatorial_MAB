@@ -240,8 +240,8 @@ public:
     // Never call this for large dataset!
     templateArm bruteBestArm(){
         unsigned long bIndex = 0;
-        float minTrueMean = armsContainer[0].trueMean();
-        assert(("Dataset too large", armsContainer.size() < 20000));
+        float minTrueMean = INFINITY;
+//        assert(("Dataset too large", armsContainer.size() < 20000));
         for (unsigned long i(0); i< armsContainer.size(); i++){
             if (armsToKeep.find(armsContainer[i].id) != armsToKeep.end())
             {

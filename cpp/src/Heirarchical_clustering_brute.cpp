@@ -25,7 +25,7 @@ int main()
 //    long endIndex(atol(argv[3])); // End index
 
 //     For debugging mode in CLion
-    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal1.ini";
+    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
     long startIndex(0); // Start index
     long endIndex(10); // End index
 
@@ -48,6 +48,7 @@ int main()
     std::vector<SquaredEuclideanPoint> pointsVec;
     std::vector<std::shared_ptr<SquaredEuclideanPoint>> sharedPtrPointsVec;
     std::vector<GroupPoint<SquaredEuclideanPoint>  > groupPoints;
+    std::vector<std::string> groupPointsNames;
     std::vector<ArmHeirarchical<SquaredEuclideanPoint> > armsVec;
     // Stores map from group id to arm id. Used to removes "irrelevant" arms
     std::unordered_map<std::pair<unsigned long, unsigned long >, unsigned long, utils::pair_hash> groupIDtoArmID;
@@ -59,20 +60,27 @@ int main()
 
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
     utils::vectorsToPoints(pointsVec, pathsToImages);
-    groupIDtoArmID.reserve(armsVec.size()*armsVec.size());
-
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = pointsVec.size();
+    unsigned long n = 10; //pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long maxGroupPointId (0);
+
+    groupIDtoArmID.reserve(n*n);
+    groupPoints.reserve(n*n);
+
+    for(unsigned long i(0); i< n*n; i++){
+        groupPoints.push_back(GroupPoint<SquaredEuclideanPoint> ()); //Todo: Bad Code
+        groupPointsNames.push_back("");
+    }
 
     for (unsigned long i(0); i < n; i++) {
         sharedPtrPointsVec.push_back(std::make_shared<SquaredEuclideanPoint>(pointsVec[i]));
         std::vector<std::shared_ptr<SquaredEuclideanPoint> > groupPointTmp1;
         groupPointTmp1.push_back(sharedPtrPointsVec[i]);
         GroupPoint<SquaredEuclideanPoint> gpTmp1(groupPointTmp1, d, maxGroupPointId);
-        groupPoints.push_back(gpTmp1);
+        groupPoints[i] = gpTmp1;
+        groupPointsNames[i] =  std::to_string(i);
         groupPointsInPlay.insert(maxGroupPointId);
         maxGroupPointId++;
 
@@ -91,16 +99,27 @@ int main()
 
     //Brute Only
     UCB1.armsKeepFromArmsContainerBrute();
-    // Step 2: Run clustering
-    for(unsigned long i(0); i < n; i++){
+    std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
 
+    // Step 2: Run clustering
+    for(unsigned long i(0); i < n-1; i++){
+        std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         //Find the best group points to join
-        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
+//        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
+        UCB1.runUCB(n*n*d);
+        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.topKArms[0];
 //        UCB1.runUCB(1000);
-        std::cout << "Step " << i <<
-                                " " << bestArm.leftGroupID<< " " << bestArm.rightGroupID << std::endl;
-        auto left = bestArm.leftGroupID;
+        std::cout << "Step " << i
+                  << " Arm ID " << bestArm.id;
+
+        auto left  = bestArm.leftGroupID;
         auto right = bestArm.rightGroupID;
+//        if(i<10){
+//            std::cout<< pathsToImages[left] << std::endl;
+//            std::cout<< pathsToImages[right] << std::endl;
+//        }
+        std::cout <<" Left " << groupPointsNames[left]<< " Right " << groupPointsNames[right];
+
         for(unsigned long index(0); index < maxGroupPointId ; index++){
             if(groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()){
                 UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
@@ -129,7 +148,8 @@ int main()
 
         //create a new group point
         GroupPoint<SquaredEuclideanPoint> gpTmp(newGroupPoint, d, maxGroupPointId);
-        groupPoints.push_back(gpTmp);
+        groupPoints[maxGroupPointId] = gpTmp;
+        groupPointsNames[maxGroupPointId] = groupPointsNames[left]+" "+groupPointsNames[right];
 
         unsigned  long idOfInsertedPoint = maxGroupPointId;
         maxGroupPointId++;
@@ -144,6 +164,14 @@ int main()
 
         //Adding inserted point to points in play
         groupPointsInPlay.insert(idOfInsertedPoint);
-
+        std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
+        long long int trueMeanTime = std::chrono::duration_cast<std::chrono::milliseconds>
+                    (timeEnd-timeStart).count();
+        std::cout << " Time = " << trueMeanTime << "(ms)" << std::endl;
     }
+
+    std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
+    long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
+            (timeEndEnd-timeStartStart).count();
+    std::cout << "Total Time = " << totalTime << "(ms)" << std::endl;
 }

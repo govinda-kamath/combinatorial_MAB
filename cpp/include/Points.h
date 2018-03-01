@@ -12,7 +12,6 @@
 class BasePoint{
 public:
     unsigned long vecSize;
-
     virtual float distance(const BasePoint &p1) const;
     virtual float sampledDistance(const BasePoint &p1) const;
     unsigned long getVecSize() const;

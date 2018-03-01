@@ -39,7 +39,7 @@ public:
         sumOfSquaresOfPulls = 0.0;
         estimateOfMean = NAN;
         estimateOfSecondMoment = NAN;
-        trueMeanValue = NAN;
+        trueMeanValue = INFINITY;
     }
 
     Arm(unsigned long armNumber, unsigned long d) : Arm() {
@@ -117,7 +117,7 @@ public:
     }
 
     float trueMean(const templatePoint &p1){
-        if (trueMeanValue != NAN){
+        if (trueMeanValue == INFINITY){
             trueMeanValue = point->distance(p1)/p1.getVecSize();
         }
         return trueMeanValue;
@@ -258,7 +258,7 @@ public:
     using Arm<GroupPoint<templatePoint> >::trueMeanValue;
     using Arm<GroupPoint<templatePoint> >::dimension;
     float trueMean(){
-        if (trueMeanValue != NAN){
+        if (trueMeanValue == INFINITY){
             trueMeanValue = leftGroupPoint->distance(*rightGroupPoint)/(dimension);
         }
 //        std::cout<< leftGroupID << " " << rightGroupID << " " << trueMeanValue << std::endl;
