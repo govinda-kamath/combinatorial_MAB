@@ -80,15 +80,10 @@ public:
         lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
     }
 
-    float pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
-                  float logDeltaInverse, bool update) {
-        return pullArm(p1, *point,  globalSigma,globalNumberOfPulls, logDeltaInverse, update);
 
-    }
 
     float pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
-                  unsigned long long globalNumberOfPulls,
-                  float logDeltaInverse, bool update){
+                  unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update){
         float sample(-INFINITY);
         if (numberOfPulls >= dimension){
             sample = trueMean();
@@ -115,6 +110,11 @@ public:
     }
 
 
+    float pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
+                  float logDeltaInverse, bool update) {
+        return pullArm(p1, *point,  globalSigma,globalNumberOfPulls, logDeltaInverse, update);
+
+    }
 
     float trueMean(const templatePoint &p1){
         if (trueMeanValue != NAN){
@@ -235,32 +235,33 @@ public:
 };
 
 template <class templatePoint>
-class ArmHeirarchical : public Arm<templatePoint> {
+class ArmHeirarchical : public Arm<GroupPoint<templatePoint> >{
 /*
      * Arms for Heirarchical Clustering */
 public:
-    GroupPoint<templatePoint> pointLeft, pointRight;
+    GroupPoint<templatePoint> *pointLeft, *pointRight;
     unsigned long leftGroupID, rightGroupID;
 
     ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
-            Arm<templatePoint>(id, p1.vecSize){
-        pointLeft = p1;
-        pointRight = p2;
+            Arm<GroupPoint<templatePoint> >(id, p1.getVecSize()){
+        pointLeft = &p1;
+        pointRight = &p2;
         leftGroupID = p1.groupID;
         rightGroupID = p2.groupID;
     }
 
-    using Arm<templatePoint>::pullArm;
+    using Arm<GroupPoint<templatePoint> >::pullArm;
     float pullArm(float globalSigma, unsigned long long globalNumberOfPulls, float logDeltaInverse, bool update = true){
-        return pullArm(pointLeft, pointRight, globalSigma, globalNumberOfPulls, logDeltaInverse, update);
+        return pullArm(*pointLeft, *pointRight, globalSigma, globalNumberOfPulls, logDeltaInverse, update);
     }
 
-    using Arm<templatePoint>::trueMeanValue;
-    using Arm<templatePoint>::dimension;
+    using Arm<GroupPoint<templatePoint> >::trueMeanValue;
+    using Arm<GroupPoint<templatePoint> >::dimension;
     float trueMean(){
         if (trueMeanValue != NAN){
-            trueMeanValue = pointLeft.distance(pointRight)/(dimension);
+            trueMeanValue = pointLeft->distance(*pointRight)/(dimension);
         }
+        std::cout<< leftGroupID << " " << rightGroupID << " " << trueMeanValue << std::endl;
         return trueMeanValue;
     }
 };

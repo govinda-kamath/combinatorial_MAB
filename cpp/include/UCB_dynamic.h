@@ -35,8 +35,6 @@ public:
         globalSumOfSquaresOfPulls = 0;
         numberOfBestArms = nOfBestArms;
         numberOfExtraArms = nOfExtraArms;
-
-
     }
 
     void updateGlobalSigma(){
@@ -97,8 +95,15 @@ public:
         initialiseSingleArm(newArm, numberOfInitialPulls);
         updateGlobalSigma();
         addSingleArm(newArm);
-
     }
+
+    // For brute force only
+    void initialiseAndAddNewArmBrute( templateArm &newArm, unsigned numberOfInitialPulls = 100){
+        initialiseAndAddNewArm( newArm, numberOfInitialPulls);
+        armsContainer.push_back(newArm);
+    }
+
+
 
     void markForRemoval(unsigned long armID){
         auto search = armsToKeep.find(armID);
@@ -185,26 +190,26 @@ public:
 
         if (UCBofBestArm < LCBofSecondBestArm){
             // Evaluating true mean of best arm
-            std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
-            bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
-            bestArm.upperConfidenceBound = bestArm.estimateOfMean;
-            bestArm.lowerConfidenceBound = bestArm.estimateOfMean;
-            globalNumberOfPulls += result["effectiveDimension"];
-            globalSumOfPulls += result["sumOfPulls"];
-            globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
+//            std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
+//            bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
+//            bestArm.upperConfidenceBound = bestArm.estimateOfMean;
+//            bestArm.lowerConfidenceBound = bestArm.estimateOfMean;
+//            globalNumberOfPulls += result["effectiveDimension"];
+//            globalSumOfPulls += result["sumOfPulls"];
+//            globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
+//
+//            if (bestArm.estimateOfMean > LCBofSecondBestArm){
+//                std::cout<< "False trigger by " << bestArm.id << std::endl;
+//                arms.push(bestArm);
+//                return false;
+//            }
 
-            if (bestArm.estimateOfMean > LCBofSecondBestArm){
-                std::cout<< "False trigger by " << bestArm.id << std::endl;
-                arms.push(bestArm);
-                return false;
-            }
-
-            arms.push(bestArm);
 #ifdef DEBUG_RUN
             std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
             std::cout << "stopping LCB " <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
             std::cout << "best estimate"<< std::setprecision (15)<< bestArm.estimateOfMean << std::endl;
 #endif
+            arms.push(bestArm);
             return true;
         }else {
             float sample;
@@ -228,18 +233,27 @@ public:
     }
 
     // Never call this for large dataset!
-    templateArm bestArm(){
+    templateArm bruteBestArm(){
         unsigned long bIndex = 0;
         float minTrueMean = armsContainer[0].trueMean();
-        assert(("Dataset too large", armsContainer.size() < 1000));
+        assert(("Dataset too large", armsContainer.size() < 20000));
         for (unsigned long i(0); i< armsContainer.size(); i++){
-            float tmpTrueMean = armsContainer[i].trueMean();
-            if ( tmpTrueMean < minTrueMean){
-                minTrueMean = tmpTrueMean;
-                bIndex = i;
+            if (armsToKeep.find(armsContainer[i].id) != armsToKeep.end())
+            {
+                float tmpTrueMean = armsContainer[i].trueMean();
+                if (tmpTrueMean < minTrueMean) {
+                    minTrueMean = tmpTrueMean;
+                    bIndex = i;
+                }
             }
         }
         return armsContainer[bIndex];
+    }
+
+    void armsKeepFromArmsContainerBrute(){
+        for (unsigned long index(0); index < armsContainer.size(); index++){
+            armsToKeep.insert(armsContainer[index].id);
+        }
     }
 };
 

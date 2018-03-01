@@ -60,6 +60,7 @@ public:
     /*Computes the exact distance between two points.
      * Used only for debug purposes*/
     float distance(const SquaredEuclideanPoint &p1) const;
+//    float distance(const std::shared_ptr<SquaredEuclideanPoint> p1) const;
 
     /*Picks a dimension of points randomly and samples the distance
      * that dimension*/
@@ -88,10 +89,11 @@ class GroupPoint: public BasePoint {
  *
  * */
 public:
-    const std::vector<std::shared_ptr<templatePoint> >  groupPoint;
+    std::vector<std::shared_ptr<templatePoint> >  groupPoint;
     unsigned long noOfPoints;
     unsigned long groupID;
 
+    explicit GroupPoint(){}
     explicit GroupPoint(const std::vector<std::shared_ptr<templatePoint> > &gp, unsigned d, unsigned long gid){
         groupPoint = gp;
         noOfPoints = gp.size();
@@ -103,7 +105,8 @@ public:
         float result(0);
         for(unsigned long i(0); i< noOfPoints; i++){
             for(unsigned long j(0); j< gp1.noOfPoints; j++){
-                result += groupPoint[i].distance(gp1.groupPoint[j]);
+                std::cout << groupPoint.size() << std::endl;
+                result += groupPoint[i]->distance((templatePoint)*gp1.groupPoint[j]);
             }
         }
         return result/(noOfPoints*gp1.noOfPoints);
@@ -113,7 +116,8 @@ public:
         unsigned long i,j;
         i = std::rand() % noOfPoints;
         j = std::rand() % gp1.noOfPoints;
-        float result = groupPoint[i].sampleDistance(gp1.groupPoint[j]);
+        float result ;
+        result = groupPoint[i]->sampledDistance((templatePoint)*gp1.groupPoint[j]);
         return result;
     };
 };

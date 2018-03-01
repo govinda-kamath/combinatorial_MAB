@@ -20,7 +20,6 @@ public:
     std::vector<templateArm> armsContainer;
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
     std::vector<templateArm> topKArms;
-    std::mutex initializeMutex;
 
     UCB(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms){
         armsContainer = armsVec;
@@ -182,6 +181,7 @@ public:
         float minTrueMean = armsContainer[0].trueMean();
         assert(("Dataset too large", armsContainer.size() < 1000));
         for (unsigned long i(0); i< armsContainer.size(); i++){
+
             float tmpTrueMean = armsContainer[i].trueMean();
             if ( tmpTrueMean < minTrueMean){
                 minTrueMean = tmpTrueMean;
