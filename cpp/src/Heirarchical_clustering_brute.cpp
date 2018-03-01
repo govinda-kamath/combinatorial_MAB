@@ -101,20 +101,14 @@ int main()
     for(unsigned long i(0); i < n-2; i++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         //Find the best group points to join
-#define UCB
-#ifdef BRUTE
         ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
 
 
         std::cout << "Step " << i
                 << " Arm ID " << bestArm.id;
-#ifdef BRUTE
-        std::cout << " Avg Pulls" << d;
-#endif
-#ifdef UCB
-        std::cout << " Avg Pulls" << UCB1.globalNumberOfPulls/(n*n*.5);
 
-#endif
+        std::cout << " Avg Pulls" << d;
+
         auto left  = bestArm.leftGroupID;
         auto right = bestArm.rightGroupID;
 //        if(i<10){

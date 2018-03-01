@@ -108,28 +108,19 @@ public:
         addSingleArm(newArm);
     }
 
-    void initialiseAndAddNewArm( templateArm &newArm, unsigned long firstArmId, unsigned long secondArmId,
+    void initialiseAndAddNewArm( templateArm &newArm, unsigned long numArmPulls,
+                                 float armSumOfPulls, float armSumOfSquaresOfPulls,
                                  unsigned numberOfInitialPulls = 100){
-        if((armStates.find(firstArmId)!= armStates.end()) and
-                (armStates.find(secondArmId)!= armStates.end()))
-        {
-            unsigned long numArmPulls = armStates[firstArmId].numberOfPulls + armStates[secondArmId].numberOfPulls;
-            float armSumOfPulls = armStates[firstArmId].sumOfPulls + armStates[secondArmId].sumOfPulls;
-            float armSumOfSquaresOfPulls = armStates[firstArmId].sumOfSquaresOfPulls
-                                           + armStates[secondArmId].sumOfSquaresOfPulls;
-            newArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls);
 
-            initialiseSingleArm( newArm, numberOfInitialPulls);
-            newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
-            utils::ArmConditions * singleArmCondition = new utils::ArmConditions(numArmPulls,armSumOfPulls,
-                                                                                 armSumOfSquaresOfPulls);
-            armStates[newArm.id] = * singleArmCondition;
-            armsToKeep.insert(newArm.id);
-            arms.push(newArm);
-        }
-        else{
-            throw std::runtime_error("[Unexpected behaviour]: Deleted arm's state not found.");
-        }
+        newArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls);
+
+        initialiseSingleArm( newArm, numberOfInitialPulls);
+        newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+        utils::ArmConditions * singleArmCondition = new utils::ArmConditions(numArmPulls,armSumOfPulls,
+                                                                             armSumOfSquaresOfPulls);
+        armStates[newArm.id] = * singleArmCondition;
+        armsToKeep.insert(newArm.id);
+        arms.push(newArm);
     }
 
     // For brute force only

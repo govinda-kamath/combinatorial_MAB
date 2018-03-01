@@ -177,11 +177,31 @@ int main()
                 rightArmRemovedId = groupIDtoArmID[std::make_pair(pointID, right)];
             }
             else{
-                throw std::runtime_error("[Unexpected behaviour]: Marked left arm's id not found.");
+                throw std::runtime_error("[Unexpected behaviour]: Marked right arm's id not found.");
             }
 #define REUSE
 #ifdef REUSE
-            UCB1.initialiseAndAddNewArm(tmpArm, leftArmRemovedId, rightArmRemovedId, 100);
+            unsigned long numArmPulls(0);
+            float armSumOfPulls(0.0);
+            float armSumOfSquaresOfPulls(0.0);
+            if(UCB1.armStates.find(leftArmRemovedId) != UCB1.armStates.end()){
+                numArmPulls += UCB1.armStates[leftArmRemovedId].numberOfPulls;
+                armSumOfPulls += UCB1.armStates[leftArmRemovedId].sumOfPulls;
+                armSumOfSquaresOfPulls += UCB1.armStates[leftArmRemovedId].sumOfSquaresOfPulls;
+            }
+            else{
+                throw std::runtime_error("[Unexpected behaviour]: Marked left arm's state not found.");
+            }
+            if(UCB1.armStates.find(rightArmRemovedId) != UCB1.armStates.end()){
+                numArmPulls += UCB1.armStates[rightArmRemovedId].numberOfPulls;
+                armSumOfPulls += UCB1.armStates[rightArmRemovedId].sumOfPulls;
+                armSumOfSquaresOfPulls += UCB1.armStates[rightArmRemovedId].sumOfSquaresOfPulls;
+            }
+            else{
+                throw std::runtime_error("[Unexpected behaviour]: Marked right arm's state not found.");
+            }
+
+            UCB1.initialiseAndAddNewArm(tmpArm, numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, 100);
 #else
             UCB1.initialiseAndAddNewArm(tmpArm, 100);
 #endif
