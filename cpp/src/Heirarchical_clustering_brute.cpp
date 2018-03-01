@@ -26,8 +26,6 @@ int main()
 
 //     For debugging mode in CLion
     std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
-    long startIndex(0); // Start index
-    long endIndex(10); // End index
 
     // Parameters
     INIReader reader(nameConfig);
@@ -41,7 +39,6 @@ int main()
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
 
-    std::cout << "Running Hierar"<<"-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
 
     std::vector<std::string>  pathsToImages;
@@ -62,9 +59,10 @@ int main()
     utils::vectorsToPoints(pointsVec, pathsToImages);
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = 10; //pointsVec.size();
+    unsigned long n = 1000; //pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long maxGroupPointId (0);
+    std::cout << "Running Hierarchical clustering for " << n << " points" << std::endl;
 
     groupIDtoArmID.reserve(n*n);
     groupPoints.reserve(n*n);
@@ -96,21 +94,25 @@ int main()
     }
 
     UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0);
-
+    UCB1.initialise(100);
     //Brute Only
     UCB1.armsKeepFromArmsContainerBrute();
     std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
 
     // Step 2: Run clustering
-    for(unsigned long i(0); i < n-1; i++){
+    for(unsigned long i(0); i < n-2; i++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         //Find the best group points to join
-//        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
+#define BRUTE
+#ifdef BRUTE
+        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
+#endif
+#ifdef UCB
         UCB1.runUCB(n*n*d);
-        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.topKArms[0];
-//        UCB1.runUCB(1000);
+        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
+#endif
         std::cout << "Step " << i
-                  << " Arm ID " << bestArm.id;
+                << " Arm ID " << bestArm.id;
 
         auto left  = bestArm.leftGroupID;
         auto right = bestArm.rightGroupID;
@@ -158,7 +160,13 @@ int main()
         for (const auto& pointID: groupPointsInPlay) {
             ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[idOfInsertedPoint], groupPoints[pointID]);
             groupIDtoArmID[std::make_pair(idOfInsertedPoint, pointID)] = armID;
-            UCB1.initialiseAndAddNewArmBrute(tmpArm);
+
+#ifdef BRUTE
+            UCB1.initialiseAndAddNewArmBrute(tmpArm); //Brute method
+#endif
+#ifdef UCB
+            UCB1.initialiseAndAddNewArm(tmpArm, 100);
+#endif
             armID ++;
         }
 
