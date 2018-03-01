@@ -179,9 +179,12 @@ int main()
             else{
                 throw std::runtime_error("[Unexpected behaviour]: Marked left arm's id not found.");
             }
-
+#define REUSE
+#ifdef REUSE
+            UCB1.initialiseAndAddNewArm(tmpArm, leftArmRemovedId, rightArmRemovedId, 100);
+#else
             UCB1.initialiseAndAddNewArm(tmpArm, 100);
-//            UCB1.initialiseAndAddNewArm(tmpArm, leftArmRemovedId, rightArmRemovedId, 100);
+#endif
 
             armID ++;
         }
