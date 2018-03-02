@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <random>
 
 #ifndef COMBINATORIAL_MAB_UTILS_H
 #define COMBINATORIAL_MAB_UTILS_H
@@ -31,12 +32,40 @@ namespace utils{
     void getPathToFile(std::vector<std::string> & pathsToImages, const std::string directoryPath,
     const std::string  fileSuffix);
 
+    template<typename T>
+    void apply_permutation(
+            std::vector<T>& v,
+            std::vector<int>& indices)
+    {
+        using std::swap; // to permit Koenig lookup
+        for (size_t i = 0; i < indices.size(); i++) {
+            auto current = i;
+            while (i != indices[current]) {
+                auto next = indices[current];
+                swap(v[current], v[next]);
+                indices[current] = current;
+                current = next;
+            }
+            indices[current] = current;
+        }
+    }
+
     template <class templatePoint>
     void vectorsToPoints(std::vector<templatePoint> &pointsVec,
                          std::vector<std::string>  &pathsToImages){
+        std::vector<float> tmpVec;
+        readImageAsVector(pathsToImages[0],tmpVec);
+        // Obtaining a random permute order
+        std::vector<int> permuteOrder(tmpVec.size());
+        std::iota(permuteOrder.begin(), permuteOrder.end(), 0);
+        std::random_device rd;
+        std::mt19937 g(std::rand());
+        std::shuffle(permuteOrder.begin(), permuteOrder.end(), g);
+        //Done
         for  (unsigned long i(0); i < pathsToImages.size(); i++) {
-            std::vector<float> tmpVec;
             readImageAsVector(pathsToImages[i],tmpVec);
+            // Permuting
+            apply_permutation<float>(tmpVec, permuteOrder );
             templatePoint tmpPoint(tmpVec);
             pointsVec.push_back(tmpPoint);
             if (i%10000 == 9999){
@@ -104,5 +133,6 @@ namespace utils{
             return h1 ^ h2;
         }
     };
+
 }
 #endif //COMBINATORIAL_MAB_UTILS_H

@@ -21,6 +21,7 @@ public:
     float globalSumOfSquaresOfPulls;
     unsigned numberOfBestArms;
     unsigned numberOfExtraArms;
+    unsigned sampleSize;
 
     std::vector<templateArm> armsContainer;
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
@@ -30,7 +31,7 @@ public:
     std::unordered_map<unsigned long, utils::ArmConditions> armStates;
 
 
-    UCBDynamic(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms, unsigned nOfExtraArms){
+    UCBDynamic(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms, unsigned nOfExtraArms, unsigned sSize){
         armsContainer = armsVec;
         numberOfArms = armsContainer.size();
         logDeltaInverse = std::log(1/delta);
@@ -40,6 +41,7 @@ public:
         globalSumOfSquaresOfPulls = 0;
         numberOfBestArms = nOfBestArms;
         numberOfExtraArms = nOfExtraArms;
+        sampleSize = sSize;
         armStates.reserve(armsContainer.size()*2);
     }
 
@@ -51,9 +53,13 @@ public:
     // Step 1 of UCB
     void initialise(unsigned numberOfInitialPulls = 100){
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
+            if (armIndex%10000==0)
+                std::cout << armIndex << "\t";
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
         }
         updateGlobalSigma();
+        std::cout << "Global sigma after initialization =  " << globalSigma << std::endl;
+        std::cout << "Global Number Of Pulls =  " << globalNumberOfPulls << std::endl;
         for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
             addSingleArm(armsContainer[armIndex]);
         }
@@ -63,7 +69,7 @@ public:
     void initialiseSingleArm( templateArm &singleArm, unsigned numberOfInitialPulls = 100){
         for (unsigned i = 0; i < numberOfInitialPulls; i++) {
             float observedSample(0);
-            observedSample = singleArm.pullArm(0, globalNumberOfPulls, 0, false);
+            observedSample = singleArm.pullArm(0, globalNumberOfPulls, 0, false, sampleSize);
             globalSumOfPulls += observedSample;
             globalSumOfSquaresOfPulls += observedSample * observedSample;
         }
@@ -201,7 +207,7 @@ public:
             return true;
         }else {
             float sample;
-            sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true);
+            sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize);
             globalSumOfPulls += sample;
             globalSumOfSquaresOfPulls += std::pow(sample, 2);
             globalNumberOfPulls++;

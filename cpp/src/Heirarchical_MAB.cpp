@@ -33,6 +33,7 @@ int main()
     std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
+    unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     std::vector<std::string>  pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
@@ -82,27 +83,29 @@ int main()
             ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[i], groupPoints[j]);
             groupIDtoArmID[std::make_pair(i,j)] = armID;
             armsVec.push_back(tmpArm);
-            armID ++;
+            armID++;
         }
     }
 
-    UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0);
+    UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
 
-//#define UCB
+#define UCB
 #ifdef UCB
-    std::cout << "Running MAB" << std::endl;
-    UCB1.initialise(100);
+    std::cout << "Running MAB with sample size " << sampleSize << std::endl;
+    std::chrono::system_clock::time_point t1 = std::chrono::system_clock::now();
+    UCB1.initialise((unsigned )numberOfInitialPulls/sampleSize);
+    std::chrono::system_clock::time_point t2 = std::chrono::system_clock::now();
+    long long int Tt = std::chrono::duration_cast<std::chrono::milliseconds>
+            (t2-t1).count();
+    std::cout << "Init Time = " << Tt << "(ms)" << std::endl;
+
 #else
     std::cout << "Running Brute" << std::endl;
     UCB1.armsKeepFromArmsContainerBrute();
 #endif
 
     std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
-
-
-
-
-
+    unsigned long prevGlobalNumberPulls = UCB1.globalNumberOfPulls;
 
     // Step 2: Run clustering
     for(unsigned long i(0); i < n-2; i++){
@@ -212,7 +215,7 @@ int main()
             tmpArm.estimateOfMean = tmpArm.trueMeanValue;
             UCB1.initialiseAndAddNewArmBrute(tmpArm, 0);
 #endif
-            armID ++;
+            armID++;
         }
 
         //Adding inserted point to points in play
@@ -221,24 +224,35 @@ int main()
         long long int trueMeanTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (timeEnd-timeStart).count();
 
-        if (rand()%50 == 0){
+//        if (rand()%50 == 0){
             std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
             long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
                     (timeEndEnd-timeStartStart).count();
-            std::cout << "Step " << i << " Time = " << trueMeanTime << "(ms)"
-                      << "Total Time = " << totalTime << "(ms)"
+            std::cout << "Step " << i << "\tTime = " << trueMeanTime
+                      << "\tTotal Time = " << totalTime
+//                      << "\tGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+                        << "\tNew number of Pulls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
+                        << "\ttime per Pulls last step = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
+                        << "\ttime per Pulls  total = " << (float)totalTime/(UCB1.globalNumberOfPulls)
+                    << "\tGlobal Sigma= " << UCB1.globalSigma
+                    << "\tLeft= " << groupPointsNames[left]
+                    << "\tRight= " << groupPointsNames[right]
                       << std::endl;
-        }
+        prevGlobalNumberPulls = UCB1.globalNumberOfPulls;
+//        }
     }
 
     std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEndEnd-timeStartStart).count();
-    std::cout << "Total Time = " << totalTime << "(ms)" << std::endl;
+    std::cout << "Total Time = " << totalTime << "(ms)"
+            << "Global number of Pulls = " << UCB1.globalNumberOfPulls/(0.5*n*n)
+            << "Global Sigma= " << UCB1.globalSigma
+            << std::endl;
 
 #ifdef UCB
-    std::cout<< "Average distances evaluated" << UCB1.globalNumberOfPulls/(0.5*n*n) << std::endl;
+    std::cout<< "Average distances evaluated " << UCB1.globalNumberOfPulls/(0.5*n*n) << std::endl;
 #else
-    std::cout<< "Average distances evaluated" << d << std::endl;
+    std::cout<< "Average distances evaluated " << d << std::endl;
 #endif
 }

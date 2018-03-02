@@ -10,7 +10,7 @@
 #include <dlib/image_io.h>
 #include <dlib/image_transforms.h>
 #include "Points.h"
-#include "../utilities/INIReader.h"
+#include "INIReader.h"
 #include "kmeans.h"
 #define DEBUG
 

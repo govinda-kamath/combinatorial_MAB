@@ -12,6 +12,10 @@
 class BasePoint{
 public:
     unsigned long vecSize;
+    unsigned long dimensionPointer;
+
+    BasePoint();
+
     virtual float distance(const BasePoint &p1) const;
     virtual float sampledDistance(const BasePoint &p1) const;
     unsigned long getVecSize() const;
@@ -21,6 +25,8 @@ class Point: public BasePoint {
 
 public:
     std::vector <float> point;
+
+    explicit Point();
     explicit Point(const std::vector <float> &p);
 };
 
@@ -38,6 +44,7 @@ public:
     std::unordered_map <unsigned long, float>  sparsePoint;
     std::vector<unsigned long> keys;
 
+    explicit SparsePoint();
     explicit SparsePoint(const std::unordered_map <unsigned long, float> &sp, unsigned long d);
 };
 
@@ -61,9 +68,9 @@ public:
     float distance(const SquaredEuclideanPoint &p1) const;
 //    float distance(const std::shared_ptr<SquaredEuclideanPoint> p1) const;
 
-    /*Picks a dimension of points randomly and samples the distance
+    /*Picks a dimension of points pointed by the dimensionPointer and samples the distance
      * that dimension*/
-    float sampledDistance(const SquaredEuclideanPoint &p1) const;
+    float sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize);
 };
 
 
@@ -77,9 +84,9 @@ public:
      * Used only for debug purposes*/
     float distance(const L1Point &p1) const;
 
-    /*Picks a dimension of points randomly and samples the distance
+    /*Picks a dimension of points pointed by the dimensionPointer and samples the distance
      * that dimension*/
-    float sampledDistance(const L1Point &p1) const;
+    float sampledDistance(const L1Point &p1, const unsigned sampleSize);
 };
 
 template <class templatePoint>
@@ -111,12 +118,12 @@ public:
         return result/(noOfPoints*gp1.noOfPoints);
     };
 
-    float sampledDistance(const GroupPoint &gp1) const {
+    float sampledDistance(const GroupPoint &gp1, const unsigned sampleSize) const {
         unsigned long i,j;
         i = std::rand() % noOfPoints;
         j = std::rand() % gp1.noOfPoints;
         float result ;
-        result = groupPoint[i]->sampledDistance((templatePoint)*gp1.groupPoint[j]);
+        result = groupPoint[i]->sampledDistance((templatePoint)*gp1.groupPoint[j], sampleSize);
         return result;
     };
 };

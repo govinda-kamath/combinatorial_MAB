@@ -10,6 +10,9 @@
 #include <cassert>
 
 //BasePoint
+BasePoint::BasePoint(){
+    dimensionPointer = 0;
+}
 float BasePoint::distance(const BasePoint &p1) const { return  -1; }
 float BasePoint::sampledDistance(const BasePoint &p1) const { return  -1; }
 unsigned long BasePoint::getVecSize() const {
@@ -17,12 +20,14 @@ unsigned long BasePoint::getVecSize() const {
 }
 
 /*Point*/
-Point::Point(const std::vector <float> &p){
+Point::Point(): BasePoint(){}
+Point::Point(const std::vector <float> &p): Point() {
     point = p;
     vecSize = p.size();
 }
 //Sparse point
-SparsePoint::SparsePoint(const std::unordered_map <unsigned long, float>  &sp, unsigned long d){
+SparsePoint::SparsePoint(): BasePoint(){}
+SparsePoint::SparsePoint(const std::unordered_map <unsigned long, float>  &sp, unsigned long d): SparsePoint(){
     sparsePoint = sp;
     vecSize = d;
     for(auto kv : sp) {
@@ -31,7 +36,7 @@ SparsePoint::SparsePoint(const std::unordered_map <unsigned long, float>  &sp, u
 }
 
 /*SquaredEuclideanPoint*/
-SquaredEuclideanPoint::SquaredEuclideanPoint(const std::vector<float> &p) : Point(p){}
+SquaredEuclideanPoint::SquaredEuclideanPoint(const std::vector<float> &p): Point(p){}
 /*Computes the exact distance between two points.
  * Used only for debug purposes*/
 float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint &p1) const {
@@ -48,17 +53,21 @@ float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint &p1) const {
 }
 /*Picks a dimension of points randomly and samples the distance
  * that dimension*/
-float SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint &p1) const {
+float SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize)  {
     assert(("Sizes do not match", point.size() == p1.point.size()));
     unsigned vecSize = getVecSize();
-    unsigned randomCoOrdinate;
-    randomCoOrdinate = std::rand() % vecSize;
-    return (point[randomCoOrdinate] - p1.point[randomCoOrdinate])
-           *(point[randomCoOrdinate] - p1.point[randomCoOrdinate]);
+    float sampleSum = 0;
+    for(unsigned i(0); i< sampleSize; i++) {
+        unsigned coordinate = dimensionPointer % getVecSize();
+        sampleSum += (point[coordinate] - p1.point[coordinate])
+                     *(point[coordinate] - p1.point[coordinate]);
+        dimensionPointer ++;
+    }
+    return sampleSum/sampleSize;
 }
 
 /* L1Point */
-L1Point::L1Point(const std::vector<float> &p) : Point(p){}
+L1Point::L1Point(const std::vector<float> &p): Point(p){}
 /*Computes the exact distance between two points.
  * Used only for debug purposes*/
 float L1Point::distance(const L1Point &p1) const {
@@ -79,12 +88,15 @@ float L1Point::distance(const L1Point &p1) const {
 }
 /*Picks a dimension of points randomly and samples the distance
  * that L1Point*/
-float L1Point::sampledDistance(const L1Point &p1) const {
+float L1Point::sampledDistance(const L1Point &p1, const unsigned sampleSize) {
     assert(("Sizes do not match", point.size() == p1.point.size()));
-    unsigned randomCoOrdinate;
-    randomCoOrdinate = std::rand() % getVecSize();
-    return std::abs(point[randomCoOrdinate] - p1.point[randomCoOrdinate]);
-
+    float sampleSum = 0;
+    for(unsigned i(0); i< sampleSize; i++) {
+        unsigned coordinate = dimensionPointer % getVecSize();
+        sampleSum += std::abs(point[coordinate] - p1.point[coordinate]);
+        dimensionPointer ++;
+    }
+    return sampleSum/sampleSize;
 }
 
 /* Sparse L1Point */
