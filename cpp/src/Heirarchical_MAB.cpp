@@ -19,9 +19,7 @@
 
 int main()
 {
-
 //    std::string nameConfig = argv[1];
-
 //     For debugging mode in CLion
     std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
@@ -90,7 +88,7 @@ int main()
 
     UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0);
 
-#define UCB
+//#define UCB
 #ifdef UCB
     std::cout << "Running MAB" << std::endl;
     UCB1.initialise(100);
@@ -100,6 +98,11 @@ int main()
 #endif
 
     std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
+
+
+
+
+
 
     // Step 2: Run clustering
     for(unsigned long i(0); i < n-2; i++){
@@ -112,18 +115,11 @@ int main()
         ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
 #endif
 
-//        std::cout << "Step " << i
-//                  << " Arm ID " << bestArm.id
-//                  << " Avg Pulls" << UCB1.globalNumberOfPulls/(n*n*.5);
-
+//        std::cout << "Step " << i  << " Arm ID " << bestArm.id  << " Avg Pulls" << UCB1.globalNumberOfPulls/(n*n*.5);
         auto left  = bestArm.leftGroupID;
         auto right = bestArm.rightGroupID;
-//        if(i<10){
-//            std::cout<< pathsToImages[left] << std::endl;
-//            std::cout<< pathsToImages[right] << std::endl;
-//        }
-//        std::cout <<" Left " << groupPointsNames[left]<< " Right " << groupPointsNames[right];
 
+//        std::cout <<" Left " << groupPointsNames[left]<< " Right " << groupPointsNames[right];
         for(unsigned long index(0); index < maxGroupPointId ; index++){
             if(groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()){
                 UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
@@ -211,6 +207,9 @@ int main()
 #ifdef UCB
             UCB1.initialiseAndAddNewArm(tmpArm, 0);
 #else
+            tmpArm.lowerConfidenceBound = tmpArm.trueMeanValue;
+            tmpArm.upperConfidenceBound = tmpArm.trueMeanValue;
+            tmpArm.estimateOfMean = tmpArm.trueMeanValue;
             UCB1.initialiseAndAddNewArmBrute(tmpArm, 0);
 #endif
             armID ++;
@@ -238,7 +237,7 @@ int main()
     std::cout << "Total Time = " << totalTime << "(ms)" << std::endl;
 
 #ifdef UCB
-    std::cout<< "Average distances evaluated" << UCB1.globalNumberOfPulls/n << std::endl;
+    std::cout<< "Average distances evaluated" << UCB1.globalNumberOfPulls/(0.5*n*n) << std::endl;
 #else
     std::cout<< "Average distances evaluated" << d << std::endl;
 #endif

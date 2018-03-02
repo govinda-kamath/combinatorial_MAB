@@ -137,13 +137,13 @@ add_executable(heirarchical cpp/src/Heirarchical_MAB.cpp
         )
 target_link_libraries( heirarchical dlib::dlib )
 
-add_executable(heirarchical_brute cpp/src/Heirarchical_clustering_brute.cpp
-        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
-        cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-        cpp/lib/Points.cpp
-        cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-        )
-target_link_libraries( heirarchical_brute dlib::dlib )
+#add_executable(heirarchical_brute cpp/src/Heirarchical_clustering_brute.cpp
+#        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
+#        cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+#        cpp/lib/Points.cpp
+#        cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+#        )
+#target_link_libraries( heirarchical_brute dlib::dlib )
 
 #add_executable(heirarchical cpp/src/Heirarchical_MAB.cpp
 #        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h

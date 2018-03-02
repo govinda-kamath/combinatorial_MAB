@@ -82,8 +82,14 @@ public:
 
 
     void updateMeanAndSecondMoment(){
-        estimateOfMean = sumOfPulls / numberOfPulls;
-        estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
+        if (trueMeanValue != INFINITY){
+            estimateOfMean = trueMeanValue;
+            estimateOfSecondMoment = trueMeanValue*trueMeanValue;
+        }
+        else{
+            estimateOfMean = sumOfPulls / numberOfPulls;
+            estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
+        }
     }
 
     void warmInitialise(unsigned long numArmPulls, float armSumOfPulls, float armSumOfSquaresOfPulls,

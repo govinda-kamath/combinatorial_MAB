@@ -24,6 +24,7 @@ public:
 
     std::vector<templateArm> armsContainer;
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
+    std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > armsBrute;
     std::vector<templateArm> topKArms;
     std::unordered_set <unsigned long > armsToKeep;
     std::unordered_map<unsigned long, utils::ArmConditions> armStates;
@@ -232,35 +233,48 @@ public:
     // For brute force only
     void initialiseAndAddNewArmBrute( templateArm &newArm, unsigned numberOfInitialPulls = 100){
         initialiseAndAddNewArm( newArm, numberOfInitialPulls);
-        armsContainer.push_back(newArm);
+        float tmpTrueMean = newArm.trueMean();
+        armsBrute.push(newArm);
     }
 
-    // For brute force only
+    // For brute force only Initial Step
     void armsKeepFromArmsContainerBrute(){
         for (unsigned long index(0); index < armsContainer.size(); index++){
+            float tmpTrueMean = armsContainer[index].trueMean();
+            armsContainer[index].lowerConfidenceBound = tmpTrueMean;
+            armsContainer[index].upperConfidenceBound = tmpTrueMean;
+            armsContainer[index].estimateOfMean = tmpTrueMean;
+            armsContainer[index].estimateOfSecondMoment = tmpTrueMean*tmpTrueMean;
             armsToKeep.insert(armsContainer[index].id);
-            armStates[armsContainer[index].id] = utils::ArmConditions(NAN, INFINITY, INFINITY,
+            armStates[armsContainer[index].id] = utils::ArmConditions(1, tmpTrueMean, tmpTrueMean*tmpTrueMean,
                     armsContainer[index].trueMeanValue);
+            armsBrute.push(armsContainer[index]);
+
         }
     }
 
     // For brute force only
-    // Never call this for large dataset!
-    templateArm bruteBestArm(){
-        unsigned long bIndex = 0;
-        float minTrueMean = INFINITY;
-//        assert(("Dataset too large", armsContainer.size() < 20000));
-        for (unsigned long i(0); i< armsContainer.size(); i++){
-            if (armsToKeep.find(armsContainer[i].id) != armsToKeep.end())
-            {
-                float tmpTrueMean = armsContainer[i].trueMean();
-                if (tmpTrueMean < minTrueMean) {
-                    minTrueMean = tmpTrueMean;
-                    bIndex = i;
-                }
+    templateArm topValidArmBrute(){
+        bool topValidArmFound(false);
+        do {
+            unsigned  long topArmID = armsBrute.top().id;
+            if (armsToKeep.find(topArmID) != armsToKeep.end())
+                topValidArmFound=true;
+            else{
+                armsBrute.pop();
             }
+        } while((!topValidArmFound) or (armsBrute.empty()) );
+        if (armsBrute.empty()){
+            throw std::runtime_error("[Unexpected behaviour]: Arms Priority Queue empty.");
         }
-        return armsContainer[bIndex];
+        return armsBrute.top();
+    }
+
+    // For brute force only
+    templateArm bruteBestArm(){
+        templateArm bestArm = topValidArmBrute();
+        armsBrute.pop();
+        return bestArm;
     }
 };
 
