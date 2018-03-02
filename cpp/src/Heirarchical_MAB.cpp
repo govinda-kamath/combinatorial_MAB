@@ -221,8 +221,14 @@ int main()
         std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
         long long int trueMeanTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (timeEnd-timeStart).count();
-        if (rand()%25 <= 2){
-            std::cout << "Step " << i << " Time = " << trueMeanTime << "(ms)" << std::endl;
+
+        if (rand()%50 == 0){
+            std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
+            long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
+                    (timeEndEnd-timeStartStart).count();
+            std::cout << "Step " << i << " Time = " << trueMeanTime << "(ms)"
+                      << "Total Time = " << totalTime << "(ms)"
+                      << std::endl;
         }
     }
 
