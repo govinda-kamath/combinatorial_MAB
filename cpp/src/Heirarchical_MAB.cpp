@@ -21,8 +21,6 @@ int main()
 {
 
 //    std::string nameConfig = argv[1];
-//    long startIndex(atol(argv[2])); // Start index
-//    long endIndex(atol(argv[3])); // End index
 
 //     For debugging mode in CLion
     std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
@@ -40,8 +38,8 @@ int main()
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     std::vector<std::string>  pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
-    std::vector<std::shared_ptr<SquaredEuclideanPoint>> sharedPtrPointsVec;
-    std::vector<GroupPoint<SquaredEuclideanPoint>  > groupPoints;
+    std::vector<std::shared_ptr<SquaredEuclideanPoint> > sharedPtrPointsVec;
+    std::vector<GroupPoint<SquaredEuclideanPoint> > groupPoints;
     std::vector<std::string> groupPointsNames;
     std::vector<ArmHeirarchical<SquaredEuclideanPoint> > armsVec;
     // Stores map from group id to arm id. Used to removes "irrelevant" arms
@@ -91,21 +89,32 @@ int main()
     }
 
     UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0);
+
+#define UCB
+#ifdef UCB
+    std::cout << "Running MAB" << std::endl;
     UCB1.initialise(100);
-    //Brute Only
+#else
+    std::cout << "Running Brute" << std::endl;
     UCB1.armsKeepFromArmsContainerBrute();
+#endif
+
     std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
 
     // Step 2: Run clustering
     for(unsigned long i(0); i < n-2; i++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         //Find the best group points to join
-
+#ifdef UCB
         UCB1.runUCB(n*n*d);
         ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
+#else
+        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
+#endif
 
-        std::cout << "Step " << i
-                  << " Arm ID " << bestArm.id;
+//        std::cout << "Step " << i
+//                  << " Arm ID " << bestArm.id
+//                  << " Avg Pulls" << UCB1.globalNumberOfPulls/(n*n*.5);
 
         auto left  = bestArm.leftGroupID;
         auto right = bestArm.rightGroupID;
@@ -113,7 +122,7 @@ int main()
 //            std::cout<< pathsToImages[left] << std::endl;
 //            std::cout<< pathsToImages[right] << std::endl;
 //        }
-        std::cout <<" Left " << groupPointsNames[left]<< " Right " << groupPointsNames[right];
+//        std::cout <<" Left " << groupPointsNames[left]<< " Right " << groupPointsNames[right];
 
         for(unsigned long index(0); index < maxGroupPointId ; index++){
             if(groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()){
@@ -176,15 +185,15 @@ int main()
             else{
                 throw std::runtime_error("[Unexpected behaviour]: Marked right arm's id not found.");
             }
-#define REUSE
-#ifdef REUSE
             unsigned long numArmPulls(0);
             float armSumOfPulls(0.0);
             float armSumOfSquaresOfPulls(0.0);
+            float trueMeanValue(0.0);
             if(UCB1.armStates.find(leftArmRemovedId) != UCB1.armStates.end()){
                 numArmPulls += UCB1.armStates[leftArmRemovedId].numberOfPulls;
                 armSumOfPulls += UCB1.armStates[leftArmRemovedId].sumOfPulls;
                 armSumOfSquaresOfPulls += UCB1.armStates[leftArmRemovedId].sumOfSquaresOfPulls;
+                trueMeanValue += UCB1.armStates[leftArmRemovedId].trueMeanValue;
             }
             else{
                 throw std::runtime_error("[Unexpected behaviour]: Marked left arm's state not found.");
@@ -193,16 +202,17 @@ int main()
                 numArmPulls += UCB1.armStates[rightArmRemovedId].numberOfPulls;
                 armSumOfPulls += UCB1.armStates[rightArmRemovedId].sumOfPulls;
                 armSumOfSquaresOfPulls += UCB1.armStates[rightArmRemovedId].sumOfSquaresOfPulls;
+                trueMeanValue += UCB1.armStates[rightArmRemovedId].trueMeanValue;
             }
             else{
                 throw std::runtime_error("[Unexpected behaviour]: Marked right arm's state not found.");
             }
-
-            UCB1.initialiseAndAddNewArm(tmpArm, numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, 0);
+            tmpArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, trueMeanValue/2);
+#ifdef UCB
+            UCB1.initialiseAndAddNewArm(tmpArm, 0);
 #else
-            UCB1.initialiseAndAddNewArm(tmpArm, 100);
+            UCB1.initialiseAndAddNewArmBrute(tmpArm, 0);
 #endif
-
             armID ++;
         }
 
@@ -211,11 +221,19 @@ int main()
         std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
         long long int trueMeanTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (timeEnd-timeStart).count();
-        std::cout << " Time = " << trueMeanTime << "(ms)" << std::endl;
+        if (rand()%25 <= 2){
+            std::cout << "Step " << i << " Time = " << trueMeanTime << "(ms)" << std::endl;
+        }
     }
 
     std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEndEnd-timeStartStart).count();
     std::cout << "Total Time = " << totalTime << "(ms)" << std::endl;
+
+#ifdef UCB
+    std::cout<< "Average distances evaluated" << UCB1.globalNumberOfPulls/n << std::endl;
+#else
+    std::cout<< "Average distances evaluated" << d << std::endl;
+#endif
 }

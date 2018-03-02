@@ -47,37 +47,18 @@ public:
                                  std::pow(globalSumOfPulls/globalNumberOfPulls,2)));
     }
 
+    // Step 1 of UCB
     void initialise(unsigned numberOfInitialPulls = 100){
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
-
-//#define DEBUG_INIT
-#ifdef DEBUG_INIT
-            if (armIndex%((int)(numberOfArms)/20) == 0){
-                std::cout << "Initialized " << std::setprecision (15) << armIndex << " out of " << numberOfArms
-                          << " Value: " << armsContainer[armIndex].estimateOfMean << std::endl;
-            }
-
-#endif
         }
         updateGlobalSigma();
-
         for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
             addSingleArm(armsContainer[armIndex]);
         }
-#ifdef DEBUG_INIT
-        std::cout << "Sigma after initialization " << globalSigma <<std::endl;
-        std::cout << "Mean after initialization "
-                  << globalSumOfPulls/globalNumberOfPulls <<std::endl;
-        std::cout << "Mean Squared after initialization "
-                  << std::pow(globalSumOfPulls/globalNumberOfPulls,2) <<std::endl;
-        std::cout << "Second Moment after initialization "
-                  << globalSumOfSquaresOfPulls/globalNumberOfPulls
-                  << " No of pulls " << globalNumberOfPulls
-                    <<std::endl;
-#endif
     }
 
+    // Used by Step 1 of UCB
     void initialiseSingleArm( templateArm &singleArm, unsigned numberOfInitialPulls = 100){
         for (unsigned i = 0; i < numberOfInitialPulls; i++) {
             float observedSample(0);
@@ -89,58 +70,33 @@ public:
 
     }
 
+    // Used by Step 1 of UCB
     void addSingleArm( templateArm &singleArm){
         singleArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
-        unsigned long numArmPulls = singleArm.numberOfPulls;
-        float armSumOfPulls = singleArm.sumOfPulls;
-        float armSumOfSquaresOfPulls = singleArm.sumOfSquaresOfPulls;
-        utils::ArmConditions * singleArmCondition = new utils::ArmConditions(numArmPulls,armSumOfPulls,
-                                                                             armSumOfSquaresOfPulls);
-        armStates[singleArm.id] = * singleArmCondition;
+        armStates[singleArm.id] = utils::ArmConditions(singleArm.numberOfPulls, singleArm.sumOfPulls,
+                                         singleArm.sumOfSquaresOfPulls, singleArm.trueMeanValue);
         armsToKeep.insert(singleArm.id);
         arms.push(singleArm);
     }
 
-
+    // Dynamic part of UCB
     void initialiseAndAddNewArm( templateArm &newArm, unsigned numberOfInitialPulls = 100){
         initialiseSingleArm(newArm, numberOfInitialPulls);
-        updateGlobalSigma();
-        addSingleArm(newArm);
-    }
-
-    void initialiseAndAddNewArm( templateArm &newArm, unsigned long numArmPulls,
-                                 float armSumOfPulls, float armSumOfSquaresOfPulls,
-                                 unsigned numberOfInitialPulls = 100){
-
-        newArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls);
-        initialiseSingleArm( newArm, numberOfInitialPulls);
         newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
-        utils::ArmConditions * singleArmCondition = new utils::ArmConditions(numArmPulls,armSumOfPulls,
-                                                                             armSumOfSquaresOfPulls);
-        armStates[newArm.id] = * singleArmCondition;
+        armStates[newArm.id] = utils::ArmConditions(newArm.numberOfPulls, newArm.sumOfPulls,
+                                           newArm.sumOfSquaresOfPulls, newArm.trueMeanValue);
         armsToKeep.insert(newArm.id);
         arms.push(newArm);
     }
 
-    // For brute force only
-    void initialiseAndAddNewArmBrute( templateArm &newArm, unsigned numberOfInitialPulls = 100){
-        initialiseAndAddNewArm( newArm, numberOfInitialPulls);
-        armsContainer.push_back(newArm);
-    }
-
-    void armsKeepFromArmsContainerBrute(){
-        for (unsigned long index(0); index < armsContainer.size(); index++){
-            armsToKeep.insert(armsContainer[index].id);
-        }
-    }
-
-
+    // Dynamic part of UCB
     void markForRemoval(unsigned long armID){
         auto search = armsToKeep.find(armID);
         if (search != armsToKeep.end())
             armsToKeep.erase(armID);
     }
 
+    // Dynamic part of UCB
     templateArm topValidArm(){
         bool topValidArmFound(false);
         do {
@@ -157,6 +113,7 @@ public:
         return arms.top();
     }
 
+    // Step 2 of UCB : Main step
     void runUCB(unsigned long maxIterations){
         unsigned bestArmCount = 0;
         unsigned long i(0);
@@ -272,7 +229,22 @@ public:
             arms.pop();
         }
     }
+    // For brute force only
+    void initialiseAndAddNewArmBrute( templateArm &newArm, unsigned numberOfInitialPulls = 100){
+        initialiseAndAddNewArm( newArm, numberOfInitialPulls);
+        armsContainer.push_back(newArm);
+    }
 
+    // For brute force only
+    void armsKeepFromArmsContainerBrute(){
+        for (unsigned long index(0); index < armsContainer.size(); index++){
+            armsToKeep.insert(armsContainer[index].id);
+            armStates[armsContainer[index].id] = utils::ArmConditions(NAN, INFINITY, INFINITY,
+                    armsContainer[index].trueMeanValue);
+        }
+    }
+
+    // For brute force only
     // Never call this for large dataset!
     templateArm bruteBestArm(){
         unsigned long bIndex = 0;
@@ -290,10 +262,6 @@ public:
         }
         return armsContainer[bIndex];
     }
-
-
 };
-
-
 
 #endif //COMBINATORIAL_MAB_UCB_DYNAMIC_H

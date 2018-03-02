@@ -86,10 +86,12 @@ public:
         estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
     }
 
-    void warmInitialise(unsigned long numArmPulls, float armSumOfPulls, float armSumOfSquaresOfPulls){
+    void warmInitialise(unsigned long numArmPulls, float armSumOfPulls, float armSumOfSquaresOfPulls,
+                        float tMeanValue){
         numberOfPulls = numArmPulls;
         sumOfPulls = armSumOfPulls;
         sumOfSquaresOfPulls = armSumOfSquaresOfPulls;
+        trueMeanValue = tMeanValue;
         updateMeanAndSecondMoment();
     }
 

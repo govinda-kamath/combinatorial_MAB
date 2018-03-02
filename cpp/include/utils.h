@@ -79,10 +79,11 @@ namespace utils{
         unsigned long numberOfPulls;
         float sumOfPulls;
         float sumOfSquaresOfPulls;
-        ArmConditions () : numberOfPulls(0), sumOfPulls(0.0), sumOfSquaresOfPulls(0.0){}
-        ArmConditions (unsigned long nP, float sumPulls, float sumSquare) : numberOfPulls(nP),
-                                                                            sumOfPulls(sumPulls),
-                                                                            sumOfSquaresOfPulls(sumSquare){}
+        float trueMeanValue;
+
+        ArmConditions () : numberOfPulls(0), sumOfPulls(0.0), sumOfSquaresOfPulls(0.0), trueMeanValue(INFINITY){}
+        ArmConditions (unsigned long nP, float sumPulls, float sumSquare, float tMeanValue) : numberOfPulls(nP),
+                       sumOfPulls(sumPulls), sumOfSquaresOfPulls(sumSquare), trueMeanValue(tMeanValue){}
         void update (unsigned long nP, float sumPulls, float sumSquare){
             numberOfPulls = nP;
             sumOfPulls = sumPulls;
