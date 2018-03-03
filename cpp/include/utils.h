@@ -59,8 +59,9 @@ namespace utils{
         std::vector<int> permuteOrder(tmpVec.size());
         std::iota(permuteOrder.begin(), permuteOrder.end(), 0);
         std::random_device rd;
-        std::mt19937 g(std::rand());
+        std::mt19937 g(9);
         std::shuffle(permuteOrder.begin(), permuteOrder.end(), g);
+
         //Done
         for  (unsigned long i(0); i < pathsToImages.size(); i++) {
             readImageAsVector(pathsToImages[i],tmpVec);
@@ -109,8 +110,10 @@ namespace utils{
         float sumOfPulls;
         float sumOfSquaresOfPulls;
         float trueMeanValue;
+        float localSigma;
 
-        ArmConditions () : numberOfPulls(0), sumOfPulls(0.0), sumOfSquaresOfPulls(0.0), trueMeanValue(INFINITY){}
+        ArmConditions () : numberOfPulls(0), sumOfPulls(0.0), sumOfSquaresOfPulls(0.0),
+                           trueMeanValue(INFINITY), localSigma(INFINITY){}
         ArmConditions (unsigned long nP, float sumPulls, float sumSquare, float tMeanValue) : numberOfPulls(nP),
                        sumOfPulls(sumPulls), sumOfSquaresOfPulls(sumSquare), trueMeanValue(tMeanValue){}
         void update (unsigned long nP, float sumPulls, float sumSquare){

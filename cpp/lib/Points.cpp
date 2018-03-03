@@ -14,7 +14,7 @@ BasePoint::BasePoint(){
     dimensionPointer = 0;
 }
 float BasePoint::distance(const BasePoint &p1) const { return  -1; }
-float BasePoint::sampledDistance(const BasePoint &p1) const { return  -1; }
+std::pair<float, float> BasePoint::sampledDistance(const BasePoint &p1) const { return  std::make_pair(-1.0, -1.0); }
 unsigned long BasePoint::getVecSize() const {
     return vecSize;
 }
@@ -53,17 +53,20 @@ float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint &p1) const {
 }
 /*Picks a dimension of points randomly and samples the distance
  * that dimension*/
-float SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize)  {
+std::pair<float, float> SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize)  {
     assert(("Sizes do not match", point.size() == p1.point.size()));
-    unsigned vecSize = getVecSize();
     float sampleSum = 0;
+    float sampleSquareSum = 0;
+    unsigned int dimensionPointer = std::rand();
     for(unsigned i(0); i< sampleSize; i++) {
-        unsigned coordinate = dimensionPointer % getVecSize();
-        sampleSum += (point[coordinate] - p1.point[coordinate])
+        unsigned long coordinate = dimensionPointer % getVecSize();
+        float value = (point[coordinate] - p1.point[coordinate])
                      *(point[coordinate] - p1.point[coordinate]);
+        sampleSum += value;
+        sampleSquareSum += value*value;
         dimensionPointer ++;
     }
-    return sampleSum/sampleSize;
+    return std::make_pair(sampleSum, sampleSquareSum);
 }
 
 /* L1Point */
@@ -72,15 +75,12 @@ L1Point::L1Point(const std::vector<float> &p): Point(p){}
  * Used only for debug purposes*/
 float L1Point::distance(const L1Point &p1) const {
     assert(("Sizes do not match", point.size() == p1.point.size()));
-
     float result(0);
 
     std::vector<float>::const_iterator pIt = point.begin();
     std::vector<float>::const_iterator p1It = p1.point.begin();
     unsigned i(0);
     for (; p1It != p1.point.end() && pIt  != point.end(); ++p1It, ++pIt){
-//        if (i<1000)
-//            std::cout << i << " " << std::abs(*p1It-*pIt) << std::endl;
         i++;
         result += std::abs(*p1It-*pIt);
     }
@@ -88,15 +88,18 @@ float L1Point::distance(const L1Point &p1) const {
 }
 /*Picks a dimension of points randomly and samples the distance
  * that L1Point*/
-float L1Point::sampledDistance(const L1Point &p1, const unsigned sampleSize) {
+std::pair<float, float> L1Point::sampledDistance(const L1Point &p1, const unsigned sampleSize) {
     assert(("Sizes do not match", point.size() == p1.point.size()));
     float sampleSum = 0;
+    float sampleSquareSum = 0;
     for(unsigned i(0); i< sampleSize; i++) {
-        unsigned coordinate = dimensionPointer % getVecSize();
-        sampleSum += std::abs(point[coordinate] - p1.point[coordinate]);
+        unsigned long coordinate = dimensionPointer % getVecSize();
+        float value = std::abs(point[coordinate] - p1.point[coordinate]);
+        sampleSum += value;
+        sampleSquareSum += value*value;
         dimensionPointer ++;
     }
-    return sampleSum/sampleSize;
+    return std::make_pair(sampleSum, sampleSquareSum);
 }
 
 /* Sparse L1Point */
@@ -113,23 +116,20 @@ float SparseL1Point::distance(const SparseL1Point &p1) const {
         // Finding two points
         auto search1 = sparsePoint.find(i);
         auto search2 = p1.sparsePoint.find(i);
-        float tmp(0);
+        float value(0);
         // If both the points have the index i
         if ( (search1 != sparsePoint.end()) && (search2 != p1.sparsePoint.end()) ){
-            tmp += std::abs(search1->second - search2->second);
+            value += std::abs(search1->second - search2->second);
         }
         // If only first point has the index i
         else if ( (search1 != sparsePoint.end()) && (search2 == p1.sparsePoint.end() )){
-            tmp += std::abs(search1->second);
+            value += std::abs(search1->second);
         }
         // If only second point has the index i
         else if ( (search1 == sparsePoint.end()) && (search2 != p1.sparsePoint.end() )){
-            tmp += std::abs(search2->second);
+            value += std::abs(search2->second);
         }
-        //If none of the points have the index, we do not update result.
-//        if (i<1000)
-//            std::cout << i << " " << tmp  << std::endl;
-        result += tmp;
+        result += value;
     }
 
     return result;
@@ -137,7 +137,7 @@ float SparseL1Point::distance(const SparseL1Point &p1) const {
 
 /*Picks a dimension of points randomly and samples the distance
  * that L1Point*/
-float SparseL1Point::sampledDistance(const SparseL1Point &p1) const {
+std::pair<float, float> SparseL1Point::sampledDistance(const SparseL1Point &p1) const {
 
     //coin flip
     float result(0);
@@ -168,9 +168,7 @@ float SparseL1Point::sampledDistance(const SparseL1Point &p1) const {
         else
             result += 2*std::abs(search2->second)*p1.keys.size()/getVecSize();
     }
-
-    return result/2;
-
+    return std::make_pair(result/2, (result/2)*(result/2));
 }
 
 

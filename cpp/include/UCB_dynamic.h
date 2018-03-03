@@ -67,12 +67,10 @@ public:
 
     // Used by Step 1 of UCB
     void initialiseSingleArm( templateArm &singleArm, unsigned numberOfInitialPulls = 100){
-        for (unsigned i = 0; i < numberOfInitialPulls; i++) {
-            float observedSample(0);
-            observedSample = singleArm.pullArm(0, globalNumberOfPulls, 0, false, sampleSize);
-            globalSumOfPulls += observedSample;
-            globalSumOfSquaresOfPulls += observedSample * observedSample;
-        }
+        std::pair<float, float> sample;
+        sample = singleArm.pullArm(0, NAN, 0, false, numberOfInitialPulls);
+        globalSumOfPulls += sample.first;
+        globalSumOfSquaresOfPulls += sample.second;
         globalNumberOfPulls += numberOfInitialPulls;
 
     }
@@ -181,7 +179,9 @@ public:
         float UCBofBestArm, LCBofSecondBestArm;
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
-
+        if (UCBofBestArm == NAN){
+            std::cout << "DAmn" << bestArm.id << std::endl;
+        }
         if (UCBofBestArm < LCBofSecondBestArm){
             // Evaluating true mean of best arm
 //            std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
@@ -206,13 +206,20 @@ public:
             arms.push(bestArm);
             return true;
         }else {
-            float sample;
+            std::pair<float, float> sample;
             sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize);
-            globalSumOfPulls += sample;
-            globalSumOfSquaresOfPulls += std::pow(sample, 2);
-            globalNumberOfPulls++;
-            globalSigma = std::sqrt((globalSumOfSquaresOfPulls / globalNumberOfPulls -
-                                     std::pow(globalSumOfPulls / globalNumberOfPulls, 2)));
+
+            globalSumOfPulls += sample.first;
+            globalSumOfSquaresOfPulls += sample.second;
+            globalNumberOfPulls += sampleSize;
+            float a, b, c;
+            a = globalSumOfSquaresOfPulls / globalNumberOfPulls;
+            b = globalSumOfPulls / globalNumberOfPulls;
+            c = std::pow(b, 2);
+            globalSigma = std::sqrt(( a - c ));
+            if (globalSigma == NAN){
+                std::cout << "second point is NAN" << std::endl;
+            }
             arms.push(bestArm);
             //Update arm status
             unsigned long numArmPulls = bestArm.numberOfPulls;

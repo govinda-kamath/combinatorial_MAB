@@ -24,6 +24,7 @@ public:
     float lowerConfidenceBound;
     float estimateOfMean;
     float estimateOfSecondMoment;
+    float localSigma;
     float sumOfSquaresOfPulls;
     unsigned long dimension;
     unsigned log10Dimension;
@@ -39,6 +40,7 @@ public:
         sumOfSquaresOfPulls = 0.0;
         estimateOfMean = NAN;
         estimateOfSecondMoment = NAN;
+        localSigma = NAN;
         trueMeanValue = INFINITY;
     }
 
@@ -71,9 +73,13 @@ public:
 
         float compositeSigma, intervalWidth;
 //        compositeSigma = globalSigma; //Todo: update sigma to new local value
-        float localVar = estimateOfSecondMoment - std::pow(estimateOfMean,2);
-        compositeSigma = std::sqrt( localVar*numberOfPulls/globalNumberOfPulls +
-                                globalSigma*globalSigma*(globalNumberOfPulls-numberOfPulls)/globalNumberOfPulls );
+        localSigma = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
+        if (localSigma<0){
+            std::cout << "fuck!" <<std::endl;
+        }
+        float frac = numberOfPulls/globalNumberOfPulls;
+        compositeSigma = std::sqrt( localSigma*frac +  globalSigma*globalSigma*(1- frac));
+
 
         intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/(float)numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;
@@ -101,35 +107,36 @@ public:
         updateMeanAndSecondMoment();
     }
 
-    float pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
+    virtual std::pair<float, float> pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
                   unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize){
-        float sample(-INFINITY);
+        std::pair<float, float> sample;
         if (numberOfPulls >= dimension){
-            sample = trueMean();
-            numberOfPulls += dimension;
-            estimateOfMean = sample;
+            float tMean(-INFINITY);
+            tMean = trueMean();
+            numberOfPulls += sampleSize;
+            estimateOfMean = tMean;
             upperConfidenceBound = estimateOfMean;
             lowerConfidenceBound = estimateOfMean;
-            sumOfPulls += sample*dimension;
-            sumOfSquaresOfPulls += std::pow(sample,2)*dimension;
-            estimateOfSecondMoment = sample*sample;
+            sumOfPulls += tMean*dimension;
+            sumOfSquaresOfPulls += std::pow(tMean,2)*dimension;
+            estimateOfSecondMoment = tMean*tMean;
+            sample.first = tMean;
+            sample.second = tMean*tMean;
         }
         else {
-            sample = p2.sampledDistance(p1, 32);
-            numberOfPulls++;
-            sumOfPulls += sample;
-            sumOfSquaresOfPulls += sample * sample;
+            sample = p2.sampledDistance(p1, sampleSize);
+            numberOfPulls += sampleSize;
+            sumOfPulls += sample.first;
+            sumOfSquaresOfPulls += sample.second;
             estimateOfMean = sumOfPulls / numberOfPulls;
             estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
             if (update)
                 updateConfidenceIntervals( globalSigma, globalNumberOfPulls, logDeltaInverse);
         }
         return sample;
-
     }
 
-
-    float pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
                   float logDeltaInverse, bool update, unsigned sampleSize) {
         return pullArm(p1, *point,  globalSigma,globalNumberOfPulls, logDeltaInverse, update, sampleSize);
 
@@ -165,7 +172,7 @@ public:
     }
 
     using Arm<templatePoint>::pullArm;
-    float pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
                   float logDeltaInverse, bool update = true, unsigned sampleSize=32){
         return pullArm(*fixedPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize);
     }
@@ -214,7 +221,7 @@ public:
     }
 
     using Arm<templatePoint>::pullArm;
-    float pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
                   float logDeltaInverse, bool update = true, unsigned sampleSize =32){
         //Choose a random point
         unsigned long randomCoOrdinate;
@@ -272,7 +279,7 @@ public:
     }
 
     using Arm<GroupPoint<templatePoint> >::pullArm;
-    float pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
                   float logDeltaInverse, bool update = true, unsigned sampleSize = 32){
         return pullArm(*leftGroupPoint, *rightGroupPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize);
     }

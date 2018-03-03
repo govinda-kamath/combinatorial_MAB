@@ -53,7 +53,7 @@ int main()
     utils::vectorsToPoints(pointsVec, pathsToImages);
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = 1000; // pointsVec.size();
+    unsigned long n = 100; // pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long maxGroupPointId (0);
     std::cout << "Running Hierarchical clustering for " << n << " points" << std::endl;
@@ -93,7 +93,7 @@ int main()
 #ifdef UCB
     std::cout << "Running MAB with sample size " << sampleSize << std::endl;
     std::chrono::system_clock::time_point t1 = std::chrono::system_clock::now();
-    UCB1.initialise((unsigned )numberOfInitialPulls/sampleSize);
+    UCB1.initialise((unsigned )numberOfInitialPulls);
     std::chrono::system_clock::time_point t2 = std::chrono::system_clock::now();
     long long int Tt = std::chrono::duration_cast<std::chrono::milliseconds>
             (t2-t1).count();
@@ -121,6 +121,7 @@ int main()
 //        std::cout << "Step " << i  << " Arm ID " << bestArm.id  << " Avg Pulls" << UCB1.globalNumberOfPulls/(n*n*.5);
         auto left  = bestArm.leftGroupID;
         auto right = bestArm.rightGroupID;
+
 
 //        std::cout <<" Left " << groupPointsNames[left]<< " Right " << groupPointsNames[right];
         for(unsigned long index(0); index < maxGroupPointId ; index++){
@@ -224,22 +225,27 @@ int main()
         long long int trueMeanTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (timeEnd-timeStart).count();
 
-//        if (rand()%50 == 0){
-            std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
-            long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
-                    (timeEndEnd-timeStartStart).count();
-            std::cout << "Step " << i << "\tTime = " << trueMeanTime
-                      << "\tTotal Time = " << totalTime
+        std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
+        long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
+                (timeEndEnd-timeStartStart).count();
+
+        float localVar = bestArm.estimateOfSecondMoment - std::pow(bestArm.estimateOfMean,2);
+        std::cout   << "Step " << i
+                << "\tEst. = " << bestArm.estimateOfMean
+                << "\tTime = " << trueMeanTime
+                    << "\tT-Time = " << totalTime
 //                      << "\tGlobal number of Pulls = " << UCB1.globalNumberOfPulls
-                        << "\tNew number of Pulls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
-                        << "\ttime per Pulls last step = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
-                        << "\ttime per Pulls  total = " << (float)totalTime/(UCB1.globalNumberOfPulls)
-                    << "\tGlobal Sigma= " << UCB1.globalSigma
-                    << "\tLeft= " << groupPointsNames[left]
+                    << "\tNew no. of Puls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
+                    << "\ttime / Pullslaststep = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
+                    << "\ttime / Pullstotal = " << (float)totalTime/(UCB1.globalNumberOfPulls)
+                << "\tGlobal Sig= " << UCB1.globalSigma
+//                << "\tBest Arm local Sigma= " << localVar
+//                << "\tBest Arm local estimate= " << bestArm.estimateOfMean
+//                << "\tBest Arm local var= " << bestArm.estimateOfSecondMoment
+                << "\tLeft= " << groupPointsNames[left]
                     << "\tRight= " << groupPointsNames[right]
-                      << std::endl;
+                  << std::endl;
         prevGlobalNumberPulls = UCB1.globalNumberOfPulls;
-//        }
     }
 
     std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();

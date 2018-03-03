@@ -17,7 +17,7 @@ public:
     BasePoint();
 
     virtual float distance(const BasePoint &p1) const;
-    virtual float sampledDistance(const BasePoint &p1) const;
+    virtual std::pair<float, float> sampledDistance(const BasePoint &p1) const;
     unsigned long getVecSize() const;
 
 };
@@ -54,7 +54,7 @@ public:
     explicit SparseL1Point(const std::unordered_map <unsigned long, float> &sp, unsigned long d);
 
     virtual float distance(const SparseL1Point &p1) const;
-    virtual float sampledDistance(const SparseL1Point &p1) const;
+    virtual std::pair<float, float> sampledDistance(const SparseL1Point &p1) const;
 };
 
 class SquaredEuclideanPoint : public Point{
@@ -70,7 +70,7 @@ public:
 
     /*Picks a dimension of points pointed by the dimensionPointer and samples the distance
      * that dimension*/
-    float sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize);
+    std::pair<float, float> sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize);
 };
 
 
@@ -86,7 +86,7 @@ public:
 
     /*Picks a dimension of points pointed by the dimensionPointer and samples the distance
      * that dimension*/
-    float sampledDistance(const L1Point &p1, const unsigned sampleSize);
+    std::pair<float, float> sampledDistance(const L1Point &p1, const unsigned sampleSize);
 };
 
 template <class templatePoint>
@@ -118,13 +118,13 @@ public:
         return result/(noOfPoints*gp1.noOfPoints);
     };
 
-    float sampledDistance(const GroupPoint &gp1, const unsigned sampleSize) const {
+    std::pair<float, float> sampledDistance(const GroupPoint &gp1, const unsigned sampleSize) const {
         unsigned long i,j;
         i = std::rand() % noOfPoints;
         j = std::rand() % gp1.noOfPoints;
-        float result ;
-        result = groupPoint[i]->sampledDistance((templatePoint)*gp1.groupPoint[j], sampleSize);
-        return result;
+        std::pair<float, float> sample; ;
+        sample = groupPoint[i]->sampledDistance((templatePoint)*gp1.groupPoint[j], sampleSize);
+        return sample;
     };
 };
 
