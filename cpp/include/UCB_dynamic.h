@@ -69,7 +69,7 @@ public:
     // Used by Step 1 of UCB
     void initialiseSingleArm( templateArm &singleArm, unsigned numberOfInitialPulls = 100){
         std::pair<float, float> sample;
-        sample = singleArm.pullArm(0, NAN, 0, false, numberOfInitialPulls);
+        sample = singleArm.pullArm(0, NAN, 0, false, numberOfInitialPulls, -1);
         globalSumOfPulls += sample.first;
         globalSumOfSquaresOfPulls += sample.second;
         globalNumberOfPulls += numberOfInitialPulls;
