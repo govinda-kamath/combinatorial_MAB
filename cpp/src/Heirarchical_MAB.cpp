@@ -20,6 +20,7 @@
 int main()
 {
 //    std::string nameConfig = argv[1];
+
 //     For debugging mode in CLion
     std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
@@ -29,31 +30,36 @@ int main()
         std::cout << "Can't load "<< nameConfig << std::endl;
         return 1;
     }
+
+    // Loading Hyper parameters and data sizes
     std::string directoryPath = reader.Get("path", "directory", "");
     std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+
+
     std::vector<std::string>  pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
     std::vector<std::shared_ptr<SquaredEuclideanPoint> > sharedPtrPointsVec;
     std::vector<GroupPoint<SquaredEuclideanPoint> > groupPoints;
-    std::vector<std::string> groupPointsNames;
+    std::vector<std::string> groupPointsNames; // Only for debugging purpose: Stores the neighbhours
     std::vector<ArmHeirarchical<SquaredEuclideanPoint> > armsVec;
     // Stores map from group id to arm id. Used to removes "irrelevant" arms
     std::unordered_map<std::pair<unsigned long, unsigned long >, unsigned long, utils::pair_hash> groupIDtoArmID;
 
     //Maintains the valid group points currently.
     //Used while creating new arms
-    std::unordered_set<unsigned  long > groupPointsInPlay;
+    std::unordered_set<unsigned long > groupPointsInPlay;
 
 
-    utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
-    utils::vectorsToPoints(pointsVec, pathsToImages);
+    utils::getPathToFile(pathsToImages, directoryPath, fileSuffix); // Loads the filepaths into an array
+    utils::vectorsToPoints(pointsVec, pathsToImages); //Loads the images from the locations in above array to pointsVec
+
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = 100; // pointsVec.size();
+    unsigned long n = 1000; // pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long maxGroupPointId (0);
     std::cout << "Running Hierarchical clustering for " << n << " points" << std::endl;
@@ -61,6 +67,7 @@ int main()
     groupIDtoArmID.reserve(n*n);
     groupPoints.reserve(n*n);
 
+    // Pushing null objects
     for(unsigned long i(0); i< n*n; i++){
         groupPoints.push_back(GroupPoint<SquaredEuclideanPoint> ()); //Todo: Bad Code
         groupPointsNames.push_back("");
@@ -124,6 +131,7 @@ int main()
 
 
 //        std::cout <<" Left " << groupPointsNames[left]<< " Right " << groupPointsNames[right];
+        //Removing arms corresponding to the left and right groups of the best arm
         for(unsigned long index(0); index < maxGroupPointId ; index++){
             if(groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()){
                 UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
@@ -139,10 +147,11 @@ int main()
             }
         }
 
+        // Removing left and right arm from the groups (nodes)
         groupPointsInPlay.erase(left);
         groupPointsInPlay.erase(right);
 
-
+        //Creating a new group point by combining left and right points
         //Create the vector of pointers to the points in the new group point
         std::vector<std::shared_ptr<SquaredEuclideanPoint > > newGroupPoint;
         newGroupPoint = bestArm.leftGroupPoint->groupPoint;
@@ -150,7 +159,7 @@ int main()
                              bestArm.rightGroupPoint->groupPoint.end());
 
 
-        //create a new group point
+        //Create a new group point
         GroupPoint<SquaredEuclideanPoint> gpTmp(newGroupPoint, d, maxGroupPointId);
         groupPoints[maxGroupPointId] = gpTmp;
         groupPointsNames[maxGroupPointId] = groupPointsNames[left]+" "+groupPointsNames[right];
@@ -209,7 +218,7 @@ int main()
             }
             tmpArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, trueMeanValue/2);
 #ifdef UCB
-            UCB1.initialiseAndAddNewArm(tmpArm, 0);
+            UCB1.initialiseAndAddNewArm(tmpArm, 0); //0 initial pulls
 #else
             tmpArm.lowerConfidenceBound = tmpArm.trueMeanValue;
             tmpArm.upperConfidenceBound = tmpArm.trueMeanValue;
@@ -232,18 +241,19 @@ int main()
         float localVar = bestArm.estimateOfSecondMoment - std::pow(bestArm.estimateOfMean,2);
         std::cout   << "Step " << i
                 << "\tEst. = " << bestArm.estimateOfMean
+                << "\tId. = " << bestArm.id
                 << "\tTime = " << trueMeanTime
                     << "\tT-Time = " << totalTime
 //                      << "\tGlobal number of Pulls = " << UCB1.globalNumberOfPulls
                     << "\tNew no. of Puls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
-                    << "\ttime / Pullslaststep = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
-                    << "\ttime / Pullstotal = " << (float)totalTime/(UCB1.globalNumberOfPulls)
+//                    << "\ttime/Pullslaststep = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
+                    << "\ttime/ Pullstotal = " << (float)totalTime/(UCB1.globalNumberOfPulls)
                 << "\tGlobal Sig= " << UCB1.globalSigma
 //                << "\tBest Arm local Sigma= " << localVar
 //                << "\tBest Arm local estimate= " << bestArm.estimateOfMean
 //                << "\tBest Arm local var= " << bestArm.estimateOfSecondMoment
-                << "\tLeft= " << groupPointsNames[left]
-                    << "\tRight= " << groupPointsNames[right]
+//                << "\tLeft= " << groupPointsNames[left]
+//                    << "\tRight= " << groupPointsNames[right]
                   << std::endl;
         prevGlobalNumberPulls = UCB1.globalNumberOfPulls;
     }

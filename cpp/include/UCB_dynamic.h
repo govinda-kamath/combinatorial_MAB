@@ -31,6 +31,7 @@ public:
     std::unordered_map<unsigned long, utils::ArmConditions> armStates;
 
 
+    // Main Constructor
     UCBDynamic(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms, unsigned nOfExtraArms, unsigned sSize){
         armsContainer = armsVec;
         numberOfArms = armsContainer.size();
@@ -84,7 +85,7 @@ public:
         arms.push(singleArm);
     }
 
-    // Dynamic part of UCB
+    // Dynamic part of UCB. Uaed to add new arm
     void initialiseAndAddNewArm( templateArm &newArm, unsigned numberOfInitialPulls = 100){
         initialiseSingleArm(newArm, numberOfInitialPulls);
         newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
@@ -94,14 +95,14 @@ public:
         arms.push(newArm);
     }
 
-    // Dynamic part of UCB
+    // Dynamic part of UCB. Removes existing arms
     void markForRemoval(unsigned long armID){
         auto search = armsToKeep.find(armID);
         if (search != armsToKeep.end())
             armsToKeep.erase(armID);
     }
 
-    // Dynamic part of UCB
+    // Dynamic part of UCB. Returns top arm (which has not been removed)
     templateArm topValidArm(){
         bool topValidArmFound(false);
         do {
@@ -146,7 +147,10 @@ public:
                           << std::endl;
             }
 #endif
+            // Run a "single" step of UCB
             bool bestArmFound = iterationOfUCB();
+
+            // Update if best arm is found
             if (bestArmFound){
                 templateArm topArm = topValidArm();
                 topKArms.push_back(topArm);
@@ -161,6 +165,8 @@ public:
                     break;
             }
         }
+
+        // Debug only
         if (bestArmCount!=numberOfBestArms){
             std::cout<< "UCB Stopped before reaching optimal" << std::endl;
         }
@@ -171,6 +177,7 @@ public:
         storeExtraTopArms(); //Storing extra arms
     }
 
+
     bool iterationOfUCB(){
         /*An iteration of UCB*/
         templateArm bestArm = topValidArm();
@@ -179,35 +186,40 @@ public:
         float UCBofBestArm, LCBofSecondBestArm;
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
+
         if (UCBofBestArm == NAN){
-            std::cout << "DAmn" << bestArm.id << std::endl;
+            std::cout << "Damn Nan" << bestArm.id << std::endl;
         }
         if (UCBofBestArm < LCBofSecondBestArm){
-            // Evaluating true mean of best arm
-//            std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
-//            bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
-//            bestArm.upperConfidenceBound = bestArm.estimateOfMean;
-//            bestArm.lowerConfidenceBound = bestArm.estimateOfMean;
-//            globalNumberOfPulls += result["effectiveDimension"];
-//            globalSumOfPulls += result["sumOfPulls"];
-//            globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
-//
-//            if (bestArm.estimateOfMean > LCBofSecondBestArm){
-//                std::cout<< "False trigger by " << bestArm.id << std::endl;
-//                arms.push(bestArm);
-//                return false;
-//            }
 
+            /* Evaluating true mean of best arm
+            std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
+            bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
+            bestArm.upperConfidenceBound = bestArm.estimateOfMean;
+            bestArm.lowerConfidenceBound = bestArm.estimateOfMean;
+            globalNumberOfPulls += result["effectiveDimension"];
+            globalSumOfPulls += result["sumOfPulls"];
+            globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
+
+            if (bestArm.estimateOfMean > LCBofSecondBestArm){
+                std::cout<< "False trigger by " << bestArm.id << std::endl;
+                arms.push(bestArm);
+                return false;
+            }
+            */
 #ifdef DEBUG_RUN
             std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
             std::cout << "stopping LCB " <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
             std::cout << "best estimate"<< std::setprecision (15)<< bestArm.estimateOfMean << std::endl;
 #endif
+
             arms.push(bestArm);
             return true;
-        }else {
+        }
+        // Run a iteration if the top arm is not the best arm
+        else {
             std::pair<float, float> sample;
-            sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize);
+            sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize, LCBofSecondBestArm);
 
             globalSumOfPulls += sample.first;
             globalSumOfSquaresOfPulls += sample.second;
@@ -237,12 +249,18 @@ public:
     }
 
 
+    // Stores extra top arms for evaluations. These arms are not optimally chosen
     void storeExtraTopArms(){
         for (unsigned i=0; i < numberOfExtraArms; i++) {
             topKArms.push_back(topValidArm());
             arms.pop();
         }
     }
+
+
+    /*
+     *  Debugging: Brute force methods.
+     */
     // For brute force only
     void initialiseAndAddNewArmBrute( templateArm &newArm, unsigned numberOfInitialPulls = 100){
         initialiseAndAddNewArm( newArm, numberOfInitialPulls);

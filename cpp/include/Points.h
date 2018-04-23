@@ -70,7 +70,7 @@ public:
 
     /*Picks a dimension of points pointed by the dimensionPointer and samples the distance
      * that dimension*/
-    std::pair<float, float> sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize);
+    std::pair<float, float> sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize) const;
 };
 
 

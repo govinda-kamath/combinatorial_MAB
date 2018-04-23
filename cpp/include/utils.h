@@ -62,7 +62,6 @@ namespace utils{
         std::mt19937 g(9);
         std::shuffle(permuteOrder.begin(), permuteOrder.end(), g);
 
-        //Done
         for  (unsigned long i(0); i < pathsToImages.size(); i++) {
             readImageAsVector(pathsToImages[i],tmpVec);
             // Permuting

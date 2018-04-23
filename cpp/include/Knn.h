@@ -82,7 +82,7 @@ public:
                 armsVec.push_back(tmpArm);
             }
 
-            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k);
+            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k, 1);
 //            UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
 
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();

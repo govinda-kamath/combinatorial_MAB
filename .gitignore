@@ -1,6 +1,7 @@
 # CLion stuff
 .idea/
 cmake-build-debug
+log
 
 .ini
 

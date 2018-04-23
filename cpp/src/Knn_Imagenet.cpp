@@ -18,15 +18,15 @@
 
 
 int main(int argc, char *argv[]){
-//    std::string nameConfig = argv[1];
+    std::string nameConfig = argv[1];
 //    long startIndex(atol(argv[2])); // Start index
 //    long endIndex(atol(argv[3])); // End index
 //
 //    int tmp(0);
 
 //     For debugging mode in CLion
-    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal1.ini";
-    long startIndex(0); // Start index
+//    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal.ini";
+    long startIndex(0); // Starmt index
     long endIndex(10); // End index
 
     // Parameters

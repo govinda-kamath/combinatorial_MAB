@@ -108,7 +108,7 @@ public:
     }
 
     virtual std::pair<float, float> pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
-                  unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize){
+                  unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         std::pair<float, float> sample;
         if (numberOfPulls >= dimension){
             float tMean(-INFINITY);
@@ -137,8 +137,8 @@ public:
     }
 
     virtual std::pair<float, float> pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
-                  float logDeltaInverse, bool update, unsigned sampleSize) {
-        return pullArm(p1, *point,  globalSigma,globalNumberOfPulls, logDeltaInverse, update, sampleSize);
+                  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm) {
+        return pullArm(p1, *point,  globalSigma,globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
 
     }
 
@@ -173,8 +173,8 @@ public:
 
     using Arm<templatePoint>::pullArm;
     virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
-                  float logDeltaInverse, bool update = true, unsigned sampleSize=32){
-        return pullArm(*fixedPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize);
+                  float logDeltaInverse, bool update , unsigned sampleSize, float LCBofSecondBestArm){
+        return pullArm(*fixedPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
     }
 
     using Arm<templatePoint>::trueMean;
@@ -222,11 +222,11 @@ public:
 
     using Arm<templatePoint>::pullArm;
     virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
-                  float logDeltaInverse, bool update = true, unsigned sampleSize =32){
+                  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         //Choose a random point
         unsigned long randomCoOrdinate;
         randomCoOrdinate = std::rand() % numberOfPoints;
-        return pullArm((*pointsVec)[randomCoOrdinate], globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize);
+        return pullArm((*pointsVec)[randomCoOrdinate], globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
     }
 
     using Arm<templatePoint>::trueMean;
@@ -280,8 +280,8 @@ public:
 
     using Arm<GroupPoint<templatePoint> >::pullArm;
     virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
-                  float logDeltaInverse, bool update = true, unsigned sampleSize = 32){
-        return pullArm(*leftGroupPoint, *rightGroupPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize);
+                  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
+        return pullArm(*leftGroupPoint, *rightGroupPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
     }
 
     using Arm<GroupPoint<templatePoint> >::trueMeanValue;
