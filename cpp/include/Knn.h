@@ -103,7 +103,7 @@ public:
 //#define Brute
 //#ifndef Brute
             UCB1.initialise(numberOfInitialPulls);
-//            std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
+            std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
             UCB1.runUCB(2000*pointsVectorRight.size());
 //#endif
 
