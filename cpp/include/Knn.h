@@ -175,9 +175,9 @@ public:
             for (unsigned i = 0; i < k*5; i++) {
                 saveFile << topKArms[i].id << " ";
 #ifdef Brute
-                topKArmsTrueMean[i] = topKArmsBrute[i].trueMean();
+                topKArmsTrueMeanBrute[i] = topKArmsBrute[i].trueMean();
 #endif
-                topKArmsTrueMeanBrute[i] = topKArms[i].trueMean();
+                topKArmsTrueMean[i] = topKArms[i].trueMean();
             }
 #ifndef Brute
 
@@ -189,8 +189,8 @@ public:
             std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
 
             saveFile << index << "A" << ": ";
-            std::cout << "\nindex " << index << ": ";
-            for (unsigned i = 0; i < k*2; i++) {
+            std::cout << "\n\nindex " << index << ": ";
+            for (unsigned i = 0; i < k*5; i++) {
                 saveFile <<  " " << topKArmsArgSort[i];
                 std::cout <<  " " << topKArmsArgSort[i];
             }
@@ -198,18 +198,12 @@ public:
             std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
 
 
-            std::cout << "\nindex " << index << ": " ;
-            for (unsigned i = 0; i < k*2; i++) {
+            std::cout << "index " << index << ": " ;
+            for (unsigned i = 0; i < k*5; i++) {
 //                saveFile <<  " " << topKArmsArgSort[i];
                 std::cout <<  " " << topKArms[i].id;
             }
 
-            std::cout << "\nTrue Values " << index << ": " ;
-
-            for (unsigned i = 0; i < k*2; i++) {
-//                saveFile <<  " " << topKArmsArgSort[i];
-                std::cout <<  " " << topKArmsTrueMean[i];
-            }
 #endif
 #ifdef Brute
             bool flag = true;
