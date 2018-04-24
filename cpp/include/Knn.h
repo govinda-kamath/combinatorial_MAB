@@ -30,9 +30,16 @@ public:
     unsigned numberOfInitialPulls; // UCB Parameters
     float delta; // UCB Parameters
     unsigned int sampleSize;
+
+    //Outputs
     std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighbours;
+    std::vector< std::vector<unsigned long> > finalNumberOfPulls;
+    std::vector< std::vector<unsigned long> > finalSortedOrder;
     std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighboursBrute;
     std::vector<short int> nearestNeighboursEvaluated;
+    long long int initTime;
+    long long int runTime;
+
     std::vector<float> avgNumberOfPulls; //Statistics
     bool leftEqualsRight = false; // True when left and right points are the same
 
@@ -67,6 +74,8 @@ public:
         for(unsigned long i(0); i< pointsVectorLeft.size(); i++){
             nearestNeighboursEvaluated.push_back(false);
             nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
+            finalNumberOfPulls.push_back(std::vector<unsigned long>()); //Todo: Bad Code
+            finalSortedOrder.push_back(std::vector<unsigned long>()); //Todo: Bad Code
 #ifdef Brute
             nearestNeighboursBrute.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
 #endif
@@ -91,39 +100,35 @@ public:
 
             UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k, sampleSize);
 
-
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
             UCB1.initialise(numberOfInitialPulls);
             std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
-//            std::cout<< "Initialized and now running" << std::endl;
 
             UCB1.runUCB(2000*pointsVectorRight.size());
 
-
+// Stats
 #ifdef Brute
             std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
 #endif
             std::chrono::system_clock::time_point timeRunEnd = std::chrono::system_clock::now();
-//            ArmKNN<templatePoint> tmp = UCB1.bestArm();
-//            std::chrono::system_clock::time_point timeTrueMeanEnd = std::chrono::system_clock::now();
 
-            long long int initTime = std::chrono::duration_cast<std::chrono::milliseconds>
+            initTime = std::chrono::duration_cast<std::chrono::milliseconds>
                     (timeRunStart - timeStart).count();
-            long long int runTime = std::chrono::duration_cast<std::chrono::milliseconds>
+            runTime = std::chrono::duration_cast<std::chrono::milliseconds>
                     (timeRunEnd - timeRunStart).count();
-//            long long int trueMeanTime = std::chrono::duration_cast<std::chrono::milliseconds>
-//                    (timeTrueMeanEnd - timeRunEnd).count();
 
 
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-
-            std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
-                      << " init time " << initTime << " ms"
-                      << " run time " << runTime << " ms"
-//                    << " true mean time " << trueMeanTime << " ms"
-                      << std::endl;
+            if (index%25==0){
+                std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
+                          << " init time " << initTime << " ms"
+                          << " run time " << runTime << " ms"
+                          << std::endl;
+            }
             nearestNeighbours[index] = UCB1.topKArms;
+            finalSortedOrder[index] = UCB1.finalSortedOrder;
+            finalNumberOfPulls[index] = UCB1.finalNumberOfPulls;
 #ifdef Brute
             nearestNeighboursBrute[index] = UCB1.bruteBestArms();
 #endif
@@ -153,10 +158,10 @@ public:
     }
 
 
-    void saveAnswers(std::string saveFilePath){
+    void saveAnswers(std::string saveFolderPath){
 
-        std::ofstream saveFile;
-        saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
+        std::string  n = std::to_string(pointsVectorLeft.size());
+        std::string  d = std::to_string(nearestNeighbours[0][0].dimension);
         int sum = 0 ;
         int total = 0;
         for (unsigned long index = 0; index<pointsVectorLeft.size() ; index++) {
@@ -164,6 +169,21 @@ public:
                 total += 1;
                 continue;
             }
+
+            std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
+            std::cout << saveFilePath << std::endl;
+            std::ofstream saveFile;
+            saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
+
+            saveFile << "AveragePulls," << avgNumberOfPulls[index] << "\n";
+            saveFile << "InitTime," << initTime << "\n";
+            saveFile << "RunTime," << runTime << "\n";
+            saveFile << "NumberOfInitialPulls," << numberOfInitialPulls << "\n";
+            saveFile << "SampleSize," << sampleSize << "\n";
+            saveFile << "n," << n << "\n";
+            saveFile << "d," << d << "\n";
+            saveFile << "k," << k << "\n";
+
             std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours[index];
 #ifdef Brute
             std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute[index];
@@ -171,9 +191,10 @@ public:
             std::vector<float> topKArmsTrueMean(k*5);
             std::vector<float> topKArmsTrueMeanBrute(k*5);
 
-            saveFile << index << "L ";
+
+            saveFile << "Answer,";
             for (unsigned i = 0; i < k*5; i++) {
-                saveFile << topKArms[i].id << " ";
+                saveFile << topKArms[i].id << ",";
 #ifdef Brute
                 topKArmsTrueMeanBrute[i] = topKArmsBrute[i].trueMean();
 #endif
@@ -187,14 +208,29 @@ public:
             std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
             auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
             std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
-
-            saveFile << index << "A" << ": ";
             std::cout << "\n\nindex " << index << ": ";
+
+            saveFile << "Position";
             for (unsigned i = 0; i < k*5; i++) {
-                saveFile <<  " " << topKArmsArgSort[i];
+                saveFile <<  "," << topKArmsArgSort[i];
                 std::cout <<  " " << topKArmsArgSort[i];
             }
-            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
+            saveFile << std::endl;
+
+            saveFile << "AllPullsNumber";
+            for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
+                saveFile <<  "," << finalNumberOfPulls[index][i];
+            }
+            saveFile << std::endl;
+
+            saveFile << "AllPullsIndex";
+            for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
+                saveFile <<  "," << finalSortedOrder[index][i];
+            }
+            saveFile << std::endl;
+
+
+
             std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
 
 

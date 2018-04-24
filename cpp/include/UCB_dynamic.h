@@ -25,6 +25,9 @@ public:
 
     std::vector<templateArm> armsContainer;
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
+    std::vector<unsigned long> finalNumberOfPulls;
+    std::vector<unsigned long> finalSortedOrder;
+
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > armsBrute;
     std::vector<templateArm> topKArms;
     std::unordered_set <unsigned long > armsToKeep;
@@ -157,7 +160,10 @@ public:
 //                                 <<  topArm.trueMeanValue << "\t"
 //                                 <<  topArm.trueMean() << std::endl;
 
+                // Storing the results
                 topKArms.push_back(topArm);
+                finalSortedOrder.push_back(topArm.id);
+                finalNumberOfPulls.push_back(topArm.numberOfPulls);
                 arms.pop();
                 markForRemoval(topArm.id);
                 bestArmCount++;
@@ -255,8 +261,12 @@ public:
 
     // Stores extra top arms for evaluations. These arms are not optimally chosen
     void storeExtraTopArms(){
-        for (unsigned i=0; i < numberOfExtraArms; i++) {
-            topKArms.push_back(topValidArm());
+        for (unsigned i=0; !arms.empty(); i++) {
+            templateArm topArm = topValidArm();
+            finalSortedOrder.push_back(topArm.id);
+            finalNumberOfPulls.push_back(topArm.numberOfPulls);
+            if (i < numberOfExtraArms)
+                topKArms.push_back(topArm);
             arms.pop();
         }
     }

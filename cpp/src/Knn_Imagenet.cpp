@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
     std::string directoryPath = reader.Get("path", "directory", "");
-    std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
+    std::string saveFileFolder =reader.Get("path", "saveFileFolder", "experiments/knn/tmp");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
@@ -61,12 +61,13 @@ int main(int argc, char *argv[]){
     std::cout << "Running" << std::endl;
     knn.run(indices);
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-    std::cout << "Saving now" <<std::endl;
-    knn.saveAnswers("./test1.out");
 
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                       (endIndex-startIndex) << std::endl;
+
+    std::cout << "Saving now" <<std::endl;
+    knn.saveAnswers(saveFileFolder);
 
     return 0;
 }
