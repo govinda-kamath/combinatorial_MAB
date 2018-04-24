@@ -33,7 +33,7 @@ public:
     std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighbours;
     std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighboursBrute;
     std::vector<short int> nearestNeighboursEvaluated;
-    std::vector<float> avgNumberOfPulls; //Stat
+    std::vector<float> avgNumberOfPulls; //Statistics
     bool leftEqualsRight = false; // True when left and right points are the same
 
     Knn( const std::vector<templatePoint> &pVecL, const std::vector<templatePoint> &pVecR,
@@ -67,7 +67,9 @@ public:
         for(unsigned long i(0); i< pointsVectorLeft.size(); i++){
             nearestNeighboursEvaluated.push_back(false);
             nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
+#ifdef Brute
             nearestNeighboursBrute.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
+#endif
         }
 
     }
@@ -98,7 +100,7 @@ public:
             UCB1.runUCB(2000*pointsVectorRight.size());
 
 
-#ifndef Brute
+#ifdef Brute
             std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
 #endif
@@ -122,7 +124,10 @@ public:
 //                    << " true mean time " << trueMeanTime << " ms"
                       << std::endl;
             nearestNeighbours[index] = UCB1.topKArms;
+#ifdef Brute
             nearestNeighboursBrute[index] = UCB1.bruteBestArms();
+#endif
+
             nearestNeighboursEvaluated[index] = true;
         }
     }
@@ -160,53 +165,53 @@ public:
                 continue;
             }
             std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours[index];
+#ifdef Brute
             std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute[index];
+#endif
             std::vector<float> topKArmsTrueMean(k*5);
             std::vector<float> topKArmsTrueMeanBrute(k*5);
 
             saveFile << index << "L ";
             for (unsigned i = 0; i < k*5; i++) {
                 saveFile << topKArms[i].id << " ";
+#ifdef Brute
                 topKArmsTrueMean[i] = topKArmsBrute[i].trueMean();
+#endif
                 topKArmsTrueMeanBrute[i] = topKArms[i].trueMean();
             }
-//            saveFile << std::endl;
-//
-//            std::vector<int> topKArmsArgSort(k*5);
-//            std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
-//            auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
-//            std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
-//
-//            saveFile << index << "A" << ": ";
-//            std::cout << "\nindex " << index << ": ";
-//            for (unsigned i = 0; i < k*2; i++) {
+#ifndef Brute
+
+            saveFile << std::endl;
+
+            std::vector<int> topKArmsArgSort(k*5);
+            std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
+            auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
+            std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
+
+            saveFile << index << "A" << ": ";
+            std::cout << "\nindex " << index << ": ";
+            for (unsigned i = 0; i < k*2; i++) {
+                saveFile <<  " " << topKArmsArgSort[i];
+                std::cout <<  " " << topKArmsArgSort[i];
+            }
+            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
+            std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
+
+
+            std::cout << "\nindex " << index << ": " ;
+            for (unsigned i = 0; i < k*2; i++) {
 //                saveFile <<  " " << topKArmsArgSort[i];
-//                std::cout <<  " " << topKArmsArgSort[i];
-//            }
-//            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
-//            std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
-//
-//
-//            std::cout << "Brute index " << index << ": " ;
-//            for (unsigned i = 0; i < k*2; i++) {
-////                saveFile <<  " " << topKArmsArgSort[i];
-//                std::cout <<  " " << topKArmsBrute[i].id;
-//            }
-//
-//
-//            std::cout << "\nindex " << index << ": " ;
-//            for (unsigned i = 0; i < k*2; i++) {
-////                saveFile <<  " " << topKArmsArgSort[i];
-//                std::cout <<  " " << topKArms[i].id;
-//            }
-//
-//            std::cout << "\nTrue Values " << index << ": " ;
-//
-//            for (unsigned i = 0; i < k*2; i++) {
-////                saveFile <<  " " << topKArmsArgSort[i];
-//                std::cout <<  " " << topKArmsTrueMean[i];
-//            }
-//
+                std::cout <<  " " << topKArms[i].id;
+            }
+
+            std::cout << "\nTrue Values " << index << ": " ;
+
+            for (unsigned i = 0; i < k*2; i++) {
+//                saveFile <<  " " << topKArmsArgSort[i];
+                std::cout <<  " " << topKArmsTrueMean[i];
+            }
+#endif
+#ifdef Brute
             bool flag = true;
             for (unsigned i = 0; i < k; i++) {
                 if (topKArms[i].id!=topKArmsBrute[i].id)
@@ -224,6 +229,7 @@ public:
                 for (unsigned i = 0; i < 2*k; i++) {
                     std::cout << topKArms[i].id << " ";
                 }
+
                 std::cout << "\nBrute: " ;
                 for (unsigned i = 0; i < 2*k; i++) {
                     std::cout << topKArmsBrute[i].id << " ";
@@ -238,8 +244,12 @@ public:
                 }
             }
             sum += (int) flag;
+#endif
         }
+
+#ifdef Brute
         std::cout << "Total " << pointsVectorLeft.size() - total
                               << "Correct " << sum << std::endl;
+#endif
     }
 };

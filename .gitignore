@@ -4,6 +4,7 @@ cmake-build-debug
 log
 test_dataset
 .ini
+*del*
 
 # Prerequisites
 *.d

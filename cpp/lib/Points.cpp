@@ -57,7 +57,7 @@ std::pair<float, float> SquaredEuclideanPoint::sampledDistance(const SquaredEucl
     assert(("Sizes do not match", point.size() == p1.point.size()));
     float sampleSum = 0;
     float sampleSquareSum = 0;
-    unsigned int dimensionPointer = std::rand(); // Todo: Bad code
+//    unsigned int dimensionPointer = std::rand(); // Todo: Bad code
 //    std::cout << dimensionPointer << std::endl;
     for(unsigned i(0); i< sampleSize; i++) {
         unsigned long coordinate = std::rand() % getVecSize();
@@ -65,7 +65,7 @@ std::pair<float, float> SquaredEuclideanPoint::sampledDistance(const SquaredEucl
                      *(point[coordinate] - p1.point[coordinate]);
         sampleSum += value;
         sampleSquareSum += value*value;
-        dimensionPointer ++;
+//        dimensionPointer ++;
     }
     return std::make_pair(sampleSum, sampleSquareSum);
 }
@@ -94,11 +94,11 @@ std::pair<float, float> L1Point::sampledDistance(const L1Point &p1, const unsign
     float sampleSum = 0;
     float sampleSquareSum = 0;
     for(unsigned i(0); i< sampleSize; i++) {
-        unsigned long coordinate = dimensionPointer % getVecSize();
+        unsigned long coordinate = std::rand() % getVecSize();
         float value = std::abs(point[coordinate] - p1.point[coordinate]);
         sampleSum += value;
         sampleSquareSum += value*value;
-        dimensionPointer ++;
+//        dimensionPointer ++;
     }
     return std::make_pair(sampleSum, sampleSquareSum);
 }
