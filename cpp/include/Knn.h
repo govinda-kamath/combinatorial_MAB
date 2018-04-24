@@ -110,7 +110,7 @@ public:
 // Stats
 #ifdef Brute
             std::cout << "Running Brute" << std::endl;
-            std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
+//            std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
             UCB1.armsKeepFromArmsContainerBrute();
 #endif
             std::chrono::system_clock::time_point timeRunEnd = std::chrono::system_clock::now();
