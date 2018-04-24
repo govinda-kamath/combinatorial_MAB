@@ -37,8 +37,8 @@ public:
     std::vector< std::vector<unsigned long> > finalSortedOrder;
     std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighboursBrute;
     std::vector<short int> nearestNeighboursEvaluated;
-    long long int initTime;
-    long long int runTime;
+    std::vector<long long int> initTime;
+    std::vector<long long int> runTime;
 
     std::vector<float> avgNumberOfPulls; //Statistics
     bool leftEqualsRight = false; // True when left and right points are the same
@@ -113,18 +113,18 @@ public:
 #endif
             std::chrono::system_clock::time_point timeRunEnd = std::chrono::system_clock::now();
 
-            initTime = std::chrono::duration_cast<std::chrono::milliseconds>
-                    (timeRunStart - timeStart).count();
-            runTime = std::chrono::duration_cast<std::chrono::milliseconds>
-                    (timeRunEnd - timeRunStart).count();
+            initTime.push_back(std::chrono::duration_cast<std::chrono::milliseconds>
+                    (timeRunStart - timeStart).count());
+            runTime.push_back(std::chrono::duration_cast<std::chrono::milliseconds>
+                    (timeRunEnd - timeRunStart).count());
 
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
             if (index%25==0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
-                          << " init time " << initTime << " ms"
-                          << " run time " << runTime << " ms"
+                          << " init time " << initTime[index] << " ms"
+                          << " run time " << runTime[index] << " ms"
                           << std::endl;
             }
             nearestNeighbours[index] = UCB1.topKArms;
@@ -177,8 +177,8 @@ public:
             saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
 
             saveFile << "AveragePulls," << avgNumberOfPulls[index] << "\n";
-            saveFile << "InitTime," << initTime << "\n";
-            saveFile << "RunTime," << runTime << "\n";
+            saveFile << "InitTime," << initTime[index] << "\n";
+            saveFile << "RunTime," << runTime[index] << "\n";
             saveFile << "NumberOfInitialPulls," << numberOfInitialPulls << "\n";
             saveFile << "SampleSize," << sampleSize << "\n";
             saveFile << "n," << n << "\n";
