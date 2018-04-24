@@ -2,7 +2,7 @@
 .idea/
 cmake-build-debug
 log
-
+test_dataset
 .ini
 
 # Prerequisites

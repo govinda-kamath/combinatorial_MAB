@@ -75,10 +75,11 @@ public:
 //        compositeSigma = globalSigma; //Todo: update sigma to new local value
         localSigma = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
         if (localSigma<0){
-            std::cout << "fuck!" <<std::endl;
+            std::cout << "duck!" <<std::endl;
         }
         float frac = numberOfPulls/globalNumberOfPulls;
-        compositeSigma = std::sqrt( localSigma*frac +  globalSigma*globalSigma*(1- frac));
+//        frac = 0;
+        compositeSigma = std::sqrt( localSigma*localSigma*frac +  globalSigma*globalSigma*(1- frac));
 
 
         intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/(float)numberOfPulls);
@@ -93,7 +94,7 @@ public:
             estimateOfSecondMoment = trueMeanValue*trueMeanValue;
         }
         else{
-            estimateOfMean = sumOfPulls / numberOfPulls;
+            estimateOfMean = sumOfPulls/numberOfPulls;
             estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
         }
     }
@@ -124,14 +125,24 @@ public:
             sample.second = tMean*tMean;
         }
         else {
-            sample = p2.sampledDistance(p1, sampleSize);
-            numberOfPulls += sampleSize;
-            sumOfPulls += sample.first;
-            sumOfSquaresOfPulls += sample.second;
-            estimateOfMean = sumOfPulls / numberOfPulls;
-            estimateOfSecondMoment = sumOfSquaresOfPulls/numberOfPulls;
-            if (update)
-                updateConfidenceIntervals( globalSigma, globalNumberOfPulls, logDeltaInverse);
+//            unsigned tmp = 0;
+           do {
+//               tmp++;
+//               std::cout << id << "\t" << "tmp = " << tmp << "\t"
+//                         << lowerConfidenceBound << "\t"
+//                         << "\t" << LCBofSecondBestArm
+//                         << "\t" << upperConfidenceBound
+//                         << std::endl;
+               sample = p2.sampledDistance(p1, sampleSize);
+               numberOfPulls += sampleSize;
+               sumOfPulls += sample.first;
+               sumOfSquaresOfPulls += sample.second;
+               estimateOfMean = sumOfPulls / numberOfPulls;
+               estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
+               if (update)
+                   updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+           } while (lowerConfidenceBound < LCBofSecondBestArm && upperConfidenceBound  > LCBofSecondBestArm && update && false);
+//        std::cout << id << "\t" << lowerConfidenceBound << "\t" << LCBofSecondBestArm << "\t" << tmp << std::endl;
         }
         return sample;
     }
@@ -185,6 +196,7 @@ public:
     using Arm<templatePoint>::estimateOfMean;
     using Arm<templatePoint>::upperConfidenceBound;
     using Arm<templatePoint>::lowerConfidenceBound;
+
     std::unordered_map<std::string, float> trueMeanUpdate(){
         float localSumOfPulls = trueMean(*fixedPoint);
         float localSumOfSquaresOfPulls = localSumOfPulls*localSumOfPulls;

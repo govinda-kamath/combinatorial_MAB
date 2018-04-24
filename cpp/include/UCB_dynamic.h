@@ -59,8 +59,8 @@ public:
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
         }
         updateGlobalSigma();
-        std::cout << "Global sigma after initialization =  " << globalSigma << std::endl;
-        std::cout << "Global Number Of Pulls =  " << globalNumberOfPulls << std::endl;
+//        std::cout << "Global sigma after initialization =  " << globalSigma << std::endl;
+//        std::cout << "Global Number Of Pulls =  " << globalNumberOfPulls << std::endl;
         for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
             addSingleArm(armsContainer[armIndex]);
         }
@@ -153,6 +153,10 @@ public:
             // Update if best arm is found
             if (bestArmFound){
                 templateArm topArm = topValidArm();
+//                std::cout << "Brute best arm " << topArm.id << "\t" << topArm.estimateOfMean << "\t"
+//                                 <<  topArm.trueMeanValue << "\t"
+//                                 <<  topArm.trueMean() << std::endl;
+
                 topKArms.push_back(topArm);
                 arms.pop();
                 markForRemoval(topArm.id);
@@ -302,10 +306,14 @@ public:
     }
 
     // For brute force only
-    templateArm bruteBestArm(){
-        templateArm bestArm = topValidArmBrute();
-        armsBrute.pop();
-        return bestArm;
+    std::vector<templateArm> bruteBestArms(){
+        std::vector<templateArm> bestArms;
+        for( int i = 0 ; i < numberOfBestArms+numberOfExtraArms; i++){
+            templateArm bestArm = topValidArmBrute();
+            armsBrute.pop();
+            bestArms.push_back(bestArm);
+        }
+        return bestArms;
     }
 };
 

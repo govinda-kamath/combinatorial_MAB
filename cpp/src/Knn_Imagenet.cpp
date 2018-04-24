@@ -19,15 +19,15 @@
 
 int main(int argc, char *argv[]){
     std::string nameConfig = argv[1];
-//    long startIndex(atol(argv[2])); // Start index
-//    long endIndex(atol(argv[3])); // End index
+    long startIndex(atol(argv[2])); // Start index
+    long endIndex(atol(argv[3])); // End index
 //
 //    int tmp(0);
 
-//     For debugging mode in CLion
+//    For debugging mode in CLion
 //    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal.ini";
-    long startIndex(0); // Starmt index
-    long endIndex(10); // End index
+//    long startIndex(0); // Start index
+//    long endIndex(10); // End index
 
     // Parameters
     INIReader reader(nameConfig);
@@ -39,6 +39,8 @@ int main(int argc, char *argv[]){
     std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
+    unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
+
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
 
@@ -53,13 +55,13 @@ int main(int argc, char *argv[]){
 
     // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Knn<SquaredEuclideanPoint> knn(pointsVec, k, numberOfInitialPulls, delta );
+    Knn<SquaredEuclideanPoint> knn(pointsVec, k, numberOfInitialPulls, delta, sampleSize);
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
     std::cout << "Running" << std::endl;
     knn.run(indices);
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
-    std::cout << "Saving onw" <<std::endl;
+    std::cout << "Saving now" <<std::endl;
     knn.saveAnswers("./test1.out");
 
     std::cout << "Average time (ms) "

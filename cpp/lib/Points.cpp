@@ -58,8 +58,9 @@ std::pair<float, float> SquaredEuclideanPoint::sampledDistance(const SquaredEucl
     float sampleSum = 0;
     float sampleSquareSum = 0;
     unsigned int dimensionPointer = std::rand(); // Todo: Bad code
+//    std::cout << dimensionPointer << std::endl;
     for(unsigned i(0); i< sampleSize; i++) {
-        unsigned long coordinate = dimensionPointer % getVecSize();
+        unsigned long coordinate = std::rand() % getVecSize();
         float value = (point[coordinate] - p1.point[coordinate])
                      *(point[coordinate] - p1.point[coordinate]);
         sampleSum += value;

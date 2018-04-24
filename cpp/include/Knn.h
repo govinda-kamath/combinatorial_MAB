@@ -29,24 +29,27 @@ public:
     unsigned k; // Number of nearest neighbhours
     unsigned numberOfInitialPulls; // UCB Parameters
     float delta; // UCB Parameters
-
+    unsigned int sampleSize;
     std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighbours;
+    std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighboursBrute;
     std::vector<short int> nearestNeighboursEvaluated;
     std::vector<float> avgNumberOfPulls; //Stat
     bool leftEqualsRight = false; // True when left and right points are the same
 
     Knn( const std::vector<templatePoint> &pVecL, const std::vector<templatePoint> &pVecR,
-         unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
+         unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy, unsigned int sSize ) {
         pointsVectorLeft = pVecL;
         pointsVectorRight = pVecR;
+        sampleSize = sSize;
         initialiseKNN(NumberOfNeighbours, noOfInitialPulls,  deltaAccuracy );
     }
 
     Knn( const std::vector<templatePoint> &pVecL,
-         unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy ) {
+         unsigned NumberOfNeighbours, unsigned noOfInitialPulls, float deltaAccuracy , unsigned int sSize ) {
         pointsVectorLeft = pVecL;
         pointsVectorRight = pVecL;
         leftEqualsRight = true;
+        sampleSize = sSize;
         initialiseKNN(NumberOfNeighbours, noOfInitialPulls,  deltaAccuracy );
     }
 
@@ -58,11 +61,13 @@ public:
         delta = deltaAccuracy;
 
         nearestNeighbours.reserve(pointsVectorLeft.size());
+        nearestNeighboursBrute.reserve(pointsVectorLeft.size());
         avgNumberOfPulls.reserve(pointsVectorLeft.size());
 
         for(unsigned long i(0); i< pointsVectorLeft.size(); i++){
             nearestNeighboursEvaluated.push_back(false);
             nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
+            nearestNeighboursBrute.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
         }
 
     }
@@ -82,14 +87,21 @@ public:
                 armsVec.push_back(tmpArm);
             }
 
-            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k, 1);
-//            UCB<ArmKNN<templatePoint> > UCB1(armsVec, delta, k);
+            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k, sampleSize);
+
 
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
             UCB1.initialise(numberOfInitialPulls);
             std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
 //            std::cout<< "Initialized and now running" << std::endl;
+
             UCB1.runUCB(2000*pointsVectorRight.size());
+
+
+#ifndef Brute
+            std::cout << "Running Brute" << std::endl;
+            UCB1.armsKeepFromArmsContainerBrute();
+#endif
             std::chrono::system_clock::time_point timeRunEnd = std::chrono::system_clock::now();
 //            ArmKNN<templatePoint> tmp = UCB1.bestArm();
 //            std::chrono::system_clock::time_point timeTrueMeanEnd = std::chrono::system_clock::now();
@@ -103,13 +115,14 @@ public:
 
 
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
+
             std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                       << " init time " << initTime << " ms"
                       << " run time " << runTime << " ms"
 //                    << " true mean time " << trueMeanTime << " ms"
                       << std::endl;
-
             nearestNeighbours[index] = UCB1.topKArms;
+            nearestNeighboursBrute[index] = UCB1.bruteBestArms();
             nearestNeighboursEvaluated[index] = true;
         }
     }
@@ -120,12 +133,14 @@ public:
         run(indices);
     }
 
+
+
     std::vector<std::vector<ArmKNN<templatePoint>> > get(std::vector<unsigned long> indices){
         std::vector<std::vector<ArmKNN<templatePoint>> > answers;
         for (unsigned long i = 0; i< indices.size(); i++) {
             unsigned long index = indices[i];
             if (not nearestNeighboursEvaluated[index])
-                throw std::invalid_argument("Trying to get nearest neighbhour to a point! You have not ran nn on it");
+                throw std::invalid_argument("Trying to get nearest neighbhour to a point! You havent yet run NN on it");
             answers.push_back(nearestNeighbours[index]);
         }
         return answers;
@@ -137,42 +152,94 @@ public:
 
         std::ofstream saveFile;
         saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
-
+        int sum = 0 ;
+        int total = 0;
         for (unsigned long index = 0; index<pointsVectorLeft.size() ; index++) {
-            if (not nearestNeighboursEvaluated[index])
+            if (not nearestNeighboursEvaluated[index]){
+                total += 1;
                 continue;
+            }
             std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours[index];
+            std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute[index];
             std::vector<float> topKArmsTrueMean(k*5);
+            std::vector<float> topKArmsTrueMeanBrute(k*5);
 
             saveFile << index << "L ";
             for (unsigned i = 0; i < k*5; i++) {
                 saveFile << topKArms[i].id << " ";
-                topKArmsTrueMean[i] = topKArms[i].trueMean();
+                topKArmsTrueMean[i] = topKArmsBrute[i].trueMean();
+                topKArmsTrueMeanBrute[i] = topKArms[i].trueMean();
             }
-            saveFile << std::endl;
-
-            std::vector<int> topKArmsArgSort(k*5);
-            std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
-            auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
-            std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
-
-            saveFile << index << "A" << ": ";
-            std::cout << "index " << index << ": ";
-            for (unsigned i = 0; i < k*5; i++) {
-                saveFile <<  " " << topKArmsArgSort[i];
-                std::cout <<  " " << topKArmsArgSort[i];
-            }
-            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
-            std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
-
-
-            std::cout << "index " << index << ": " ;
-            for (unsigned i = 0; i < k*5; i++) {
+//            saveFile << std::endl;
+//
+//            std::vector<int> topKArmsArgSort(k*5);
+//            std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
+//            auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
+//            std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
+//
+//            saveFile << index << "A" << ": ";
+//            std::cout << "\nindex " << index << ": ";
+//            for (unsigned i = 0; i < k*2; i++) {
 //                saveFile <<  " " << topKArmsArgSort[i];
-                std::cout <<  " " << topKArms[i].id;
-            }
+//                std::cout <<  " " << topKArmsArgSort[i];
+//            }
 //            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
-            std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
+//            std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
+//
+//
+//            std::cout << "Brute index " << index << ": " ;
+//            for (unsigned i = 0; i < k*2; i++) {
+////                saveFile <<  " " << topKArmsArgSort[i];
+//                std::cout <<  " " << topKArmsBrute[i].id;
+//            }
+//
+//
+//            std::cout << "\nindex " << index << ": " ;
+//            for (unsigned i = 0; i < k*2; i++) {
+////                saveFile <<  " " << topKArmsArgSort[i];
+//                std::cout <<  " " << topKArms[i].id;
+//            }
+//
+//            std::cout << "\nTrue Values " << index << ": " ;
+//
+//            for (unsigned i = 0; i < k*2; i++) {
+////                saveFile <<  " " << topKArmsArgSort[i];
+//                std::cout <<  " " << topKArmsTrueMean[i];
+//            }
+//
+            bool flag = true;
+            for (unsigned i = 0; i < k; i++) {
+                if (topKArms[i].id!=topKArmsBrute[i].id)
+                    flag = false;
+            }
+//
+//
+////            saveFile << " Av:" << avgNumberOfPulls[index] << "\n";
+//            std::cout << " Av:" << avgNumberOfPulls[index];
+            std::cout << "index " << index << ": ";
+
+            std::cout << "Verdict: " << flag << "\n";
+            if (flag == false){
+                std::cout << "\nUCB: " ;
+                for (unsigned i = 0; i < 2*k; i++) {
+                    std::cout << topKArms[i].id << " ";
+                }
+                std::cout << "\nBrute: " ;
+                for (unsigned i = 0; i < 2*k; i++) {
+                    std::cout << topKArmsBrute[i].id << " ";
+                }
+
+                for (unsigned i = 0; i < 2*k; i++) {
+                    std::cout << topKArmsTrueMean[i] << " ";
+                }
+                std::cout << "\nBrute: " ;
+                for (unsigned i = 0; i < 2*k; i++) {
+                    std::cout << topKArmsTrueMeanBrute[i] << " ";
+                }
+            }
+            sum += (int) flag;
         }
+        std::cout << "Total " << pointsVectorLeft.size() - total
+                              << "Correct " << sum << std::endl;
     }
 };
