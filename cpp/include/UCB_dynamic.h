@@ -57,8 +57,6 @@ public:
     // Step 1 of UCB
     void initialise(unsigned numberOfInitialPulls = 100){
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
-            if (armIndex%10000==0)
-                std::cout << armIndex << "\t";
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
         }
         updateGlobalSigma();

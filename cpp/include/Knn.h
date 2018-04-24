@@ -123,12 +123,12 @@ public:
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            if (index%25==0){
+//            if (index%25==0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                           << " init time " << initTime[index] << " ms"
                           << " run time " << runTime[index] << " ms"
                           << std::endl;
-            }
+//            }
             nearestNeighbours[index] = UCB1.topKArms;
             finalSortedOrder[index] = UCB1.finalSortedOrder;
             finalNumberOfPulls[index] = UCB1.finalNumberOfPulls;
@@ -174,7 +174,7 @@ public:
             }
 
             std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
-            std::cout << saveFilePath << std::endl;
+//            std::cout << saveFilePath << std::endl;
             std::ofstream saveFile;
             saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
 
@@ -211,7 +211,7 @@ public:
             std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
             auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
             std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
-            std::cout << "\n\nindex " << index << ": ";
+            std::cout << "\nPoint number " << index << ": Rank:\t";
 
             saveFile << "Position";
             for (unsigned i = 0; i < k*5; i++) {
@@ -237,7 +237,7 @@ public:
             std::cout << " Av:" << avgNumberOfPulls[index] << "\n";
 
 
-            std::cout << "index " << index << ": " ;
+            std::cout << "\nPoint number " << index << ": ArmId:\t";
             for (unsigned i = 0; i < k*5; i++) {
 //                saveFile <<  " " << topKArmsArgSort[i];
                 std::cout <<  " " << topKArms[i].id;
