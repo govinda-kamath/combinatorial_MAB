@@ -119,6 +119,7 @@ public:
                     (timeRunEnd - timeRunStart).count();
 
 
+            UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
             if (index%25==0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]

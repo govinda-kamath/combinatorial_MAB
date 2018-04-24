@@ -184,7 +184,6 @@ public:
         std::cout << "Best arm number " << bestArmCount << " Position" << i
                   << " Max iter" << maxIterations  << std::endl;
 #endif
-        storeExtraTopArms(); //Storing extra arms
     }
 
 
