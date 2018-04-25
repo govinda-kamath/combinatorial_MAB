@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
 
     // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Knn<SquaredEuclideanPoint> knn(pointsVec, k, numberOfInitialPulls, delta, sampleSize);
+    Knn<SquaredEuclideanPoint> knn(pointsVec, k, numberOfInitialPulls, delta, sampleSize, saveFileFolder);
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
     std::cout << "Running" << std::endl;
@@ -66,8 +66,8 @@ int main(int argc, char *argv[]){
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                       (endIndex-startIndex) << std::endl;
 
-    std::cout << "Saving now" <<std::endl;
-    knn.saveAnswers(saveFileFolder);
+//    std::cout << "Saving now" <<std::endl;
+//    knn.saveAnswers();
 
     return 0;
 }
