@@ -32,10 +32,10 @@ public:
     unsigned int sampleSize;
 
     //Outputs
-    std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighbours;
-    std::vector< std::vector<unsigned long> > finalNumberOfPulls;
-    std::vector< std::vector<unsigned long> > finalSortedOrder;
-    std::vector<std::vector<ArmKNN<templatePoint>> > nearestNeighboursBrute;
+    std::vector<ArmKNN<templatePoint>>nearestNeighbours;
+    std::vector<unsigned long> finalNumberOfPulls;
+    std::vector<unsigned long> finalSortedOrder;
+    std::vector<ArmKNN<templatePoint>> nearestNeighboursBrute;
     std::vector<long long int> initTime;
     std::vector<long long int> runTime;
     std::string saveFolderPath;
@@ -74,15 +74,6 @@ public:
         nearestNeighbours.reserve(pointsVectorLeft.size());
         nearestNeighboursBrute.reserve(pointsVectorLeft.size());
         avgNumberOfPulls.reserve(pointsVectorLeft.size());
-
-        for(unsigned long i(0); i< pointsVectorLeft.size(); i++){
-            nearestNeighbours.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
-            finalNumberOfPulls.push_back(std::vector<unsigned long>()); //Todo: Bad Code
-            finalSortedOrder.push_back(std::vector<unsigned long>()); //Todo: Bad Code
-#ifdef Brute
-            nearestNeighboursBrute.push_back(std::vector<ArmKNN<templatePoint>>()); //Todo: Bad Code
-#endif
-        }
 
     }
 
@@ -129,11 +120,11 @@ public:
                           << " run time " << runTime[index] << " ms"
                           << std::endl;
 //            }
-            nearestNeighbours[index] = UCB1.topKArms;
-            finalSortedOrder[index] = UCB1.finalSortedOrder;
-            finalNumberOfPulls[index] = UCB1.finalNumberOfPulls;
+            nearestNeighbours = UCB1.topKArms;
+            finalSortedOrder = UCB1.finalSortedOrder;
+            finalNumberOfPulls = UCB1.finalNumberOfPulls;
 #ifdef Brute
-            nearestNeighboursBrute[index] = UCB1.bruteBestArms();
+            nearestNeighboursBrute = UCB1.bruteBestArms();
 #endif
 
 
@@ -153,7 +144,7 @@ public:
         std::vector<std::vector<ArmKNN<templatePoint>> > answers;
         for (unsigned long i = 0; i< indices.size(); i++) {
             unsigned long index = indices[i];
-            answers.push_back(nearestNeighbours[index]);
+            answers.push_back(nearestNeighbours);
         }
         return answers;
 
@@ -164,13 +155,13 @@ public:
 
         //Variables
         std::string  n = std::to_string(pointsVectorLeft.size());
-        std::string  d = std::to_string(nearestNeighbours[0][0].dimension);
+        std::string  d = std::to_string(nearestNeighbours[0].dimension);
         std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
         std::ofstream saveFile;
         saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
-        std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours[index];
+        std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours;
 #ifdef Brute
-        std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute[index];
+        std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute;
 #endif
         std::vector<float> topKArmsTrueMean(k*5);
         std::vector<float> topKArmsTrueMeanBrute(k*5);
@@ -213,13 +204,13 @@ public:
         // Saving stats for all the arms
         saveFile << "AllPullsNumber";
         for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-            saveFile <<  "," << finalNumberOfPulls[index][i];
+            saveFile <<  "," << finalNumberOfPulls[i];
         }
         saveFile << std::endl;
 
         saveFile << "AllPullsIndex";
         for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-            saveFile <<  "," << finalSortedOrder[index][i];
+            saveFile <<  "," << finalSortedOrder[i];
         }
         saveFile << std::endl;
 
