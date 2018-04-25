@@ -70,11 +70,10 @@ public:
     // Used by Step 1 of UCB
     void initialiseSingleArm( templateArm &singleArm, unsigned numberOfInitialPulls = 100){
         std::pair<float, float> sample;
-        sample = singleArm.pullArm(0, NAN, 0, false, numberOfInitialPulls, -1);
-        globalSumOfPulls += sample.first;
-        globalSumOfSquaresOfPulls += sample.second;
-        globalNumberOfPulls += numberOfInitialPulls;
-
+            sample = singleArm.pullArm(0, NAN, 0, false, numberOfInitialPulls, -1);
+            globalSumOfPulls += sample.first;
+            globalSumOfSquaresOfPulls += sample.second;
+            globalNumberOfPulls += numberOfInitialPulls;
     }
 
     // Used by Step 1 of UCB
@@ -86,10 +85,12 @@ public:
         arms.push(singleArm);
     }
 
-    // Dynamic part of UCB. Uaed to add new arm
+    // Dynamic part of UCB. Used to add new arm
     void initialiseAndAddNewArm( templateArm &newArm, unsigned numberOfInitialPulls = 100){
-        initialiseSingleArm(newArm, numberOfInitialPulls);
-        newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+        if (numberOfInitialPulls > 0) {
+            initialiseSingleArm(newArm, numberOfInitialPulls);
+            newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+        }
         armStates[newArm.id] = utils::ArmConditions(newArm.numberOfPulls, newArm.sumOfPulls,
                                            newArm.sumOfSquaresOfPulls, newArm.trueMeanValue);
         armsToKeep.insert(newArm.id);
@@ -199,21 +200,26 @@ public:
         }
         if (UCBofBestArm < LCBofSecondBestArm){
 
-            /* Evaluating true mean of best arm
-            std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
-            bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
-            bestArm.upperConfidenceBound = bestArm.estimateOfMean;
-            bestArm.lowerConfidenceBound = bestArm.estimateOfMean;
-            globalNumberOfPulls += result["effectiveDimension"];
-            globalSumOfPulls += result["sumOfPulls"];
-            globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
+            // Evaluating true mean of best arm
 
-            if (bestArm.estimateOfMean > LCBofSecondBestArm){
-                std::cout<< "False trigger by " << bestArm.id << std::endl;
-                arms.push(bestArm);
-                return false;
-            }
-            */
+//            bestArm.estimateOfMean = bestArm.trueMean();
+//            secondBestArm.estimateOfMean  = secondBestArm.trueMean();
+//            std::cout << secondBestArm.estimateOfMean  << "\t" << bestArm.estimateOfMean <<std::endl;
+//            secondBestArm.upperConfidenceBound = secondBestArm.estimateOfMean;
+//            secondBestArm.lowerConfidenceBound = secondBestArm.estimateOfMean;
+//            bestArm.upperConfidenceBound = bestArm.estimateOfMean;
+//            bestArm.lowerConfidenceBound = bestArm.estimateOfMean;
+
+//            globalNumberOfPulls += result["effectiveDimension"];
+//            globalSumOfPulls += result["sumOfPulls"];
+//            globalSumOfSquaresOfPulls += result["sumOfSquaresPulls"];
+
+//            if (bestArm.estimateOfMean > secondBestArm.estimateOfMean ){
+//                std::cout<< "False trigger by " << bestArm.id << std::endl;
+//                arms.push(bestArm);
+//                return false;
+//            }
+
 #ifdef DEBUG_RUN
             std::cout << "stopping UCB "<< std::setprecision (15)<< UCBofBestArm << "id " << bestArm.id <<  std::endl;
             std::cout << "stopping LCB " <<  LCBofSecondBestArm << "id " << secondBestArm.id << std::endl;
@@ -283,6 +289,9 @@ public:
     void armsKeepFromArmsContainerBrute(){
         for (unsigned long index(0); index < armsContainer.size(); index++){
             float tmpTrueMean = armsContainer[index].trueMean();
+            std::cout << armsContainer[index].leftGroupID << "\t" ;
+            std::cout << armsContainer[index].rightGroupID << "\t" ;
+            std::cout << tmpTrueMean <<std::endl;
             armsContainer[index].lowerConfidenceBound = tmpTrueMean;
             armsContainer[index].upperConfidenceBound = tmpTrueMean;
             armsContainer[index].estimateOfMean = tmpTrueMean;

@@ -33,7 +33,7 @@ int main()
 
     // Loading Hyper parameters and data sizes
     std::string directoryPath = reader.Get("path", "directory", "");
-    std::string saveFilePath = reader.Get("path", "saveFilePath", "test.output");
+    std::string saveFilePath = reader.Get("path", "saveFilePathHeirarchical", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
@@ -58,6 +58,11 @@ int main()
     //Maintains the valid group points currently.
     //Used while creating new arms
     std::unordered_set<unsigned long > activeGroups;
+
+    std::ofstream saveFile;
+    saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
+    std::ofstream saveFileBrute;
+    saveFileBrute.open (saveFilePath+"brute", std::ofstream::out | std::ofstream::app);
 
 
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix); // Loads the filepaths into an array
@@ -129,7 +134,7 @@ int main()
         UCB1.runUCB(n*d);
         ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
 #else
-        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArm();
+        ArmHeirarchical<SquaredEuclideanPoint> bestArm = UCB1.bruteBestArms()[0];
 #endif
 
 //        std::cout << "Step " << i  << " Arm ID " << bestArm.id  << " Avg Pulls" << UCB1.globalNumberOfPulls/(n*n*.5);
@@ -208,6 +213,7 @@ int main()
             float armSumOfPulls(0.0);
             float armSumOfSquaresOfPulls(0.0);
             float trueMeanValue(0.0);
+
             if(UCB1.armStates.find(leftArmRemovedId) != UCB1.armStates.end()){
                 numArmPulls += UCB1.armStates[leftArmRemovedId].numberOfPulls;
                 armSumOfPulls += UCB1.armStates[leftArmRemovedId].sumOfPulls;
@@ -227,10 +233,16 @@ int main()
                 throw std::runtime_error("[Unexpected behaviour]: Marked right arm's state not found.");
             }
 
+//            std::cout << "Left pulls " << UCB1.armStates[leftArmRemovedId].numberOfPulls;
+//            std::cout << " Right pulls " << UCB1.armStates[rightArmRemovedId].numberOfPulls;
+//            std::cout << std::endl;
+
             //Create a new arm
-            tmpArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, trueMeanValue/2);
 #ifdef UCB
+            tmpArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, trueMeanValue/2);
             UCB1.initialiseAndAddNewArm(tmpArm, 0); //0 initial pulls
+//            tmpArm.warmInitialise(0, 0, 0, INFINITY);
+//            UCB1.initialiseAndAddNewArm(tmpArm, numberOfInitialPulls); //0 initial pulls
 #else
             tmpArm.lowerConfidenceBound = tmpArm.trueMeanValue;
             tmpArm.upperConfidenceBound = tmpArm.trueMeanValue;
@@ -254,15 +266,21 @@ int main()
 
         float localVar = bestArm.estimateOfSecondMoment - std::pow(bestArm.estimateOfMean,2);
         std::cout   << "Step " << i
-                    << "\tEst. = " << bestArm.estimateOfMean
-                    << "\tId. = " << bestArm.id
-                    << "\tTime = " << trueMeanTime
-                    << "\tT-Time = " << totalTime
+                << "\tTrue. = " << bestArm.trueMean()
+//                << "\tSecond True. = " << UCB1.topValidArm().trueMean()
+                << "\tEst. = " << bestArm.estimateOfMean
+                << "\tId. 1= " << bestArm.leftGroupID
+                << "\tId. 2= " << bestArm.rightGroupID
+//                << "\tSecond Id. 1= " << UCB1.topValidArm().leftGroupID
+//                << "\tSecond Id. 2= " << UCB1.topValidArm().rightGroupID
+//                    << "\tTime = " << trueMeanTime
+//                    << "\tT-Time = " << totalTime
 //                  << "\tGlobal number of Pulls = " << UCB1.globalNumberOfPulls
-                    << "\tNew no. of Puls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
-//                  << "\ttime/Pullslaststep = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
-                    << "\ttime/ Pullstotal = " << (float)totalTime/(UCB1.globalNumberOfPulls)
-                    << "\tGlobal Sig= " << UCB1.globalSigma
+//                    << "\tNew no. of Puls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
+////                  << "\ttime/Pullslaststep = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
+//                    << "\ttime/ Pullstotal = " << (float)totalTime/(UCB1.globalNumberOfPulls)
+//                    << "\tGlobal Sig= " << UCB1.globalSigma
+//                    << "\tActive group size=" << activeGroups.size()
 //                << "\tBest Arm local Sigma= " << localVar
 //                << "\tBest Arm local estimate= " << bestArm.estimateOfMean
 //                << "\tBest Arm local var= " << bestArm.estimateOfSecondMoment
@@ -270,8 +288,21 @@ int main()
 //                    << "\tRight= " << groupPointsNames[right]
                     << std::endl;
         prevGlobalNumberPulls = UCB1.globalNumberOfPulls;
-    }
 
+        saveFile <<  groupPointId-1 << "," <<  left << "," << right << std::endl;
+
+#ifndef UCB
+        saveFileBrute <<  groupPointId-1 << "," <<  left << "," << right << std::endl;
+#endif
+    }
+    saveFile <<  groupPointId;
+
+    std::cout << "GroupID\t" << groupPointId << std::endl;
+    for (const auto& pointID: activeGroups) {
+        saveFile <<  "," << pointID ;
+        std::cout << "Active left\t" << pointID << std::endl;
+    }
+    saveFile << std::endl;
     std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEndEnd-timeStartStart).count();

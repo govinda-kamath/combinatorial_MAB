@@ -83,10 +83,5 @@ void utils::getPathToFile(std::vector<std::string> & pathsToImages, const std::s
     for (unsigned long i(0); i < glob_result.gl_pathc; i ++){
         pathsToImages.push_back(glob_result.gl_pathv[i]);
     }
-    std::ofstream dataIDfile;
-    dataIDfile.open ("data_id.map", std::ofstream::out | std::ofstream::app);
-    for (unsigned long i(0); i< pathsToImages.size(); i++){
-        dataIDfile << i << " " << pathsToImages[i] << "\n";
-    }
     std::sort(pathsToImages.begin(), pathsToImages.end());
 }
