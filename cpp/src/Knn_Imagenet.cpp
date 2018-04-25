@@ -41,6 +41,7 @@ int main(int argc, char *argv[]){
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
 
+    long n = (unsigned) reader.GetInteger("UCB", "n", -1);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
 
@@ -51,7 +52,7 @@ int main(int argc, char *argv[]){
     std::vector<std::string>  pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
-    utils::vectorsToPoints(pointsVec, pathsToImages);
+    utils::vectorsToPoints(pointsVec, pathsToImages, n);
 
     // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
