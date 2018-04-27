@@ -59,13 +59,12 @@ int main(int argc, char *argv[])
     //Used while creating new arms
     std::unordered_set<unsigned long > activeGroups;
 
+    std::ofstream saveFile;
 #define UCB
 #ifdef UCB
-    std::ofstream saveFile;
     saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
 #else
-    std::ofstream saveFileBrute;
-    saveFileBrute.open (saveFilePath+"brute", std::ofstream::out | std::ofstream::trunc);
+    saveFile.open (saveFilePath+"brute", std::ofstream::out | std::ofstream::trunc);
 #endif
 
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix); // Loads the filepaths into an array
@@ -385,9 +384,6 @@ int main(int argc, char *argv[])
         prevGlobalNumberPulls = UCB1.globalNumberOfPulls;
         saveFile <<  groupPointId-1 << "," <<  left << "," << right << std::endl;
 
-#ifndef UCB
-        saveFileBrute <<  groupPointId-1 << "," <<  left << "," << right << std::endl;
-#endif
     }
     saveFile <<  groupPointId;
     std::cout << "GroupID\t" << groupPointId << std::endl;
