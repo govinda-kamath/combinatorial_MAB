@@ -296,9 +296,9 @@ public:
     void armsKeepFromArmsContainerBrute(){
         for (unsigned long index(0); index < armsContainer.size(); index++){
             float tmpTrueMean = armsContainer[index].trueMean();
-            std::cout << armsContainer[index].leftGroupID << "\t" ;
-            std::cout << armsContainer[index].rightGroupID << "\t" ;
-            std::cout << tmpTrueMean <<std::endl;
+//            std::cout << armsContainer[index].leftGroupID << "\t" ;
+//            std::cout << armsContainer[index].rightGroupID << "\t" ;
+//            std::cout << tmpTrueMean <<std::endl;
             armsContainer[index].lowerConfidenceBound = tmpTrueMean;
             armsContainer[index].upperConfidenceBound = tmpTrueMean;
             armsContainer[index].estimateOfMean = tmpTrueMean;

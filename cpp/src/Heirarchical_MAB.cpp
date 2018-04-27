@@ -19,10 +19,10 @@
 
 int main(int argc, char *argv[])
 {
-    std::string nameConfig = argv[1];
+//    std::string nameConfig = argv[1];
 
 //     For debugging mode in CLion
-//    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     // Parameters
     INIReader reader(nameConfig);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     std::unordered_set<unsigned long > activeGroups;
 
     std::ofstream saveFile;
-#define UCB
+//#define UCB
 #ifdef UCB
     saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
 #else
@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
     saveFile <<  groupPointId;
     std::cout << "GroupID\t" << groupPointId << std::endl;
     for (const auto& pointID: activeGroups) {
-        saveFile <<  "," << pointID ;
+//        saveFile <<  "," << pointID ;
         std::cout << "Active left\t" << pointID << std::endl;
     }
     saveFile << std::endl;
