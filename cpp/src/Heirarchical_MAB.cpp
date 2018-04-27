@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+    unsigned long n = (unsigned) reader.GetInteger("UCB", "n_h", 100);
 
 
     std::vector<std::string>  pathsToImages;
@@ -72,7 +73,6 @@ int main(int argc, char *argv[])
 
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = 200; // pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long groupPointId (0);
     std::cout << "Running Hierarchical clustering for " << n << " points" << std::endl;
