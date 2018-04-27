@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
     saveFile <<  groupPointId;
     std::cout << "GroupID\t" << groupPointId << std::endl;
     for (const auto& pointID: activeGroups) {
-//        saveFile <<  "," << pointID ;
+        saveFile <<  "," << pointID ;
         std::cout << "Active left\t" << pointID << std::endl;
     }
     saveFile << std::endl;
