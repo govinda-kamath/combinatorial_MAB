@@ -17,7 +17,7 @@
 #include "Knn.h"
 
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
 {
     std::string nameConfig = argv[1];
 
