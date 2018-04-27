@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
 //                << "\tSecond Id. 2= " << UCB1.topValidArm().rightGroupID
 //                    << "\tTime = " << trueMeanTime
 //                    << "\tT-Time = " << totalTime
-                  << "\tGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+                  << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls/(0.5*n*n)
 //                    << "\tNew no. of Puls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
 ////                  << "\ttime/Pullslaststep = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
 //                    << "\ttime/ Pullstotal = " << (float)totalTime/(UCB1.globalNumberOfPulls)
