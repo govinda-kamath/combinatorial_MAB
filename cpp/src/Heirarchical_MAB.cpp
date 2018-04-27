@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
 
     // Adding the first set of n choose 2 arms.
     for (unsigned long i(0); i < n; i++) {
+        if (i%20==0)
+        {std::cout << i << "\t" << std::endl;}
         for (unsigned long j(0); j < i; j++) {
             ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[i], groupPoints[j]);
 //            float lore  = tmpArm.trueMean();
