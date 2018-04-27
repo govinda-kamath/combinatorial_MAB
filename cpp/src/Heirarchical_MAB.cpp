@@ -59,11 +59,14 @@ int main(int argc, char *argv[])
     //Used while creating new arms
     std::unordered_set<unsigned long > activeGroups;
 
+#define UCB
+#ifdef UCB
     std::ofstream saveFile;
     saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
+#else
     std::ofstream saveFileBrute;
     saveFileBrute.open (saveFilePath+"brute", std::ofstream::out | std::ofstream::trunc);
-
+#endif
 
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix); // Loads the filepaths into an array
     utils::vectorsToPoints(pointsVec, pathsToImages); //Loads the images from the locations in above array to pointsVec
@@ -109,7 +112,6 @@ int main(int argc, char *argv[])
 
     UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
 
-#define UCB
 #ifdef UCB
     std::cout << "Running MAB with sample size " << sampleSize << std::endl;
     std::chrono::system_clock::time_point t1 = std::chrono::system_clock::now();
