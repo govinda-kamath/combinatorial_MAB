@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     std::unordered_set<unsigned long > activeGroups;
 
     std::ofstream saveFile;
+    saveFilePath = saveFilePath+"_"+std::to_string(n);
 //#define UCB
 #ifdef UCB
     saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
