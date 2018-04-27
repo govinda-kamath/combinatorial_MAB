@@ -32,7 +32,7 @@ int main()
     }
 
     // Loading Hyper parameters and data sizes
-    std::string directoryPath = reader.Get("path", "directory", "");
+    std::string directoryPath = reader.Get("path", "h_directory", "");
     std::string saveFilePath = reader.Get("path", "saveFilePathHeirarchical", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
