@@ -111,11 +111,11 @@ namespace utils{
         float sumOfSquaresOfPulls;
         float trueMeanValue;
         float localSigma;
-
+        std::unordered_map<std::string, float> misc;
         ArmConditions () : numberOfPulls(0), sumOfPulls(0.0), sumOfSquaresOfPulls(0.0),
                            trueMeanValue(INFINITY), localSigma(INFINITY){}
-        ArmConditions (unsigned long nP, float sumPulls, float sumSquare, float tMeanValue) : numberOfPulls(nP),
-                       sumOfPulls(sumPulls), sumOfSquaresOfPulls(sumSquare), trueMeanValue(tMeanValue){}
+        ArmConditions (unsigned long nP, float sumPulls, float sumSquare, float tMeanValue, std::unordered_map<std::string, float> msc) :
+        numberOfPulls(nP),  sumOfPulls(sumPulls), sumOfSquaresOfPulls(sumSquare), trueMeanValue(tMeanValue), misc(msc) {}
         void update (unsigned long nP, float sumPulls, float sumSquare){
             numberOfPulls = nP;
             sumOfPulls = sumPulls;

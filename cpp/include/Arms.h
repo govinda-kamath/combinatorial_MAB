@@ -28,6 +28,7 @@ public:
     float sumOfSquaresOfPulls;
     unsigned long dimension;
     unsigned log10Dimension;
+    std::unordered_map<std::string, float> misc;
     const templatePoint *point;
     unsigned long id;
     float trueMeanValue;
@@ -77,7 +78,10 @@ public:
         if (localSigma<0){
             std::cout << "duck!" <<std::endl;
         }
-        float frac = numberOfPulls/globalNumberOfPulls;
+        float frac = numberOfPulls/dimension;
+        if (frac>=1){
+            frac = 1;
+        }
 //        frac = 0;
         compositeSigma = std::sqrt( localSigma*localSigma*frac +  globalSigma*globalSigma*(1- frac));
 
@@ -281,7 +285,6 @@ class ArmHeirarchical : public Arm<GroupPoint<templatePoint> >{
 public:
     GroupPoint<templatePoint> *leftGroupPoint, *rightGroupPoint;
     unsigned long leftGroupID, rightGroupID;
-
     ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
             Arm<GroupPoint<templatePoint> >(id, p1.getVecSize()){
         leftGroupPoint = &p1;

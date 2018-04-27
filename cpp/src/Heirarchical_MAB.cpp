@@ -60,9 +60,9 @@ int main()
     std::unordered_set<unsigned long > activeGroups;
 
     std::ofstream saveFile;
-    saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
+    saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
     std::ofstream saveFileBrute;
-    saveFileBrute.open (saveFilePath+"brute", std::ofstream::out | std::ofstream::app);
+    saveFileBrute.open (saveFilePath+"brute", std::ofstream::out | std::ofstream::trunc);
 
 
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix); // Loads the filepaths into an array
@@ -70,7 +70,7 @@ int main()
 
     // Step 1: Initialize all the leaves
     unsigned long armID = 0;
-    unsigned long n = 100; // pointsVec.size();
+    unsigned long n = 200; // pointsVec.size();
     unsigned long d = pointsVec[0].getVecSize();
     unsigned long groupPointId (0);
     std::cout << "Running Hierarchical clustering for " << n << " points" << std::endl;
@@ -100,6 +100,7 @@ int main()
     for (unsigned long i(0); i < n; i++) {
         for (unsigned long j(0); j < i; j++) {
             ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[i], groupPoints[j]);
+//            float lore  = tmpArm.trueMean();
             groupIDtoArmID[std::make_pair(i,j)] = armID;
             armsVec.push_back(tmpArm);
             armID++;
@@ -214,24 +215,115 @@ int main()
             float armSumOfSquaresOfPulls(0.0);
             float trueMeanValue(0.0);
 
-            if(UCB1.armStates.find(leftArmRemovedId) != UCB1.armStates.end()){
-                numArmPulls += UCB1.armStates[leftArmRemovedId].numberOfPulls;
-                armSumOfPulls += UCB1.armStates[leftArmRemovedId].sumOfPulls;
-                armSumOfSquaresOfPulls += UCB1.armStates[leftArmRemovedId].sumOfSquaresOfPulls;
-                trueMeanValue += UCB1.armStates[leftArmRemovedId].trueMeanValue;
-            }
-            else{
-                throw std::runtime_error("[Unexpected behaviour]: Marked left arm's state not found.");
-            }
-            if(UCB1.armStates.find(rightArmRemovedId) != UCB1.armStates.end()){
-                numArmPulls += UCB1.armStates[rightArmRemovedId].numberOfPulls;
-                armSumOfPulls += UCB1.armStates[rightArmRemovedId].sumOfPulls;
-                armSumOfSquaresOfPulls += UCB1.armStates[rightArmRemovedId].sumOfSquaresOfPulls;
-                trueMeanValue += UCB1.armStates[rightArmRemovedId].trueMeanValue;
-            }
-            else{
-                throw std::runtime_error("[Unexpected behaviour]: Marked right arm's state not found.");
-            }
+            long minNumberOfPulls = std::min(UCB1.armStates[leftArmRemovedId].numberOfPulls,
+                                             UCB1.armStates[rightArmRemovedId].numberOfPulls);
+
+
+
+            float leftSize  = bestArm.leftGroupPoint->noOfPoints;
+            float rightSize = bestArm.rightGroupPoint->noOfPoints;
+
+            float f = (leftSize)/(leftSize+rightSize);
+            unsigned long n1 = UCB1.armStates[leftArmRemovedId].numberOfPulls;
+            unsigned long n2 = UCB1.armStates[rightArmRemovedId].numberOfPulls;
+            float mu1 = UCB1.armStates[leftArmRemovedId].sumOfPulls/n1;
+            float mu2 = UCB1.armStates[rightArmRemovedId].sumOfPulls/n2;
+
+            float s1 = UCB1.armStates[leftArmRemovedId].sumOfSquaresOfPulls/n1;
+            float s2 = UCB1.armStates[rightArmRemovedId].sumOfSquaresOfPulls/n2;
+            float sigma1 = std::sqrt(s1-mu1*mu1);
+            float sigma2 = std::sqrt(s2-mu2*mu2);
+
+            float t1 = UCB1.armStates[leftArmRemovedId].trueMeanValue;
+            float t2 = UCB1.armStates[rightArmRemovedId].trueMeanValue;
+
+            float uEff = f*mu1+(1-f)*mu2;
+            float sEff = f*s1+(1-f)*s2;
+            float sigmaEff = std::sqrt(sEff - uEff*uEff);
+
+            numArmPulls = std::min(n1,n2);
+            armSumOfPulls = uEff*numArmPulls;
+            armSumOfSquaresOfPulls = sEff*numArmPulls;
+            trueMeanValue = f*t1+(1-f)*t2;
+
+//            std::cout << "IMMMP " << groupPointsNames[pointID];
+//            std::cout << "\t" << groupPointsNames[groupPointId];
+//            std::cout << "\t" << groupPointsNames[left];
+//            std::cout << "\t" << groupPointsNames[right];
+//            std::cout << "\t" << t1;
+//            std::cout << "\t" << t2;
+//            std::cout << "\t" << trueMeanValue << std::endl;
+//
+
+//            std::cout << "IMMMP " << groupPointsNames[pointID];
+//            std::cout << "\t" << groupPointsNames[groupPointId];
+//            std::cout << "\t" << n1 << " " << n2;
+//            std::cout << "\t" << mu1 << " " << t1;
+//            std::cout << "\t" << mu2 << " " << t2;
+//            std::cout << "\t" << uEff << " " << trueMeanValue << std::endl;
+////
+//            if ( (mu1-sigma1 > t1) or(mu1+sigma1 < t1)){
+//                std::cout << "Point1 group!! ";
+//                std::cout << "\t" << leftArmRemovedId;
+//                std::cout << "Left: " << mu1-sigma1 << " " << " " << mu1 <<"," << t1 << " " <<mu1+sigma1;
+//
+//                bad++;
+//
+//            }
+//            if ( (mu2-sigma2 > t2) or(mu2+sigma2 < t2)){
+//                std::cout << "\nPoint2 Wrong!! ";
+//                std::cout << "\t" << rightArmRemovedId;
+//                std::cout << "\nRight: " << mu2-sigma2 << " " << mu2 <<"," << t2 << " " <<mu2+sigma2;
+//
+//            std::cout << "IMMMP " << groupPointsNames[pointID];
+//            std::cout << "\t" << groupPointsNames[groupPointId];
+//            std::cout << "\t" << groupPointsNames[left];
+//            std::cout << "\t" << groupPointsNames[right];
+//            std::cout << "\t" << t1;
+//            std::cout << "\t" << t2;
+//            std::cout << "\t" << trueMeanValue << std::endl;
+//            bad++;
+//            }
+//            if ( (uEff-sigmaEff> trueMeanValue) or(uEff+sigmaEff< trueMeanValue) ){
+//                std::cout << "\nPoint Combination Wrong!!";
+//                std::cout << "\nCombination: " << uEff-sigmaEff << " " << uEff <<"," << trueMeanValue << " " <<uEff+sigmaEff;
+//            }
+//            std::cout << "Left: " << mu1-sigma1 << " " << " " << mu1 <<"," << t1 << " " <<mu1+sigma1;
+//            std::cout << "\nRight: " << mu2-sigma2 << " " << mu2 <<"," << t2 << " " <<mu2+sigma2;
+//            std::cout << "\nCombination: " << u << mu1 <<"," << t1 << " " <<mu1+sigma1;
+//            std::cout << "\nRight: " << mu2-sigma2 << " " << mu2 <<"," << t2 << " " <<mu2+sigma2;
+//            std::cout << "\nCombination: " << uEff-sigmaEff << " " << uEff <<"," << trueMeanValue << " " <<uEff+sigmaEff;
+
+//            std::cout << "ratio " << f <<" n1 " << n1 << " n2 " << n2;
+////            std::cout << " mu1 " << mu1 << " mu2 " <<mu2;
+////            std::cout << " s1 " << s1 << " s2 " <<s2;
+////            std::cout <<" Left Size " << leftSize << " Right Size " <<rightSize;
+//            std::cout << "LG " << uEff - sigmaEff;
+//            std::cout <<" uEff " << uEff;
+//            std::cout << "UG " << uEff + sigmaEff;
+//            std::cout <<" TrueMean " << trueMeanValue;
+////            std::cout << "\t" << groupPointsNames[leftArmRemovedId];
+////            std::cout << "\t" << groupPointsNames[rightArmRemovedId];
+//            std::cout << std::endl;
+
+//            if(UCB1.armStates.find(leftArmRemovedId) != UCB1.armStates.end()){
+//                numArmPulls += UCB1.armStates[leftArmRemovedId].numberOfPulls;
+//                armSumOfPulls += UCB1.armStates[leftArmRemovedId].sumOfPulls;
+//                armSumOfSquaresOfPulls += UCB1.armStates[leftArmRemovedId].sumOfSquaresOfPulls;
+//                trueMeanValue += UCB1.armStates[leftArmRemovedId].trueMeanValue;
+//            }
+//            else{
+//                throw std::runtime_error("[Unexpected behaviour]: Marked left arm's state not found.");
+//            }
+//            if(UCB1.armStates.find(rightArmRemovedId) != UCB1.armStates.end()){
+//                numArmPulls += UCB1.armStates[rightArmRemovedId].numberOfPulls;
+//                armSumOfPulls += UCB1.armStates[rightArmRemovedId].sumOfPulls;
+//                armSumOfSquaresOfPulls += UCB1.armStates[rightArmRemovedId].sumOfSquaresOfPulls;
+//                trueMeanValue += UCB1.armStates[rightArmRemovedId].trueMeanValue;
+//            }
+//            else{
+//                throw std::runtime_error("[Unexpected behaviour]: Marked right arm's state not found.");
+//            }
 
 //            std::cout << "Left pulls " << UCB1.armStates[leftArmRemovedId].numberOfPulls;
 //            std::cout << " Right pulls " << UCB1.armStates[rightArmRemovedId].numberOfPulls;
@@ -239,11 +331,12 @@ int main()
 
             //Create a new arm
 #ifdef UCB
-            tmpArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, trueMeanValue/2);
-            UCB1.initialiseAndAddNewArm(tmpArm, 0); //0 initial pulls
-//            tmpArm.warmInitialise(0, 0, 0, INFINITY);
-//            UCB1.initialiseAndAddNewArm(tmpArm, numberOfInitialPulls); //0 initial pulls
+//            tmpArm.warmInitialise(numArmPulls, armSumOfPulls, armSumOfSquaresOfPulls, trueMeanValue);
+//            UCB1.initialiseAndAddNewArm(tmpArm, 0); //0 initial pulls
+            tmpArm.warmInitialise(0, 0, 0, INFINITY);
+            UCB1.initialiseAndAddNewArm(tmpArm, numberOfInitialPulls); //0 initial pulls
 #else
+            tmpArm.trueMeanValue = trueMeanValue;
             tmpArm.lowerConfidenceBound = tmpArm.trueMeanValue;
             tmpArm.upperConfidenceBound = tmpArm.trueMeanValue;
             tmpArm.estimateOfMean = tmpArm.trueMeanValue;
@@ -275,7 +368,7 @@ int main()
 //                << "\tSecond Id. 2= " << UCB1.topValidArm().rightGroupID
 //                    << "\tTime = " << trueMeanTime
 //                    << "\tT-Time = " << totalTime
-//                  << "\tGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+                  << "\tGlobal number of Pulls = " << UCB1.globalNumberOfPulls
 //                    << "\tNew no. of Puls = " << UCB1.globalNumberOfPulls - prevGlobalNumberPulls
 ////                  << "\ttime/Pullslaststep = " << (float)trueMeanTime/(UCB1.globalNumberOfPulls - prevGlobalNumberPulls)
 //                    << "\ttime/ Pullstotal = " << (float)totalTime/(UCB1.globalNumberOfPulls)
@@ -288,7 +381,6 @@ int main()
 //                    << "\tRight= " << groupPointsNames[right]
                     << std::endl;
         prevGlobalNumberPulls = UCB1.globalNumberOfPulls;
-
         saveFile <<  groupPointId-1 << "," <<  left << "," << right << std::endl;
 
 #ifndef UCB
@@ -296,7 +388,6 @@ int main()
 #endif
     }
     saveFile <<  groupPointId;
-
     std::cout << "GroupID\t" << groupPointId << std::endl;
     for (const auto& pointID: activeGroups) {
         saveFile <<  "," << pointID ;

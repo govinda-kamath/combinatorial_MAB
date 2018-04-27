@@ -74,13 +74,20 @@ public:
             globalSumOfPulls += sample.first;
             globalSumOfSquaresOfPulls += sample.second;
             globalNumberOfPulls += numberOfInitialPulls;
+//        std::cout << "Initial: " << singleArm.estimateOfMean << " "
+////                << singleArm.estimateOfMean-globalSigma << " "
+////                << singleArm.estimateOfMean+globalSigma << " "
+//                << singleArm.trueMeanValue << " "
+//                  << singleArm.misc["leftGroupID"]
+//                  << " " << singleArm.misc["rightGroupID"]
+//                  << " " << singleArm.id << std::endl;
     }
 
     // Used by Step 1 of UCB
     void addSingleArm( templateArm &singleArm){
         singleArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
         armStates[singleArm.id] = utils::ArmConditions(singleArm.numberOfPulls, singleArm.sumOfPulls,
-                                         singleArm.sumOfSquaresOfPulls, singleArm.trueMeanValue);
+                                         singleArm.sumOfSquaresOfPulls, singleArm.trueMeanValue, singleArm.misc);
         armsToKeep.insert(singleArm.id);
         arms.push(singleArm);
     }
@@ -92,7 +99,7 @@ public:
             newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
         }
         armStates[newArm.id] = utils::ArmConditions(newArm.numberOfPulls, newArm.sumOfPulls,
-                                           newArm.sumOfSquaresOfPulls, newArm.trueMeanValue);
+                                           newArm.sumOfSquaresOfPulls, newArm.trueMeanValue, newArm.misc);
         armsToKeep.insert(newArm.id);
         arms.push(newArm);
     }
@@ -298,7 +305,7 @@ public:
             armsContainer[index].estimateOfSecondMoment = tmpTrueMean*tmpTrueMean;
             armsToKeep.insert(armsContainer[index].id);
             armStates[armsContainer[index].id] = utils::ArmConditions(1, tmpTrueMean, tmpTrueMean*tmpTrueMean,
-                    armsContainer[index].trueMeanValue);
+                    armsContainer[index].trueMeanValue, armsContainer[index].misc);
             armsBrute.push(armsContainer[index]);
 
         }
