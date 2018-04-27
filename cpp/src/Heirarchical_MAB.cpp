@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     unsigned long n = (unsigned) reader.GetInteger("UCB", "n_h", 100);
-
+    delta = delta/(n*n);
 
     std::vector<std::string>  pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
             armID++;
         }
     }
-
+    std::cout << "Delta: " <<delta <<std::endl;
     UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
 
 #ifdef UCB
