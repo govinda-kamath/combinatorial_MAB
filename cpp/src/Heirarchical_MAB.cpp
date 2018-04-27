@@ -19,10 +19,10 @@
 
 int main(int argc, char *argv[])
 {
-//    std::string nameConfig = argv[1];
+    std::string nameConfig = argv[1];
 
 //     For debugging mode in CLion
-    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+//    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     // Parameters
     INIReader reader(nameConfig);
