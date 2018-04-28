@@ -71,9 +71,7 @@ public:
 
     /*Picks a dimension of points pointed by the dimensionPointer and samples the distance
      * that dimension*/
-    std::map<int, float> sampleDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize,
-     unsigned long numberOfPulls,  float sumOfPulls,  float sumOfSquaresOfPulls, float LCBofSecondBestArm,
-     float globalSigma, float logDeltaInverse )const;
+    std::pair<float, float> sampleDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize)  const ;
 };
 
 

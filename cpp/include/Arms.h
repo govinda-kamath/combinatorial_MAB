@@ -111,7 +111,6 @@ public:
     virtual std::pair<float, float> pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
                   unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         std::pair<float, float> sample;
-        std::map<int, float> result;
 
         if (numberOfPulls >= dimension){
             float tMean(-INFINITY);
@@ -138,18 +137,7 @@ public:
                if (sampleSize <= 0){
 //                   std::cout << sampleSize << ", " << id << " " ;
                }
-               result = p2.sampleDistance(p1, sampleSize, numberOfPulls, sumOfPulls, sumOfSquaresOfPulls,
-                                          LCBofSecondBestArm, globalSigma, logDeltaInverse);
-
-//               result.insert(std::make_pair(0, sumOfPulls));
-//               result.insert(std::make_pair(1, sumOfSquaresOfPulls));
-//               result.insert(std::make_pair(2, numberOfPulls));
-
-               sumOfPulls = result[0];
-               sumOfSquaresOfPulls = result[1];
-               numberOfPulls = result[2];
-               sample.first = result[3];
-               sample.second = result[4];
+               sample = p2.sampleDistance(p1, sampleSize);
                estimateOfMean = sumOfPulls / numberOfPulls;
                estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
                if (update)

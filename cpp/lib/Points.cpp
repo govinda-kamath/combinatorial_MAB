@@ -15,7 +15,7 @@ BasePoint::BasePoint(){
     dimensionPointer = 0;
 }
 float BasePoint::distance(const BasePoint &p1) const { return  -1; }
-std::pair<float, float> BasePoint::sampledDistance(const BasePoint &p1) const { return  std::make_pair(-1.0, -1.0); }
+std::pair<float, float> BasePoint::sampleDistance(const BasePoint &p1) const { return  std::make_pair(-1.0, -1.0); }
 unsigned long BasePoint::getVecSize() const {
     return vecSize;
 }
@@ -54,7 +54,7 @@ float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint &p1) const {
 }
 /*Picks a dimension of points randomly and samples the distance
  * that dimension*/
-std::pair<float, float> SquaredEuclideanPoint::sampledDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize)  const {
+std::pair<float, float> SquaredEuclideanPoint::sampleDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize)  const {
     assert(("Sizes do not match", point.size() == p1.point.size()));
     float sampleSum = 0;
     float sampleSquareSum = 0;
@@ -90,7 +90,7 @@ float L1Point::distance(const L1Point &p1) const {
 }
 /*Picks a dimension of points randomly and samples the distance
  * that L1Point*/
-std::pair<float, float> L1Point::sampledDistance(const L1Point &p1, const unsigned sampleSize) {
+std::pair<float, float> L1Point::sampleDistance(const L1Point &p1, const unsigned sampleSize) {
     assert(("Sizes do not match", point.size() == p1.point.size()));
     float sampleSum = 0;
     float sampleSquareSum = 0;
@@ -139,7 +139,7 @@ float SparseL1Point::distance(const SparseL1Point &p1) const {
 
 /*Picks a dimension of points randomly and samples the distance
  * that L1Point*/
-std::pair<float, float> SparseL1Point::sampledDistance(const SparseL1Point &p1) const {
+std::pair<float, float> SparseL1Point::sampleDistance(const SparseL1Point &p1) const {
 
     //coin flip
     float result(0);

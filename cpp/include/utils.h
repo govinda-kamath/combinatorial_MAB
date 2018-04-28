@@ -52,7 +52,7 @@ namespace utils{
 
     template <class templatePoint>
     void vectorsToPoints(std::vector<templatePoint> &pointsVec,
-                         std::vector<std::string>  &pathsToImages){
+                         std::vector<std::string>  &pathsToImages, long n = -1){
         std::vector<float> tmpVec;
         readImageAsVector(pathsToImages[0],tmpVec);
         // Obtaining a random permute order

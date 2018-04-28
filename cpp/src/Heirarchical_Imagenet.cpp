@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> pathsToImages;
     std::vector<SquaredEuclideanPoint> pointsVec;
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix); // Loads the filepaths into an array
-    utils::vectorsToPoints(pointsVec, pathsToImages); //Loads the images from the locations in above array to pointsVec
+    utils::vectorsToPoints(pointsVec, pathsToImages, n); //Loads the images from the locations in above array to pointsVec
 
     // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
