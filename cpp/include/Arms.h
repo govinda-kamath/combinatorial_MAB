@@ -137,6 +137,7 @@ public:
 //                         << "\t" << LCBofSecondBestArm
 //                         << "\t" << upperConfidenceBound
 //                         << std::endl;
+               
                sample = p2.sampledDistance(p1, sampleSize);
                numberOfPulls += sampleSize;
                sumOfPulls += sample.first;
