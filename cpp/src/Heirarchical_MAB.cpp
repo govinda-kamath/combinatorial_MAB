@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
     std::ofstream saveFile;
     saveFilePath = saveFilePath+"_"+std::to_string(n);
-//#define UCB
+#define UCB
 #ifdef UCB
     saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
 #else
