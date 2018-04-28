@@ -129,13 +129,23 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
 #    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 #
-add_executable(heirarchical cpp/src/Heirarchical_MAB.cpp
+add_executable(heirarchical cpp/src/Heirarchical_Imagenet.cpp
         cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
+        cpp/include/HeirarchicalClustering.h./
         cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
         cpp/lib/Points.cpp
         cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
         )
 target_link_libraries( heirarchical dlib::dlib )
+
+add_executable(heirarchical_old cpp/src/Heirarchical_MAB.cpp
+        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
+        cpp/include/HeirarchicalClustering.h./
+        cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+        cpp/lib/Points.cpp
+        cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+        )
+target_link_libraries( heirarchical_old dlib::dlib )
 
 #add_executable(heirarchical_brute cpp/src/Heirarchical_clustering_brute.cpp
 #        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
