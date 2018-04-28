@@ -52,7 +52,7 @@ namespace utils{
 
     template <class templatePoint>
     void vectorsToPoints(std::vector<templatePoint> &pointsVec,
-                         std::vector<std::string>  &pathsToImages, long n = -1){
+                         std::vector<std::string>  &pathsToImages){
         std::vector<float> tmpVec;
         readImageAsVector(pathsToImages[0],tmpVec);
         // Obtaining a random permute order
@@ -61,9 +61,8 @@ namespace utils{
         std::random_device rd;
         std::mt19937 g(9);
         std::shuffle(permuteOrder.begin(), permuteOrder.end(), g);
-        if (n==-1)
-            n = pathsToImages.size();
-        for  (unsigned long i(0); i < n; i++) {
+
+        for  (unsigned long i(0); i < pathsToImages.size(); i++) {
             readImageAsVector(pathsToImages[i],tmpVec);
             // Permuting
             apply_permutation<float>(tmpVec, permuteOrder );
@@ -111,11 +110,11 @@ namespace utils{
         float sumOfSquaresOfPulls;
         float trueMeanValue;
         float localSigma;
-        std::unordered_map<std::string, float> misc;
+
         ArmConditions () : numberOfPulls(0), sumOfPulls(0.0), sumOfSquaresOfPulls(0.0),
                            trueMeanValue(INFINITY), localSigma(INFINITY){}
-        ArmConditions (unsigned long nP, float sumPulls, float sumSquare, float tMeanValue, std::unordered_map<std::string, float> msc) :
-        numberOfPulls(nP),  sumOfPulls(sumPulls), sumOfSquaresOfPulls(sumSquare), trueMeanValue(tMeanValue), misc(msc) {}
+        ArmConditions (unsigned long nP, float sumPulls, float sumSquare, float tMeanValue) : numberOfPulls(nP),
+                       sumOfPulls(sumPulls), sumOfSquaresOfPulls(sumSquare), trueMeanValue(tMeanValue){}
         void update (unsigned long nP, float sumPulls, float sumSquare){
             numberOfPulls = nP;
             sumOfPulls = sumPulls;

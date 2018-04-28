@@ -1,6 +1,7 @@
 //
 // Created by Vivek Kumar Bagaria on 1/31/18.
 //
+//
 
 #include "Points.h"
 #include <cmath>
@@ -171,6 +172,3 @@ std::pair<float, float> SparseL1Point::sampledDistance(const SparseL1Point &p1) 
     }
     return std::make_pair(result/2, (result/2)*(result/2));
 }
-
-
-

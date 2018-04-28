@@ -28,7 +28,6 @@ public:
     float sumOfSquaresOfPulls;
     unsigned long dimension;
     unsigned log10Dimension;
-    std::unordered_map<std::string, float> misc;
     const templatePoint *point;
     unsigned long id;
     float trueMeanValue;
@@ -78,11 +77,8 @@ public:
         if (localSigma<0){
             std::cout << "duck!" <<std::endl;
         }
-        float frac = numberOfPulls/dimension;
-        if (frac>=1){
-            frac = 1;
-        }
-//        frac = 0;
+        float frac = numberOfPulls/globalNumberOfPulls;
+        frac = 0;
         compositeSigma = std::sqrt( localSigma*localSigma*frac +  globalSigma*globalSigma*(1- frac));
 
 
@@ -115,6 +111,8 @@ public:
     virtual std::pair<float, float> pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
                   unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         std::pair<float, float> sample;
+        std::map<int, float> result;
+
         if (numberOfPulls >= dimension){
             float tMean(-INFINITY);
             tMean = trueMean();
@@ -137,16 +135,29 @@ public:
 //                         << "\t" << LCBofSecondBestArm
 //                         << "\t" << upperConfidenceBound
 //                         << std::endl;
-               sample = p2.sampledDistance(p1, sampleSize);
-               numberOfPulls += sampleSize;
-               sumOfPulls += sample.first;
-               sumOfSquaresOfPulls += sample.second;
+               if (sampleSize <= 0){
+//                   std::cout << sampleSize << ", " << id << " " ;
+               }
+               result = p2.sampleDistance(p1, sampleSize, numberOfPulls, sumOfPulls, sumOfSquaresOfPulls,
+                                          LCBofSecondBestArm, globalSigma, logDeltaInverse);
+
+//               result.insert(std::make_pair(0, sumOfPulls));
+//               result.insert(std::make_pair(1, sumOfSquaresOfPulls));
+//               result.insert(std::make_pair(2, numberOfPulls));
+
+               sumOfPulls = result[0];
+               sumOfSquaresOfPulls = result[1];
+               numberOfPulls = result[2];
+               sample.first = result[3];
+               sample.second = result[4];
                estimateOfMean = sumOfPulls / numberOfPulls;
                estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
                if (update)
                    updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
-           } while (lowerConfidenceBound < LCBofSecondBestArm && upperConfidenceBound  > LCBofSecondBestArm && update && false);
-//        std::cout << id << "\t" << lowerConfidenceBound << "\t" << LCBofSecondBestArm << "\t" << tmp << std::endl;
+           } while (lowerConfidenceBound < LCBofSecondBestArm && upperConfidenceBound > LCBofSecondBestArm && update && false);
+            //The above block is executed only once for now
+//        std::cout << id << "\t" << lowerConfidenceBound << "\t" << LCBofSecondBestArm << "\t"
+//                  << upperConfidenceBound <<  "\t" << numberOfPulls << std::endl;
         }
         return sample;
     }
@@ -285,6 +296,7 @@ class ArmHeirarchical : public Arm<GroupPoint<templatePoint> >{
 public:
     GroupPoint<templatePoint> *leftGroupPoint, *rightGroupPoint;
     unsigned long leftGroupID, rightGroupID;
+
     ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
             Arm<GroupPoint<templatePoint> >(id, p1.getVecSize()){
         leftGroupPoint = &p1;
