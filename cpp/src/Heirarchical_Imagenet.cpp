@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     unsigned long n = (unsigned) reader.GetInteger("UCB", "n_h", 100);
-//    delta = delta / (n * n);
+    delta = delta / (n);
 
     // Data to Points (vectors)
     std::vector<std::string> pathsToImages;
@@ -60,6 +60,5 @@ int main(int argc, char *argv[]) {
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                  (n) << std::endl;
-
     heirar.saveAnswers();
 }

@@ -60,7 +60,7 @@ public:
     std::ofstream graphSaveFile; //Graph output file
 
     Heirarchical( const std::vector<templatePoint> &pVec, unsigned noOfInitialPulls, float deltaAccuracy,
-        unsigned int sSize, std::string sFilePath, std::string gSaveFile, char alg, unsigned long nn) {
+        unsigned int sSize, std::string sFilePath, std::string gFilePath, char alg, unsigned long nn) {
 
         pointsVector = pVec;
         d = pointsVector[0].getVecSize();
@@ -69,11 +69,14 @@ public:
         sampleSize = sSize;
         n = nn;
         algo = alg;
+        gFilePath = gFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+        sFilePath = sFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+
         if (algo == 'm') {
-            graphSaveFile.open(gSaveFile, std::ofstream::out | std::ofstream::trunc);
+            graphSaveFile.open(gFilePath, std::ofstream::out | std::ofstream::trunc);
             saveFile.open(sFilePath, std::ofstream::out | std::ofstream::trunc);
         } else {
-            graphSaveFile.open(gSaveFile + "brute", std::ofstream::out | std::ofstream::trunc);
+            graphSaveFile.open(gFilePath + "brute", std::ofstream::out | std::ofstream::trunc);
             saveFile.open(sFilePath + "brute", std::ofstream::out | std::ofstream::trunc);
         }
 
@@ -292,7 +295,6 @@ public:
     }
 
    void saveAnswers(){
-
        saveFile << "AllPullsNumber";
        for (unsigned i = 0; i < finalNumberOfPulls.size(); i++) {
            saveFile <<  "," << finalNumberOfPulls[i];
