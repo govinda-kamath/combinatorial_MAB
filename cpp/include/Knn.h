@@ -33,7 +33,7 @@ public:
 
     //Outputs
     std::vector<ArmKNN<templatePoint>>nearestNeighbours;
-    std::vector<unsigned long> finalNumberOfPulls;
+    std::unordered_map<unsigned long, unsigned long> finalNumberOfPulls;
     std::vector<unsigned long> finalSortedOrder;
     std::vector<ArmKNN<templatePoint>> nearestNeighboursBrute;
     float initTime;
@@ -93,11 +93,9 @@ public:
             UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k, sampleSize);
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
 //#define Brute
-//#ifndef Brute
             UCB1.initialise(numberOfInitialPulls);
             std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
             UCB1.runUCB(2000*pointsVectorRight.size());
-//#endif
 
 // Stats
 #ifdef Brute
@@ -152,13 +150,12 @@ public:
 
 
     void saveAnswers(unsigned long index ){
-
         //Variables
         std::string  n = std::to_string(pointsVectorLeft.size());
         std::string  d = std::to_string(nearestNeighbours[0].dimension);
         std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
         std::ofstream saveFile;
-        saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
+        saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
         std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours;
 #ifdef Brute
         std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute;
@@ -168,7 +165,6 @@ public:
         std::vector<int> topKArmsArgSort(k*5);
         std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
         auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
-
 
         //Save single stats
         saveFile << "AveragePulls," << avgNumberOfPulls[index] << "\n";
@@ -213,8 +209,6 @@ public:
             saveFile <<  "," << finalSortedOrder[i];
         }
         saveFile << std::endl;
-
-
         std::cout << "\nPoint number " << index  << " Av:" << avgNumberOfPulls[index] << "\n";
 
 #endif

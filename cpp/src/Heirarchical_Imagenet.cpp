@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
 
     // Loading Hyper parameters and data sizes
     std::string directoryPath = reader.Get("path", "h_directory", "");
+    std::string graphFilePath = reader.Get("path", "graphFilePathHeirarchical", "h_graph_output");
     std::string saveFilePath = reader.Get("path", "saveFilePathHeirarchical", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
@@ -50,9 +51,9 @@ int main(int argc, char *argv[]) {
     // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     Heirarchical<SquaredEuclideanPoint> heirar(pointsVec, numberOfInitialPulls, delta, sampleSize,
-                                                     saveFilePath, saveFilePath, algo, n);
+                                               saveFilePath, graphFilePath,  algo, n);
 
-    std::cout << "Running" << std::endl;
+    std::cout << "Start!" << std::endl;
     heirar.run();
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
 
@@ -60,5 +61,5 @@ int main(int argc, char *argv[]) {
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                  (n) << std::endl;
 
-
+    heirar.saveAnswers();
 }

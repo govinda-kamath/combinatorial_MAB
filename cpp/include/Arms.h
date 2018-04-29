@@ -180,6 +180,12 @@ public:
     const templatePoint *fixedPoint;
 
     ArmKNN(): Arm<templatePoint>(){}
+
+    using Arm<templatePoint>::id;
+    ArmKNN(unsigned long armNumber){
+        id = armNumber;
+    }
+
     ArmKNN(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
     ArmKNN(unsigned long id, const templatePoint &p, const templatePoint &fixPoint) : Arm<templatePoint>(id, p, p.vecSize) {
@@ -285,6 +291,12 @@ class ArmHeirarchical : public Arm<GroupPoint<templatePoint> >{
 public:
     GroupPoint<templatePoint> *leftGroupPoint, *rightGroupPoint;
     unsigned long leftGroupID, rightGroupID;
+
+    using Arm<GroupPoint<templatePoint> > ::id;
+    ArmHeirarchical(unsigned long armNumber){
+        id = armNumber;
+    }
+
     ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
             Arm<GroupPoint<templatePoint> >(id, p1.getVecSize()){
         leftGroupPoint = &p1;

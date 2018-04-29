@@ -52,28 +52,29 @@ public:
     //Outputs Variables
     std::vector<std::vector<unsigned int>> merges;
     std::vector<ArmKNN<templatePoint>> mergesBrute;
-    std::vector<unsigned long> finalNumberOfPulls;
+    std::unordered_map<unsigned long, unsigned long> finalNumberOfPulls;
     std::vector<unsigned long> finalSortedOrder;
     float initTime;
     float runTime;
-    std::string saveFolderPath;  //Stats output file
+    std::ofstream saveFile; //Stats output file
     std::ofstream graphSaveFile; //Graph output file
 
     Heirarchical( const std::vector<templatePoint> &pVec, unsigned noOfInitialPulls, float deltaAccuracy,
-        unsigned int sSize, std::string sFolderPath, std::string gSaveFile, char alg, unsigned long nn) {
+        unsigned int sSize, std::string sFilePath, std::string gSaveFile, char alg, unsigned long nn) {
 
         pointsVector = pVec;
         d = pointsVector[0].getVecSize();
         numberOfInitialPulls = noOfInitialPulls;
         delta = deltaAccuracy;
         sampleSize = sSize;
-        saveFolderPath = sFolderPath;
         n = nn;
         algo = alg;
         if (algo == 'm') {
             graphSaveFile.open(gSaveFile, std::ofstream::out | std::ofstream::trunc);
+            saveFile.open(sFilePath, std::ofstream::out | std::ofstream::trunc);
         } else {
             graphSaveFile.open(gSaveFile + "brute", std::ofstream::out | std::ofstream::trunc);
+            saveFile.open(sFilePath + "brute", std::ofstream::out | std::ofstream::trunc);
         }
 
         setup(); //Todo: Check
@@ -107,11 +108,11 @@ public:
             groupPointId++;
         }
 
-        std::cout << "Adding the first n*n/2 arms";
+        std::cout << "Adding the first n*n/2 arms" << std::endl;
         // Adding the first set of n choose 2 arms.
         for (unsigned long i(0); i < n; i++) {
             if (i % (int) std::pow(n, .5) == 0) {
-                std::cout << i << "done" << std::endl;
+                std::cout << i << " arms added" << std::endl;
             }
             for (unsigned long j(0); j < i; j++) {
                 ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[i], groupPoints[j]);
@@ -135,7 +136,7 @@ public:
             std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
         }
-        std::cout << "Init done " << d << std::endl;
+        std::cout << "Init done "<< std::endl;
 
         std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
 
@@ -148,19 +149,18 @@ public:
                 UCB1.runUCB(n * d);
                 bestArm = &UCB1.topKArms.back();
             } else {
-                bestArm = &UCB1.bruteBestArms()[0];
+                std::vector<ArmHeirarchical<SquaredEuclideanPoint>> bestArms = UCB1.bruteBestArms();
+                bestArm = &bestArms[0];
             }
-
             auto left = bestArm->leftGroupID;
             auto right = bestArm->rightGroupID;
 
             // Removing left and right groups from the list of groups (nodes)
             activeGroups.erase(left);
             activeGroups.erase(right);
-
-
             //Removing arms containing either of the above left and right group of points.
             for (unsigned long index(0); index < groupPointId; index++) {
+
                 if (groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()) {
                     UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
                 }
@@ -247,225 +247,56 @@ public:
                       << "\tEst. = " << bestArm->estimateOfMean
                       << "\tId. 1= " << bestArm->leftGroupID
                       << "\tId. 2= " << bestArm->rightGroupID
-                      << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / (0.5 * n * n)
+                      << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
                       << std::endl;
-
+            saveFile << "Step " << i
+                         << "\tTrue. = " << bestArm->trueMean()
+                         << "\tEst. = " << bestArm->estimateOfMean
+                         << "\tId. 1= " << bestArm->leftGroupID
+                         << "\tId. 2= " << bestArm->rightGroupID
+                         << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
+                         << std::endl;
             graphSaveFile << groupPointId - 1 << "," << left << "," << right << std::endl;
 
         }
         graphSaveFile << groupPointId;
-        std::cout << "GroupID\t" << groupPointId << std::endl;
         for (const auto &pointID: activeGroups) {
             graphSaveFile << "," << pointID;
-            std::cout << "Active left\t" << pointID << std::endl;
+//            std::cout << "Active left\t" << pointID << std::endl;
         }
         graphSaveFile << std::endl;
         std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
         long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (timeEndEnd - timeStartStart).count();
         std::cout << "Total Time = " << totalTime << "(ms)"
-                  << "Global number of Pulls = " << UCB1.globalNumberOfPulls / (0.5 * n * n)
-                  << "Global Sigma= " << UCB1.globalSigma
+                  << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+                  << "\nGlobal Sigma= " << UCB1.globalSigma
                   << std::endl;
+        saveFile   << "TotalTime," << totalTime << std::endl;
+        saveFile   << "GlobalnumberofPulls," << UCB1.globalNumberOfPulls << std::endl;
+        saveFile   << "GlobalSigma," << UCB1.globalSigma  << std::endl;
 
         if (algo == 'm') {
-            std::cout << "Average distances evaluated " << UCB1.globalNumberOfPulls / (0.5 * n * n) << std::endl;
+            std::cout << "Average distances evaluated " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
+                         << ". Gain = " << d / (UCB1.globalNumberOfPulls / ((n-1) * (n-1))) << std::endl;
+            saveFile<< "AveragePulls," << UCB1.globalNumberOfPulls / ((n-1) * (n-1)) << std::endl;
+
         } else {
             std::cout << "Average distances evaluated " << d << std::endl;
+            saveFile<< "AveragePulls," << d << std::endl;
         }
+        UCB1.storeExtraTopArms();
+        finalNumberOfPulls = UCB1.finalNumberOfPulls;
+
+
     }
 
-   void saveAnswers(unsigned long index ){
-//
-//        //Variables
-//        std::string  n = std::to_string(pointsVectorLeft.size());
-//        std::string  d = std::to_string(nearestNeighbours[0].dimension);
-//        std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
-//        std::ofstream saveFile;
-//        saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
-//        std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours;
-//#ifdef Brute
-//        std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute;
-//#endif
-//        std::vector<float> topKArmsTrueMean(k*5);
-//        std::vector<float> topKArmsTrueMeanBrute(k*5);
-//        std::vector<int> topKArmsArgSort(k*5);
-//        std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
-//        auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
-//
-//
-//        //Save single stats
-//        saveFile << "AveragePulls," << avgNumberOfPulls[index] << "\n";
-//        saveFile << "InitTime," << initTime << "\n";
-//        saveFile << "RunTime," << runTime << "\n";
-//        saveFile << "NumberOfInitialPulls," << numberOfInitialPulls << "\n";
-//        saveFile << "SampleSize," << sampleSize << "\n";
-//        saveFile << "n," << n << "\n";
-//        saveFile << "d," << d << "\n";
-//        saveFile << "k," << k << "\n";
-//
-//
-//        // Saving k+4k nearest neighbhours
-//        saveFile << "Answer,";
-//        for (unsigned i = 0; i < k*5; i++) {
-//            saveFile << topKArms[i].id << ",";
-//#ifdef Brute
-//            topKArmsTrueMeanBrute[i] = topKArmsBrute[i].trueMean();
-//#endif
-//            topKArmsTrueMean[i] = topKArms[i].trueMean();
-//        }
-//#ifndef Brute
-//        saveFile << std::endl;
-//
-//        // Saving the local true order of k+4k points
-//        std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
-//        saveFile << "Position";
-//        for (unsigned i = 0; i < k*5; i++) {
-//            saveFile <<  "," << topKArmsArgSort[i];
-//        }
-//        saveFile << std::endl;
-//
-//        // Saving stats for all the arms
-//        saveFile << "AllPullsNumber";
-//        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-//            saveFile <<  "," << finalNumberOfPulls[i];
-//        }
-//        saveFile << std::endl;
-//
-//        saveFile << "AllPullsIndex";
-//        for (unsigned i = 0; i < pointsVectorRight.size();  void saveAnswers(unsigned long index ){
-//
-//        //Variables
-//        std::string  n = std::to_string(pointsVectorLeft.size());
-//        std::string  d = std::to_string(nearestNeighbours[0].dimension);
-//        std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
-//        std::ofstream saveFile;
-//        saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::app);
-//        std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours;
-//#ifdef Brute
-//        std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute;
-//#endif
-//        std::vector<float> topKArmsTrueMean(k*5);
-//        std::vector<float> topKArmsTrueMeanBrute(k*5);
-//        std::vector<int> topKArmsArgSort(k*5);
-//        std::iota(topKArmsArgSort.begin(), topKArmsArgSort.end(), 0);
-//        auto comparator = [&topKArmsTrueMean](int a, int b){ return topKArmsTrueMean[a] < topKArmsTrueMean[b]; };
-//
-//
-//        //Save single stats
-//        saveFile << "AveragePulls," << avgNumberOfPulls[index] << "\n";
-//        saveFile << "InitTime," << initTime << "\n";
-//        saveFile << "RunTime," << runTime << "\n";
-//        saveFile << "NumberOfInitialPulls," << numberOfInitialPulls << "\n";
-//        saveFile << "SampleSize," << sampleSize << "\n";
-//        saveFile << "n," << n << "\n";
-//        saveFile << "d," << d << "\n";
-//        saveFile << "k," << k << "\n";
-//
-//
-//        // Saving k+4k nearest neighbhours
-//        saveFile << "Answer,";
-//        for (unsigned i = 0; i < k*5; i++) {
-//            saveFile << topKArms[i].id << ",";
-//#ifdef Brute
-//            topKArmsTrueMeanBrute[i] = topKArmsBrute[i].trueMean();
-//#endif
-//            topKArmsTrueMean[i] = topKArms[i].trueMean();
-//        }
-//#ifndef Brute
-//        saveFile << std::endl;
-//
-//        // Saving the local true order of k+4k points
-//        std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
-//        saveFile << "Position";
-//        for (unsigned i = 0; i < k*5; i++) {
-//            saveFile <<  "," << topKArmsArgSort[i];
-//        }
-//        saveFile << std::endl;
-//
-//        // Saving stats for all the arms
-//        saveFile << "AllPullsNumber";
-//        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-//            saveFile <<  "," << finalNumberOfPulls[i];
-//        }
-//        saveFile << std::endl;
-//
-//        saveFile << "AllPullsIndex";
-//        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-//            saveFile <<  "," << finalSortedOrder[i];
-//        }
-//        saveFile << std::endl;
-//
-//
-//        std::cout << "\nPoint number " << index  << " Av:" << avgNumberOfPulls[index] << "\n";
-//
-//#endif
-//#ifdef Brute
-//        bool flag = true;
-//        for (unsigned i = 0; i < k; i++) {
-//            if (topKArms[i].id!=topKArmsBrute[i].id)
-//                flag = false;
-//        }
-//        std::cout << "index " << index << ": ";
-//
-//        std::cout << "Verdict: " << flag << "\n";
-//        if (flag == false){
-//            std::cout << "\nUCB: " ;
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArms[i].id << " ";
-//            }
-//
-//            std::cout << "\nBrute: " ;
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArmsBrute[i].id << " ";
-//            }
-//
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArmsTrueMean[i] << " ";
-//            }
-//            std::cout << "\nBrute: " ;
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArmsTrueMeanBrute[i] << " ";
-//            }
-//        }
-//#endif
-//     i++) {
-//            saveFile <<  "," << finalSortedOrder[i];
-//        }
-//        saveFile << std::endl;
-//
-//
-//        std::cout << "\nPoint number " << index  << " Av:" << avgNumberOfPulls[index] << "\n";
-//
-//#endif
-//#ifdef Brute
-//        bool flag = true;
-//        for (unsigned i = 0; i < k; i++) {
-//            if (topKArms[i].id!=topKArmsBrute[i].id)
-//                flag = false;
-//        }
-//        std::cout << "index " << index << ": ";
-//
-//        std::cout << "Verdict: " << flag << "\n";
-//        if (flag == false){
-//            std::cout << "\nUCB: " ;
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArms[i].id << " ";
-//            }
-//
-//            std::cout << "\nBrute: " ;
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArmsBrute[i].id << " ";
-//            }
-//
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArmsTrueMean[i] << " ";
-//            }
-//            std::cout << "\nBrute: " ;
-//            for (unsigned i = 0; i < 2*k; i++) {
-//                std::cout << topKArmsTrueMeanBrute[i] << " ";
-//            }
-//        }
-//#endif
+   void saveAnswers(){
+
+       saveFile << "AllPullsNumber";
+       for (unsigned i = 0; i < finalNumberOfPulls.size(); i++) {
+           saveFile <<  "," << finalNumberOfPulls[i];
+       }
+       saveFile << std::endl;
  }
 };

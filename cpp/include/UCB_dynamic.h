@@ -25,13 +25,14 @@ public:
 
     std::vector<templateArm> armsContainer;
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > arms;
-    std::vector<unsigned long> finalNumberOfPulls;
+    std::unordered_map<unsigned long, unsigned long> finalNumberOfPulls;
     std::vector<unsigned long> finalSortedOrder;
 
     std::priority_queue<templateArm, std::vector<templateArm>, std::greater<templateArm> > armsBrute;
     std::vector<templateArm> topKArms;
     std::unordered_set <unsigned long > armsToKeep;
     std::unordered_map<unsigned long, utils::ArmConditions> armStates;
+    std::unordered_map<unsigned long, long int> finalNumberOfArmPulls;
 
 
     // Main Constructor
@@ -57,9 +58,6 @@ public:
     // Step 1 of UCB
     void initialise(unsigned numberOfInitialPulls = 100){
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
-            if(armIndex%10000 == 0){
-                std::cout<< armIndex << std::endl;
-            }
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
         }
         updateGlobalSigma();
@@ -122,11 +120,14 @@ public:
             if (armsToKeep.find(topArmID) != armsToKeep.end())
                 topValidArmFound=true;
             else{
+                finalNumberOfPulls[arms.top().id] = arms.top().numberOfPulls;
                 arms.pop();
             }
-        } while((!topValidArmFound) or (arms.empty()) );
+        } while((!topValidArmFound) and (!arms.empty()) );
         if (arms.empty()){
-            throw std::runtime_error("[Unexpected behaviour]: Arms Priority Queue empty.");
+            std::cout << "Arms Priority Queue empty." << std::endl;
+            templateArm tmpArm(0);
+            return tmpArm;
         }
         return arms.top();
     }
@@ -172,7 +173,8 @@ public:
                 // Storing the results
                 topKArms.push_back(topArm);
                 finalSortedOrder.push_back(topArm.id);
-                finalNumberOfPulls.push_back(topArm.numberOfPulls);
+                finalNumberOfPulls[topArm.id] = topArm.numberOfPulls;
+
                 arms.pop();
                 markForRemoval(topArm.id);
                 bestArmCount++;
@@ -274,10 +276,12 @@ public:
 
     // Stores extra top arms for evaluations. These arms are not optimally chosen
     void storeExtraTopArms(){
-        for (unsigned i=0; !arms.empty(); i++) {
+        for (unsigned i=0; arms.size()>0; i++) {
             templateArm topArm = topValidArm();
+            if (topArm.id == 0)
+                break;
             finalSortedOrder.push_back(topArm.id);
-            finalNumberOfPulls.push_back(topArm.numberOfPulls);
+            finalNumberOfPulls[topArm.id] = topArm.numberOfPulls;
             if (i < numberOfExtraArms)
                 topKArms.push_back(topArm);
             arms.pop();
@@ -335,10 +339,12 @@ public:
     std::vector<templateArm> bruteBestArms(){
         std::vector<templateArm> bestArms;
         for( int i = 0 ; i < numberOfBestArms+numberOfExtraArms; i++){
+            std::cout << i << std::endl;
             templateArm bestArm = topValidArmBrute();
             armsBrute.pop();
             bestArms.push_back(bestArm);
         }
+        std::cout<<"Returning " << bestArms.size()<<  std::endl;
         return bestArms;
     }
 };
