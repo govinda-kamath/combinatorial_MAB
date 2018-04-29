@@ -63,7 +63,7 @@ namespace utils{
         std::shuffle(permuteOrder.begin(), permuteOrder.end(), g);
         if (n==-1)
             n = pathsToImages.size();
-        for  (long i(0); i < n; i++) {
+        for  (unsigned long i(0); i < n; i++) {
             readImageAsVector(pathsToImages[i],tmpVec);
             // Permuting
             apply_permutation<float>(tmpVec, permuteOrder );

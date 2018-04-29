@@ -25,7 +25,6 @@ template <class templatePoint>
 class Heirarchical{
 public:
 
-
     std::vector<templatePoint> pointsVector;
     unsigned numberOfInitialPulls; // UCB Parameters
     float delta; // UCB Parameters
@@ -52,25 +51,33 @@ public:
 
     //Outputs Variables
     std::vector<std::vector<unsigned int>> merges;
-
-    std::string saveFolderPath;  //Stats output file
+    std::vector<ArmKNN<templatePoint>> mergesBrute;
+    std::unordered_map<unsigned long, unsigned long> finalNumberOfPulls;
+    std::vector<unsigned long> finalSortedOrder;
+    float initTime;
+    float runTime;
+    std::ofstream saveFile; //Stats output file
     std::ofstream graphSaveFile; //Graph output file
 
     Heirarchical( const std::vector<templatePoint> &pVec, unsigned noOfInitialPulls, float deltaAccuracy,
-        unsigned int sSize, std::string sFolderPath, std::string gSaveFile, char alg, unsigned long nn) {
+        unsigned int sSize, std::string sFilePath, std::string gFilePath, char alg, unsigned long nn) {
 
         pointsVector = pVec;
         d = pointsVector[0].getVecSize();
         numberOfInitialPulls = noOfInitialPulls;
         delta = deltaAccuracy;
         sampleSize = sSize;
-        saveFolderPath = sFolderPath;
         n = nn;
         algo = alg;
+        gFilePath = gFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+        sFilePath = sFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+
         if (algo == 'm') {
-            graphSaveFile.open(gSaveFile, std::ofstream::out | std::ofstream::trunc);
+            graphSaveFile.open(gFilePath, std::ofstream::out | std::ofstream::trunc);
+            saveFile.open(sFilePath, std::ofstream::out | std::ofstream::trunc);
         } else {
-            graphSaveFile.open(gSaveFile + "brute", std::ofstream::out | std::ofstream::trunc);
+            graphSaveFile.open(gFilePath + "brute", std::ofstream::out | std::ofstream::trunc);
+            saveFile.open(sFilePath + "brute", std::ofstream::out | std::ofstream::trunc);
         }
 
         setup(); //Todo: Check
@@ -104,11 +111,11 @@ public:
             groupPointId++;
         }
 
-        std::cout << "Adding the first n*n/2 arms";
+        std::cout << "Adding the first n*n/2 arms" << std::endl;
         // Adding the first set of n choose 2 arms.
         for (unsigned long i(0); i < n; i++) {
             if (i % (int) std::pow(n, .5) == 0) {
-                std::cout << i << "done" << std::endl;
+                std::cout << i << " arms added" << std::endl;
             }
             for (unsigned long j(0); j < i; j++) {
                 ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[i], groupPoints[j]);
@@ -132,7 +139,7 @@ public:
             std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
         }
-        std::cout << "Init done " << d << std::endl;
+        std::cout << "Init done "<< std::endl;
 
         std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
 
@@ -145,19 +152,18 @@ public:
                 UCB1.runUCB(n * d);
                 bestArm = &UCB1.topKArms.back();
             } else {
-                bestArm = &UCB1.bruteBestArms()[0];
+                std::vector<ArmHeirarchical<SquaredEuclideanPoint>> bestArms = UCB1.bruteBestArms();
+                bestArm = &bestArms[0];
             }
-
             auto left = bestArm->leftGroupID;
             auto right = bestArm->rightGroupID;
 
             // Removing left and right groups from the list of groups (nodes)
             activeGroups.erase(left);
             activeGroups.erase(right);
-
-
             //Removing arms containing either of the above left and right group of points.
             for (unsigned long index(0); index < groupPointId; index++) {
+
                 if (groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()) {
                     UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
                 }
@@ -244,32 +250,55 @@ public:
                       << "\tEst. = " << bestArm->estimateOfMean
                       << "\tId. 1= " << bestArm->leftGroupID
                       << "\tId. 2= " << bestArm->rightGroupID
-                      << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / (0.5 * n * n)
+                      << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
                       << std::endl;
-
+            saveFile << "Step " << i
+                         << "\tTrue. = " << bestArm->trueMean()
+                         << "\tEst. = " << bestArm->estimateOfMean
+                         << "\tId. 1= " << bestArm->leftGroupID
+                         << "\tId. 2= " << bestArm->rightGroupID
+                         << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
+                         << std::endl;
             graphSaveFile << groupPointId - 1 << "," << left << "," << right << std::endl;
 
         }
         graphSaveFile << groupPointId;
-        std::cout << "GroupID\t" << groupPointId << std::endl;
         for (const auto &pointID: activeGroups) {
             graphSaveFile << "," << pointID;
-            std::cout << "Active left\t" << pointID << std::endl;
+//            std::cout << "Active left\t" << pointID << std::endl;
         }
         graphSaveFile << std::endl;
         std::chrono::system_clock::time_point timeEndEnd = std::chrono::system_clock::now();
         long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (timeEndEnd - timeStartStart).count();
         std::cout << "Total Time = " << totalTime << "(ms)"
-                  << "Global number of Pulls = " << UCB1.globalNumberOfPulls / (0.5 * n * n)
-                  << "Global Sigma= " << UCB1.globalSigma
+                  << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+                  << "\nGlobal Sigma= " << UCB1.globalSigma
                   << std::endl;
+        saveFile   << "TotalTime," << totalTime << std::endl;
+        saveFile   << "GlobalnumberofPulls," << UCB1.globalNumberOfPulls << std::endl;
+        saveFile   << "GlobalSigma," << UCB1.globalSigma  << std::endl;
 
         if (algo == 'm') {
-            std::cout << "Average distances evaluated " << UCB1.globalNumberOfPulls / (0.5 * n * n) << std::endl;
+            std::cout << "Average distances evaluated " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
+                         << ". Gain = " << d / (UCB1.globalNumberOfPulls / ((n-1) * (n-1))) << std::endl;
+            saveFile<< "AveragePulls," << UCB1.globalNumberOfPulls / ((n-1) * (n-1)) << std::endl;
+
         } else {
             std::cout << "Average distances evaluated " << d << std::endl;
+            saveFile<< "AveragePulls," << d << std::endl;
         }
+        UCB1.storeExtraTopArms();
+        finalNumberOfPulls = UCB1.finalNumberOfPulls;
+
+
     }
 
+   void saveAnswers(){
+       saveFile << "AllPullsNumber";
+       for (unsigned i = 0; i < finalNumberOfPulls.size(); i++) {
+           saveFile <<  "," << finalNumberOfPulls[i];
+       }
+       saveFile << std::endl;
+ }
 };

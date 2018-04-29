@@ -67,8 +67,6 @@ int main(int argc, char *argv[]){
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                       (endIndex-startIndex) << std::endl;
 
-//    std::cout << "Saving now" <<std::endl;
-//    knn.saveAnswers();
 
     return 0;
 }

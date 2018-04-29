@@ -28,6 +28,7 @@ public:
     float sumOfSquaresOfPulls;
     unsigned long dimension;
     unsigned log10Dimension;
+    std::unordered_map<std::string, float> misc;
     const templatePoint *point;
     unsigned long id;
     float trueMeanValue;
@@ -77,8 +78,11 @@ public:
         if (localSigma<0){
             std::cout << "duck!" <<std::endl;
         }
-        float frac = numberOfPulls/globalNumberOfPulls;
-        frac = 0;
+        float frac = numberOfPulls/dimension;
+        if (frac>=1){
+            frac = 1;
+        }
+//        frac = 0;
         compositeSigma = std::sqrt( localSigma*localSigma*frac +  globalSigma*globalSigma*(1- frac));
 
 
@@ -111,7 +115,6 @@ public:
     virtual std::pair<float, float> pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
                   unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         std::pair<float, float> sample;
-
         if (numberOfPulls >= dimension){
             float tMean(-INFINITY);
             tMean = trueMean();
@@ -134,18 +137,15 @@ public:
 //                         << "\t" << LCBofSecondBestArm
 //                         << "\t" << upperConfidenceBound
 //                         << std::endl;
-               if (sampleSize <= 0){
-//                   std::cout << sampleSize << ", " << id << " " ;
-               }
                sample = p2.sampleDistance(p1, sampleSize);
+               numberOfPulls += sampleSize;
+               sumOfPulls += sample.first;
+               sumOfSquaresOfPulls += sample.second;
                estimateOfMean = sumOfPulls / numberOfPulls;
                estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
                if (update)
                    updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
-           } while (lowerConfidenceBound < LCBofSecondBestArm && upperConfidenceBound > LCBofSecondBestArm && update && false);
-            //The above block is executed only once for now
-//        std::cout << id << "\t" << lowerConfidenceBound << "\t" << LCBofSecondBestArm << "\t"
-//                  << upperConfidenceBound <<  "\t" << numberOfPulls << std::endl;
+           } while (lowerConfidenceBound < LCBofSecondBestArm && upperConfidenceBound  > LCBofSecondBestArm && update && false);
         }
         return sample;
     }
@@ -179,6 +179,12 @@ public:
     const templatePoint *fixedPoint;
 
     ArmKNN(): Arm<templatePoint>(){}
+
+    using Arm<templatePoint>::id;
+    ArmKNN(unsigned long armNumber){
+        id = armNumber;
+    }
+
     ArmKNN(unsigned long id, const templatePoint &p) : Arm<templatePoint>(id, p) {}
 
     ArmKNN(unsigned long id, const templatePoint &p, const templatePoint &fixPoint) : Arm<templatePoint>(id, p, p.vecSize) {
@@ -284,6 +290,11 @@ class ArmHeirarchical : public Arm<GroupPoint<templatePoint> >{
 public:
     GroupPoint<templatePoint> *leftGroupPoint, *rightGroupPoint;
     unsigned long leftGroupID, rightGroupID;
+
+    using Arm<GroupPoint<templatePoint> > ::id;
+    ArmHeirarchical(unsigned long armNumber){
+        id = armNumber;
+    }
 
     ArmHeirarchical(unsigned long id, GroupPoint<templatePoint> &p1, GroupPoint<templatePoint> &p2) :
             Arm<GroupPoint<templatePoint> >(id, p1.getVecSize()){
