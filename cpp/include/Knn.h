@@ -90,12 +90,12 @@ public:
                 armsVec.push_back(tmpArm);
             }
 
-            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 5*k, sampleSize);
+            UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 4*k, sampleSize);
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
 //#define Brute
             UCB1.initialise(numberOfInitialPulls);
             std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
-            UCB1.runUCB(2000*pointsVectorRight.size());
+            UCB1.runUCB(20000*pointsVectorRight.size());
 
 // Stats
 #ifdef Brute
@@ -176,9 +176,8 @@ public:
         saveFile << "d," << d << "\n";
         saveFile << "k," << k << "\n";
 
-
         // Saving k+4k nearest neighbhours
-        saveFile << "Answer,";
+        saveFile << "Answer," << std::endl;
         for (unsigned i = 0; i < k*5; i++) {
             saveFile << topKArms[i].id << ",";
 #ifdef Brute

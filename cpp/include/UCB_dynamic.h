@@ -118,7 +118,7 @@ public:
         } while((!topValidArmFound) and (!arms.empty()) );
         if (arms.empty()){
             std::cout << "Arms Priority Queue empty." << std::endl;
-            templateArm tmpArm(0);
+            templateArm tmpArm(-1);
             return tmpArm;
         }
         return arms.top();
@@ -273,8 +273,10 @@ public:
     void storeExtraTopArms(){
         for (unsigned i=0; arms.size()>0; i++) {
             templateArm topArm = topValidArm();
-            if (topArm.id == 0)
+            if (topArm.id == -1){
+                std::cout << "Breaking Bad Here" << std::endl;
                 break;
+            }
             finalSortedOrder.push_back(topArm.id);
             finalNumberOfPulls[topArm.id] = topArm.numberOfPulls;
             if (i < numberOfExtraArms)

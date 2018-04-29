@@ -11,7 +11,7 @@
 #include <dlib/image_transforms.h>
 #include "Points.h"
 #include "Arms.h"
-#include "UCB.h"
+#include "../deprecated/UCB.h"
 #include "../utilities/INIReader.h"
 #include "Knn.h"
 //#define DEBUG
@@ -21,13 +21,6 @@ int main(int argc, char *argv[]){
     std::string nameConfig = argv[1];
     long startIndex(atol(argv[2])); // Start index
     long endIndex(atol(argv[3])); // End index
-//
-//    int tmp(0);
-
-//    For debugging mode in CLion
-//    std::string nameConfig = "/Users/govinda/Code/combinatorial_MAB/nominal.ini";
-//    long startIndex(0); // Start index
-//    long endIndex(10); // End index
 
     // Parameters
     INIReader reader(nameConfig);
@@ -40,8 +33,7 @@ int main(int argc, char *argv[]){
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
-
-    long n = (unsigned) reader.GetInteger("UCB", "n_h", -1);
+    long n = (unsigned) reader.GetInteger("UCB", "n", -1);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
 

@@ -13,7 +13,7 @@
 #include <map>
 #include "Points.h"
 #include "Arms.h"
-#include "../utilities/INIReader.h"
+#include "INIReader.h"
 #include "Knn.h"
 
 #define  UCB

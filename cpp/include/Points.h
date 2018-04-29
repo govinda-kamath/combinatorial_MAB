@@ -55,7 +55,7 @@ public:
     explicit SparseL1Point(const std::unordered_map <unsigned long, float> &sp, unsigned long d);
 
     virtual float distance(const SparseL1Point &p1) const;
-    virtual std::pair<float, float> sampleDistance(const SparseL1Point &p1) const;
+    virtual std::pair<float, float> sampleDistance(const SparseL1Point &p1, const unsigned sampleSize ) const;
 };
 
 class SquaredEuclideanPoint : public Point{

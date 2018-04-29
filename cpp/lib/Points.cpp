@@ -139,36 +139,44 @@ float SparseL1Point::distance(const SparseL1Point &p1) const {
 
 /*Picks a dimension of points randomly and samples the distance
  * that L1Point*/
-std::pair<float, float> SparseL1Point::sampleDistance(const SparseL1Point &p1) const {
+std::pair<float, float> SparseL1Point::sampleDistance(const SparseL1Point &p1, const unsigned sampleSize ) const {
 
-    //coin flip
+    float sampleSum = 0;
+    float sampleSquareSum = 0;
     float result(0);
-    {
-        // pick a random index from the current point
-        unsigned long randomCoOrdinate = std::rand() % keys.size();
-        unsigned long index = keys[randomCoOrdinate];
 
-        // Check if the index exists in the other point
-        auto search1 = sparsePoint.find(index);
-        auto search2 = p1.sparsePoint.find(index);
-//        std::cout << "index = " << index << "\t" << search1->first << "\t" << search1->second << std::endl;
-        if (search2 != p1.sparsePoint.end() )
-            result =  std::abs(search1->second - search2->second)*keys.size()/getVecSize();
-        else
-            result =  2*std::abs(search1->second)*keys.size()/getVecSize();
-    }
-    {
-        // pick a random index from the current point
-        unsigned long randomCoOrdinate = std::rand() % p1.keys.size();
-        unsigned long index = p1.keys[randomCoOrdinate];
+    for(unsigned i(0); i< sampleSize; i++) {
 
-        // Check if the index exists in the first point
-        auto search1 = sparsePoint.find(index);
-        auto search2 = p1.sparsePoint.find(index);
-        if (search1 != sparsePoint.end() )
-            result += std::abs(search1->second - search2->second)*p1.keys.size()/getVecSize();
-        else
-            result += 2*std::abs(search2->second)*p1.keys.size()/getVecSize();
+        {
+            // pick a random index from the current point
+            unsigned long randomCoOrdinate = std::rand() % keys.size();
+            unsigned long index = keys[randomCoOrdinate];
+
+            // Check if the index exists in the other point
+            auto search1 = sparsePoint.find(index);
+            auto search2 = p1.sparsePoint.find(index);
+            if (search2 != p1.sparsePoint.end())
+                result = std::abs(search1->second - search2->second) * keys.size() / getVecSize();
+            else
+                result = 2 * std::abs(search1->second) * keys.size() / getVecSize();
+        }
+        sampleSum += result;
+        sampleSquareSum += result * result;
+        {
+            // pick a random index from the current point
+            unsigned long randomCoOrdinate = std::rand() % p1.keys.size();
+            unsigned long index = p1.keys[randomCoOrdinate];
+
+            // Check if the index exists in the first point
+            auto search1 = sparsePoint.find(index);
+            auto search2 = p1.sparsePoint.find(index);
+            if (search1 != sparsePoint.end())
+                result = std::abs(search1->second - search2->second) * p1.keys.size() / getVecSize();
+            else
+                result = 2 * std::abs(search2->second) * p1.keys.size() / getVecSize();
+        }
+        sampleSum += result;
+        sampleSquareSum += result * result;
     }
-    return std::make_pair(result/2, (result/2)*(result/2));
+    return std::make_pair(sampleSum/2, sampleSquareSum/2);
 }

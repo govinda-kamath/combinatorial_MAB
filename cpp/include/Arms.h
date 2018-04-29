@@ -30,7 +30,7 @@ public:
     unsigned log10Dimension;
     std::unordered_map<std::string, float> misc;
     const templatePoint *point;
-    unsigned long id;
+    long id;
     float trueMeanValue;
 
     Arm(){

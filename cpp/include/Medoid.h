@@ -14,7 +14,7 @@
 #include <dlib/image_transforms.h>
 #include "Points.h"
 #include "Arms.h"
-#include "UCB.h"
+#include "../deprecated/UCB.h"
 #include <stdexcept>
 #include "utils.h"
 
