@@ -181,7 +181,15 @@ public:
 
         // Debug only
         if (bestArmCount!=numberOfBestArms){
-            std::cout<< "UCB Stopped before reaching optimal" << std::endl;
+            std::cout<< "UCB Stopped before reaching optimal. Adding the top arms anyways" << std::endl;
+            for (int remain = 0; remain<numberOfBestArms-bestArmCount; remain++){
+                templateArm topArm = topValidArm();
+                topKArms.push_back(topArm);
+                finalSortedOrder.push_back(topArm.id);
+                finalNumberOfPulls[topArm.id] = topArm.numberOfPulls;
+                arms.pop();
+                markForRemoval(topArm.id);
+            }
         }
 #ifdef DEBUG_RUN
         std::cout << "Best arm number " << bestArmCount << " Position" << i

@@ -10,6 +10,8 @@ experiments
 data_id.map
 other_softwares
 python
+h_output*
+
 # Prerequisites
 *.d
 
