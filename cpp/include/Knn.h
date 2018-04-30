@@ -209,7 +209,7 @@ public:
             saveFile <<  "," << finalSortedOrder[i];
         }
         saveFile << std::endl;
-        std::cout << "\nPoint number " << index  << " Av:" << avgNumberOfPulls[index] << "\n";
+//        std::cout << "\nPoint number " << index  << " Av:" << avgNumberOfPulls[index] << "\n";
 
 #endif
 #ifdef Brute
