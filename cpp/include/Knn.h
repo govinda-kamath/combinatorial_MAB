@@ -218,7 +218,7 @@ public:
             if (topKArms[i].id!=topKArmsBrute[i].id)
                 flag = false;
         }
-        std::cout << "index " << index << ": ";
+//        std::cout << "index " << index << ": ";
 
         std::cout << "Verdict: " << flag << "\n";
         if (flag == false){
