@@ -333,7 +333,6 @@ public:
     std::vector<templateArm> bruteBestArms(){
         std::vector<templateArm> bestArms;
         for( int i = 0 ; i < numberOfBestArms+numberOfExtraArms; i++){
-            std::cout << i << std::endl;
             templateArm bestArm = topValidArmBrute();
             armsBrute.pop();
             bestArms.push_back(bestArm);

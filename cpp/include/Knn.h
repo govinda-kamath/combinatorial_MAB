@@ -92,30 +92,34 @@ public:
 
             UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 4*k, sampleSize);
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
-//#define Brute
             UCB1.initialise(numberOfInitialPulls);
             std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
             UCB1.runUCB(20000*pointsVectorRight.size());
-
+            std::chrono::system_clock::time_point timeMABEnd = std::chrono::system_clock::now();
 // Stats
+#define Brute
 #ifdef Brute
-            std::cout << "Running Brute" << std::endl;
+//            std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
 #endif
-            std::chrono::system_clock::time_point timeRunEnd = std::chrono::system_clock::now();
+            std::chrono::system_clock::time_point timeBruteEnd = std::chrono::system_clock::now();
 
-            initTime = std::chrono::duration_cast<std::chrono::milliseconds>
+            initTime = std::chrono::duration_cast<std::chrono::microseconds>
                     (timeRunStart - timeStart).count();
-            runTime = std::chrono::duration_cast<std::chrono::milliseconds>
-                    (timeRunEnd - timeRunStart).count();
+            runTime = std::chrono::duration_cast<std::chrono::microseconds>
+                    (timeMABEnd - timeRunStart).count();
+            float bruteTime = std::chrono::duration_cast<std::chrono::microseconds>
+                    (timeBruteEnd - timeMABEnd).count();
 
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            if (index%100 == 0){
+            if (index%1 == 0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                           << " init time " << initTime << " ms"
-                          << " run time " << runTime << " ms"
+                        << " run time " << runTime << " ms"
+                        << " total mab time " << runTime +initTime<< " ms"
+                        << " brute time " << bruteTime << " ms"
                           << std::endl;
             }
             nearestNeighbours = UCB1.topKArms;
