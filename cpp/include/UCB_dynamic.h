@@ -300,11 +300,11 @@ public:
     void armsKeepFromArmsContainerBrute(){
         for (unsigned long index(0); index < armsContainer.size(); index++){
             float tmpTrueMean = armsContainer[index].trueMean();
-//            armsContainer[index].lowerConfidenceBound = tmpTrueMean;
-//            armsContainer[index].upperConfidenceBound = tmpTrueMean;
+            armsContainer[index].lowerConfidenceBound = tmpTrueMean;
+            armsContainer[index].upperConfidenceBound = tmpTrueMean;
             armsContainer[index].estimateOfMean = tmpTrueMean;
-//            armsContainer[index].estimateOfSecondMoment = tmpTrueMean*tmpTrueMean;
-//            armsToKeep.insert(armsContainer[index].id);
+            armsContainer[index].estimateOfSecondMoment = tmpTrueMean*tmpTrueMean;
+            armsToKeep.insert(armsContainer[index].id);
             armStates[armsContainer[index].id] = utils::ArmConditions(1, tmpTrueMean, tmpTrueMean*tmpTrueMean,
                     armsContainer[index].trueMeanValue);
             armsBrute.push(armsContainer[index]);
