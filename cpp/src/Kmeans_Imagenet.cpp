@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
     std::string directoryPath = reader.Get("path", "directory", "");
-    std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
+    std::string saveFileFolder =reader.Get("path", "saveFileFolderknn", "experiments/knn/tmp");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 50);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
         pointsVec.push_back(allPointsVec[i]);
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Kmeans<SquaredEuclideanPoint> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta, sampleSize, "del");
+    Kmeans<SquaredEuclideanPoint> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta, sampleSize, saveFileFolder);
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
 //    kmeans.run(indices);

@@ -321,7 +321,7 @@ public:
 
 template <class templatePoint>
 class ArmEntropy: public Arm<templatePoint>{
-    
+
 
 };
 
