@@ -92,7 +92,7 @@ public:
 
             UCBDynamic<ArmKNN<templatePoint> > UCB1(armsVec, delta, k, 4*k, sampleSize);
             std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
-//#define Brute
+#define Brute
             UCB1.initialise(numberOfInitialPulls);
             std::chrono::system_clock::time_point timeRunStart = std::chrono::system_clock::now();
             UCB1.runUCB(20000*pointsVectorRight.size());

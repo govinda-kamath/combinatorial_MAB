@@ -13,6 +13,7 @@
 #include <map>
 #include "Points.h"
 #include "Arms.h"
+#include "tenXReader.h"
 #include "../utilities/INIReader.h"
 #include "Knn.h"
 #include "HeirarchicalClustering.h"
@@ -21,8 +22,7 @@
 int main(int argc, char *argv[]) {
     std::string nameConfig = argv[1];
     char algo = argv[2][0]; //m - for mab and b for brute
-//     For debugging mode in CLion
-//    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+
 
     // Parameters
     INIReader reader(nameConfig);
@@ -33,8 +33,9 @@ int main(int argc, char *argv[]) {
 
     // Loading Hyper parameters and data sizes
     std::string directoryPath = reader.Get("path", "h_directory", "");
-    std::string graphFilePath = reader.Get("path", "graphFilePathHeirarchical", "h_graph_output");
-    std::string saveFilePath = reader.Get("path", "saveFilePathHeirarchical", "h_output_data");
+    std::string fileName = reader.Get("path", "h5path", "test_dataset/1M_neurons_matrix_subsampled_2k.h5");
+    std::string graphFilePath = reader.Get("path", "graphFilePathHeirarchical10x", "h_graph_output10x");
+    std::string saveFilePath = reader.Get("path", "saveFilePathHeirarchical10x", "h_output_data10x");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
@@ -42,15 +43,19 @@ int main(int argc, char *argv[]) {
     unsigned long n = (unsigned) reader.GetInteger("UCB", "n_h", 100);
     delta = delta / (n);
 
-    // Data to Points (vectors)
-    std::vector<std::string> pathsToImages;
-    std::vector<SquaredEuclideanPoint> pointsVec;
-    utils::getPathToFile(pathsToImages, directoryPath, fileSuffix); // Loads the filepaths into an array
-    utils::vectorsToPoints(pointsVec, pathsToImages, n); //Loads the images from the locations in above array to pointsVec
+    // Loading 10x data shape
+    std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
+    // Loading Sparse matrix
+    std::cout << "Reading normalised data sparsely" << std::endl;
+    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
+    tenXReader::get10xNormalisedSparseMatrix(fileName, sparseNormalisedDataMatrix);
+    //Arms
+    std::vector<SparseL1Point> pointsVec;
+    utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0]);
 
-    // Arms and UCB
+    //UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Heirarchical<SquaredEuclideanPoint> heirar(pointsVec, numberOfInitialPulls, delta, sampleSize,
+    Heirarchical<SparseL1Point> heirar(pointsVec, numberOfInitialPulls, delta, sampleSize,
                                                saveFilePath, graphFilePath,  algo, n);
 
     std::cout << "Start!" << std::endl;

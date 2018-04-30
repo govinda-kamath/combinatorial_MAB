@@ -38,11 +38,11 @@ public:
      * Since vectors are shared across arms, we use shared pointers to share
      * the memory location of vectors. This is pretty obvious but very important
      */
-    std::vector<std::shared_ptr<SquaredEuclideanPoint> > sharedPtrPointsVec;
+    std::vector<std::shared_ptr<templatePoint> > sharedPtrPointsVec;
 
-    std::vector<GroupPoint<SquaredEuclideanPoint> > groupPoints;
+    std::vector<GroupPoint<templatePoint> > groupPoints;
     std::vector<std::string> groupPointsNames; // Only for debugging purpose: Stores the groups in text format
-    std::vector<ArmHeirarchical<SquaredEuclideanPoint> > armsVec;
+    std::vector<ArmHeirarchical<templatePoint> > armsVec;
     // Stores map from group id to arm id. Used to removes "irrelevant" arms
     std::unordered_map<std::pair<unsigned long, unsigned long>, unsigned long, utils::pair_hash> groupIDtoArmID;
     //Maintains the valid group points currently and used while creating new arms
@@ -95,15 +95,15 @@ public:
         // Pushing null objects
         std::cout << "Creating n^2 Group points";
         for (unsigned long i(0); i < n * n; i++) {
-            groupPoints.push_back(GroupPoint<SquaredEuclideanPoint>()); //Todo: Bad Code
+            groupPoints.push_back(GroupPoint<templatePoint>()); //Todo: Bad Code
             groupPointsNames.push_back("");
         }
 
         for (unsigned long i(0); i < n; i++) {
-            sharedPtrPointsVec.push_back(std::make_shared<SquaredEuclideanPoint>(pointsVector[i]));
-            std::vector<std::shared_ptr<SquaredEuclideanPoint> > groupPointTmp1;
+            sharedPtrPointsVec.push_back(std::make_shared<templatePoint>(pointsVector[i]));
+            std::vector<std::shared_ptr<templatePoint> > groupPointTmp1;
             groupPointTmp1.push_back(sharedPtrPointsVec[i]);
-            GroupPoint<SquaredEuclideanPoint> gpTmp1(groupPointTmp1, d, groupPointId);
+            GroupPoint<templatePoint> gpTmp1(groupPointTmp1, d, groupPointId);
             groupPoints[i] = gpTmp1;
             groupPointsNames[i] = std::to_string(i);
             //Updating the  group to the active list
@@ -118,7 +118,7 @@ public:
                 std::cout << i << " arms added" << std::endl;
             }
             for (unsigned long j(0); j < i; j++) {
-                ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[i], groupPoints[j]);
+                ArmHeirarchical<templatePoint> tmpArm(armID, groupPoints[i], groupPoints[j]);
                 groupIDtoArmID[std::make_pair(i, j)] = armID;
                 armsVec.push_back(tmpArm);
                 armID++;
@@ -129,7 +129,7 @@ public:
 
     void run(){
 
-        UCBDynamic<ArmHeirarchical<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
+        UCBDynamic<ArmHeirarchical<templatePoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
 
         if (algo == 'm') {
             std::cout << "Running MAB" << std::endl;
@@ -147,12 +147,12 @@ public:
         for (unsigned long i(0); i < n - 2; i++) {
 
             //Find the best group points to join
-            ArmHeirarchical<SquaredEuclideanPoint> *bestArm;
+            ArmHeirarchical<templatePoint> *bestArm;
             if (algo == 'm') {
                 UCB1.runUCB(n * d);
                 bestArm = &UCB1.topKArms.back();
             } else {
-                std::vector<ArmHeirarchical<SquaredEuclideanPoint>> bestArms = UCB1.bruteBestArms();
+                std::vector<ArmHeirarchical<templatePoint>> bestArms = UCB1.bruteBestArms();
                 bestArm = &bestArms[0];
             }
             auto left = bestArm->leftGroupID;
@@ -180,11 +180,11 @@ public:
 
 
             //Creating a new group by combining left and right group points
-            std::vector<std::shared_ptr<SquaredEuclideanPoint> > newGroupPoint;
+            std::vector<std::shared_ptr<templatePoint> > newGroupPoint;
             newGroupPoint = bestArm->leftGroupPoint->groupPoint;
             newGroupPoint.insert(newGroupPoint.end(), bestArm->rightGroupPoint->groupPoint.begin(),
                                  bestArm->rightGroupPoint->groupPoint.end());
-            GroupPoint<SquaredEuclideanPoint> newCombinedGroupPoint(newGroupPoint, d, groupPointId);
+            GroupPoint<templatePoint> newCombinedGroupPoint(newGroupPoint, d, groupPointId);
             groupPoints[groupPointId] = newCombinedGroupPoint;
             groupPointsNames[groupPointId] = groupPointsNames[left] + " " + groupPointsNames[right]; //Debug
 
@@ -195,7 +195,7 @@ public:
              */
             for (const auto &pointID: activeGroups) {
 
-                ArmHeirarchical<SquaredEuclideanPoint> tmpArm(armID, groupPoints[groupPointId], groupPoints[pointID]);
+                ArmHeirarchical<templatePoint> tmpArm(armID, groupPoints[groupPointId], groupPoints[pointID]);
                 groupIDtoArmID[std::make_pair(groupPointId, pointID)] = armID;
 
                 unsigned long leftArmRemovedId;

@@ -25,5 +25,5 @@ then ssh -t $1@shannon.stanford.edu "export TEMP=/home/$1/tmp && cd /data/MAB/wo
 fi
 
 if [ "$2" == "all" ];
-then rsync -rizP --delete --exclude '.*' --exclude 'data' --exclude '*.pyc' --exclude 'figures' --exclude 'build' . $1@shannon.stanford.edu:/data/MAB/work/code/
+then rsync -rizP --delete --exclude '.*' --exclude 'data' --exclude '*.pyc' --exclude 'figures' --exclude 'build' --exclude 'cmake-build-debug' . $1@shannon.stanford.edu:/data/MAB/work/code/
 fi
