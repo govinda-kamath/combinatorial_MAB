@@ -15,13 +15,13 @@
 #define DEBUG
 
 int main(int argc, char *argv[]){
-//    std::string nameConfig = argv[1];
+    std::string nameConfig = argv[1];
 //    long startIndex(atol(argv[2])); // Start index
 //    long endIndex(atol(argv[3])); // End index
 
 
 //     For debugging mode in CLion
-    std::string nameConfig = "nominal.ini";
+//    std::string nameConfig = "nominal.ini";
     long startIndex(0); // Start index
     long endIndex(100); // End index
 
