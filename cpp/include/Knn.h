@@ -112,7 +112,7 @@ public:
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            if (std::rand()%100 == 0){
+            if (index%100 == 0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                           << " init time " << initTime << " ms"
                           << " run time " << runTime << " ms"
