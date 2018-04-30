@@ -34,8 +34,9 @@ int main(int argc, char *argv[]){
     std::string saveFilePath =reader.Get("path", "saveFilePath", "test.output");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
-    unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
+    unsigned k = (unsigned) reader.GetInteger("UCB", "k", 50);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+    unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
 
 
     std::cout << "Running "<<k<< "-means for " << endIndex-startIndex << " points" << std::endl;
@@ -46,22 +47,22 @@ int main(int argc, char *argv[]){
     utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
 
     //Points
-    std::vector<SquaredEuclideanPoint> initialPointsVec;
-    utils::vectorsToPoints(initialPointsVec, pathsToImages);
+    std::vector<SquaredEuclideanPoint> allPointsVec;
+    utils::vectorsToPoints(allPointsVec, pathsToImages);
 
     // Arms and UCB
     std::vector<SquaredEuclideanPoint> centersVec;
     std::vector<SquaredEuclideanPoint> pointsVec;
 
     for(unsigned long i(0); i < k ; i++){
-        unsigned long index = std::rand()%initialPointsVec.size();
-        centersVec.push_back(initialPointsVec[index]);
+        unsigned long index = std::rand()%allPointsVec.size();
+        centersVec.push_back(allPointsVec[index]);
     }
-    for(unsigned long i(k); i < initialPointsVec.size() ; i++)
-        pointsVec.push_back(initialPointsVec[i]);
+    for(unsigned long i(k); i < allPointsVec.size() ; i++)
+        pointsVec.push_back(allPointsVec[i]);
 
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Kmeans<SquaredEuclideanPoint> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta);
+    Kmeans<SquaredEuclideanPoint> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta, sampleSize, "del");
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
 //    kmeans.run(indices);

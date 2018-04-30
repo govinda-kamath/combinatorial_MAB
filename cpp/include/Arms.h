@@ -56,8 +56,6 @@ public:
         point = &p;
         dimension = d;
         log10Dimension = (unsigned) std::ceil(std::log10(dimension));
-//        std::cout << "log10D " << log10Dimension << std::endl;
-
     }
 
     ~Arm(){
@@ -319,6 +317,12 @@ public:
 //        std::cout<< leftGroupID << " " << rightGroupID << " " << trueMeanValue << std::endl;
         return trueMeanValue;
     }
+};
+
+template <class templatePoint>
+class ArmEntropy: public Arm<templatePoint>{
+    
+
 };
 
 #endif //COMBINATORIAL_MAB_ARMS_H

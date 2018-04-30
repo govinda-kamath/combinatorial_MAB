@@ -106,13 +106,13 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp)
 #    target_link_libraries(medoid dlib::dlib pthread ${Boost_LIBRARIES})
 #
-#    add_executable(kmeans cpp/src/Kmeans_main.cpp
-#            cpp/include/Points.h cpp/include/Arms.h
-#            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-#            cpp/lib/Points.cpp
-#            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-#            cpp/include/kmeans.h )
-#    target_link_libraries(kmeans dlib::dlib pthread ${Boost_LIBRARIES})
+    add_executable(kmeans cpp/src/Kmeans_Imagenet.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+            cpp/lib/Points.cpp
+            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/kmeans.h )
+    target_link_libraries(kmeans dlib::dlib pthread ${Boost_LIBRARIES})
 #
 #    add_executable(medoid10x cpp/src/Medoid_10x.cpp
 #            cpp/include/Points.h cpp/include/Arms.h
@@ -122,13 +122,13 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
 #    target_link_libraries( medoid10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 #
-    add_executable(knn10x cpp/src/Knn_10x.cpp
-            cpp/include/Points.h cpp/include/Arms.h
-            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-            cpp/lib/Points.cpp
-            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
-    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
+#    add_executable(knn10x cpp/src/Knn_10x.cpp
+#            cpp/include/Points.h cpp/include/Arms.h
+#            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+#            cpp/lib/Points.cpp
+#            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+#            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+#    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 #
 #add_executable(heirarchical cpp/src/Heirarchical_Imagenet.cpp
 #        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
@@ -139,14 +139,14 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #target_link_libraries( heirarchical dlib::dlib )
 
 
-add_executable(heirarchical10x cpp/src/Heirarchical_10x.cpp
-        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
-        cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-        cpp/lib/Points.cpp cpp/include/tenXReader.h
-        cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-        cpp/lib/tenXReader.cpp
-        )
-target_link_libraries( heirarchical10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
+#add_executable(heirarchical10x cpp/src/Heirarchical_10x.cpp
+#        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
+#        cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+#        cpp/lib/Points.cpp cpp/include/tenXReader.h
+#        cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+#        cpp/lib/tenXReader.cpp
+#        )
+#target_link_libraries( heirarchical10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 #target_link_libraries( heirarchical10x dlib::dlib )
 
 #endif()
