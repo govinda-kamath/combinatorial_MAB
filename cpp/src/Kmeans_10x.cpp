@@ -55,6 +55,8 @@ int main(int argc, char *argv[]){
     
     std::vector<SparseL1Point> centersVec;
     std::vector<SparseL1Point> pointsVec;
+    if (n>allPointsVec.size())
+        n = allPointsVec.size();
     for(unsigned long i(0); i < n ; i++)
         pointsVec.push_back(allPointsVec[i]);
     //Choosing random points as my cluster centers
