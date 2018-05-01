@@ -158,9 +158,7 @@ public:
             // Update if best arm is found
             if (bestArmFound){
                 templateArm topArm = topValidArm();
-//                std::cout << "Brute best arm " << topArm.id << "\t" << topArm.estimateOfMean << "\t"
-//                                 <<  topArm.trueMeanValue << "\t"
-//                                 <<  topArm.trueMean() << std::endl;
+//                std::cout << "best arm " << topArm.id << std::endl;
 
                 // Storing the results
                 topKArms.push_back(topArm);

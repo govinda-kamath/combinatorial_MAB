@@ -32,10 +32,11 @@ public:
     unsigned int sampleSize;
 
     //Outputs
-    std::vector<ArmKNN<templatePoint>>nearestNeighbours;
     std::unordered_map<unsigned long, unsigned long> finalNumberOfPulls;
     std::vector<unsigned long> finalSortedOrder;
-    std::vector<ArmKNN<templatePoint>> nearestNeighboursBrute;
+    std::vector<ArmKNN<templatePoint>>nearestNeighbourIndex;
+    std::vector<ArmKNN<templatePoint>> nearestNeighbourIndexBrute;
+    std::vector< std::vector<long >> allNearestNeighbhourIds;
     float initTime;
     float runTime;
     std::string saveFolderPath;
@@ -70,10 +71,12 @@ public:
         k = NumberOfNeighbhours;
         numberOfInitialPulls = noOfInitialPulls;
         delta = deltaAccuracy;
+        for (unsigned long i(0); i< pointsVectorLeft.size(); i++){
+            avgNumberOfPulls.push_back(0);
+        }
 
-        nearestNeighbours.reserve(pointsVectorLeft.size());
-        nearestNeighboursBrute.reserve(pointsVectorLeft.size());
-        avgNumberOfPulls.reserve(pointsVectorLeft.size());
+        nearestNeighbourIndex.reserve(pointsVectorLeft.size());
+        nearestNeighbourIndexBrute.reserve(pointsVectorLeft.size());
 
     }
 
@@ -97,7 +100,7 @@ public:
             UCB1.runUCB(20000*pointsVectorRight.size());
             std::chrono::system_clock::time_point timeMABEnd = std::chrono::system_clock::now();
 // Stats
-#define Brute
+//#define Brute
 #ifdef Brute
 //            std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
@@ -114,22 +117,27 @@ public:
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            if (index%1 == 0){
+            if (index%1000 == 0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                           << " init time " << initTime << " ms"
                         << " run time " << runTime << " ms"
                         << " total mab time " << runTime +initTime<< " ms"
                         << " brute time " << bruteTime << " ms"
                           << std::endl;
+
             }
-            nearestNeighbours = UCB1.topKArms;
+            nearestNeighbourIndex = UCB1.topKArms;
             finalSortedOrder = UCB1.finalSortedOrder;
             finalNumberOfPulls = UCB1.finalNumberOfPulls;
 #ifdef Brute
-            nearestNeighboursBrute = UCB1.bruteBestArms();
+            nearestNeighbourIndexBrute = UCB1.bruteBestArms();
 #endif
 
-
+            std::vector<long> ids;
+            for (unsigned int j(0); j < k ; j++){
+                ids.push_back(nearestNeighbourIndex[0].id);
+            }
+            allNearestNeighbhourIds.push_back(ids);
             saveAnswers(index);
         }
     }
@@ -137,8 +145,9 @@ public:
     void run(){
         std::vector<unsigned long> indices(pointsVectorLeft.size());
         std::iota(indices.begin(), indices.end(), 0);
-//        std::cout << "size of indices" << indices
+//        std::cout << "size of indices" << indices.size() << std::endl;
         run(indices);
+
     }
 
 
@@ -147,7 +156,7 @@ public:
         std::vector<std::vector<ArmKNN<templatePoint>> > answers;
         for (unsigned long i = 0; i< indices.size(); i++) {
             unsigned long index = indices[i];
-            answers.push_back(nearestNeighbours);
+            answers.push_back(nearestNeighbourIndex);
         }
         return answers;
 
@@ -157,13 +166,13 @@ public:
     void saveAnswers(unsigned long index ){
         //Variables
         std::string  n = std::to_string(pointsVectorLeft.size());
-        std::string  d = std::to_string(nearestNeighbours[0].dimension);
+        std::string  d = std::to_string(nearestNeighbourIndex[0].dimension);
         std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
         std::ofstream saveFile;
         saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
-        std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbours;
+        std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbourIndex;
 #ifdef Brute
-        std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighboursBrute;
+        std::vector<ArmKNN<templatePoint>> topKArmsBrute = nearestNeighbourIndexBrute;
 #endif
         std::vector<float> topKArmsTrueMean(k*5);
         std::vector<float> topKArmsTrueMeanBrute(k*5);

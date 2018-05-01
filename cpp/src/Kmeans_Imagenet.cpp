@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
     std::string directoryPath = reader.Get("path", "directory", "");
-    std::string saveFileFolder =reader.Get("path", "saveFileFolderknn", "experiments/knn/tmp");
+    std::string saveFileFolder =reader.Get("path", "saveFileFolderkmean", "../experiments/kmeans/");
     std::string fileSuffix = reader.Get("path", "suffix", "");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 50);
@@ -49,43 +49,36 @@ int main(int argc, char *argv[]){
     //Points
     std::vector<SquaredEuclideanPoint> allPointsVec;
     utils::vectorsToPoints(allPointsVec, pathsToImages);
-
-    // Arms and UCB
     std::vector<SquaredEuclideanPoint> centersVec;
     std::vector<SquaredEuclideanPoint> pointsVec;
-
+    for(unsigned long i(0); i < allPointsVec.size() ; i++)
+        pointsVec.push_back(allPointsVec[i]);
+    //Choosing random points as my cluster centers
     for(unsigned long i(0); i < k ; i++){
         unsigned long index = std::rand()%allPointsVec.size();
         centersVec.push_back(allPointsVec[index]);
     }
-    for(unsigned long i(k); i < allPointsVec.size() ; i++)
-        pointsVec.push_back(allPointsVec[i]);
 
+    //Running one step of kmeans, the maximization step.
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     Kmeans<SquaredEuclideanPoint> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta, sampleSize, saveFileFolder);
-    std::vector<unsigned long> indices(endIndex-startIndex);
-    std::iota(indices.begin(), indices.end(), startIndex);
-//    kmeans.run(indices);
-    kMeans.run();
-
-
+    kMeans.maximization();
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
+
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                  (endIndex-startIndex) << std::endl;
+    kMeans.saveAnswers();
 
-    loopTimeStart = std::chrono::system_clock::now();
-    for (unsigned  long i(0); i << centersVec.size(); i++) {
-        for (unsigned long j(0); j << pointsVec.size(); j++) {
-            float die = centersVec[i].distance(pointsVec[j]);
-        }
-    }
-    loopTimeEnd = std::chrono::system_clock::now();
+    // Print the clusters
+//    for (unsigned i(0); i < k; i ++){
+//        std::cout<< "Cluster " << i  << std::endl;
+//        for(unsigned long j(0); j < kMeans.clusters[i].size(); j ++){
+//            std::cout<< i << " " << kMeans.clusters[i][j];
+//        }
+//        std::cout<< std::endl;
+//    }
 
-    std::cout << "Average time Naive (ms) "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
-                 (endIndex-startIndex) << std::endl;
-     return 0;
 }
 
 
