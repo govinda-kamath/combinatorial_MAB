@@ -37,6 +37,7 @@ int main(int argc, char *argv[]){
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 50);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
+    long n = (unsigned) reader.GetInteger("UCB", "n", -1);
 
 
     std::cout << "Running "<<k<< "-means for " << endIndex-startIndex << " points" << std::endl;
@@ -48,7 +49,7 @@ int main(int argc, char *argv[]){
 
     //Points
     std::vector<SquaredEuclideanPoint> allPointsVec;
-    utils::vectorsToPoints(allPointsVec, pathsToImages);
+    utils::vectorsToPoints(allPointsVec, pathsToImages, n);
     std::vector<SquaredEuclideanPoint> centersVec;
     std::vector<SquaredEuclideanPoint> pointsVec;
     for(unsigned long i(0); i < allPointsVec.size() ; i++)
