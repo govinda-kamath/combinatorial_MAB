@@ -27,7 +27,6 @@ public:
     float localSigma;
     float sumOfSquaresOfPulls;
     unsigned long dimension;
-    unsigned log10Dimension;
     std::unordered_map<std::string, float> misc;
     const templatePoint *point;
     long id;
@@ -48,14 +47,12 @@ public:
     Arm(unsigned long armNumber, unsigned long d) : Arm() {
         id = armNumber;
         dimension = d;
-        log10Dimension = (unsigned) std::ceil(std::log10(dimension));
     }
 
     Arm(unsigned long armNumber, const templatePoint &p, unsigned long d) : Arm() {
         id = armNumber;
         point = &p;
         dimension = d;
-        log10Dimension = (unsigned) std::ceil(std::log10(dimension));
     }
 
     ~Arm(){
@@ -71,10 +68,9 @@ public:
 
 
         float compositeSigma, intervalWidth;
-//        compositeSigma = globalSigma; //Todo: update sigma to new local value
         localSigma = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
         if (localSigma<0){
-            std::cout << "duck!" <<std::endl;
+            std::cout << "Abort mission!! Fundamental error" <<std::endl;
         }
         float frac = numberOfPulls/dimension;
         if (frac>=1){
@@ -82,7 +78,6 @@ public:
         }
 //        frac = 0;
         compositeSigma = std::sqrt( localSigma*localSigma*frac +  globalSigma*globalSigma*(1- frac));
-
 
         intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/(float)numberOfPulls);
         upperConfidenceBound = estimateOfMean + intervalWidth;
@@ -245,7 +240,8 @@ public:
         //Choose a random point
         unsigned long randomCoOrdinate;
         randomCoOrdinate = std::rand() % numberOfPoints;
-        return pullArm((*pointsVec)[randomCoOrdinate], globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
+        return pullArm((*pointsVec)[randomCoOrdinate], globalSigma, globalNumberOfPulls, logDeltaInverse,
+                       update, sampleSize, LCBofSecondBestArm);
     }
 
     using Arm<templatePoint>::trueMean;

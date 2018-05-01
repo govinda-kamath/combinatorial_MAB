@@ -36,8 +36,8 @@ public:
     std::string savefilePath;
 
     std::vector< std::vector<unsigned long> > clusters;
-    std::vector<SquaredEuclideanPoint> centersVec;
-    std::vector<SquaredEuclideanPoint> pointsVec;
+    std::vector<templatePoint> centersVec;
+    std::vector<templatePoint> pointsVec;
 
     //Output
     std::vector<float> finalNumberOfPulls;
@@ -63,7 +63,7 @@ public:
         for(unsigned j(0); j<k ;j++){
             clusters.push_back(std::vector<unsigned long>());
         }
-        Knn<SquaredEuclideanPoint> knn( pointsVec, centersVec, 1, numberOfInitialPulls, delta, sampleSize, "/tmp");
+        Knn<templatePoint> knn( pointsVec, centersVec, 1, numberOfInitialPulls, delta, sampleSize, "/tmp");
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         knn.run();
         std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
@@ -97,7 +97,7 @@ public:
 
     void saveAnswers() {
         //Variables
-        std::string d = std::to_string(pointsVec[0].point.size());
+        std::string d = std::to_string(pointsVec[0].vecSize);
         std::string saveFilePath =
                 savefilePath + "n_" + std::to_string(n) + "_d_" + d + "_k_" + std::to_string(k);
         std::ofstream saveFile;

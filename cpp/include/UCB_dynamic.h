@@ -180,7 +180,7 @@ public:
         // Debug only
         if (bestArmCount!=numberOfBestArms){
             std::cout<< "UCB Stopped before reaching optimal. Adding the top arms anyways" << std::endl;
-            for (int remain = 0; remain<numberOfBestArms-bestArmCount; remain++){
+            for (unsigned int remain = 0; remain<numberOfBestArms-bestArmCount; remain++){
                 templateArm topArm = topValidArm();
                 topKArms.push_back(topArm);
                 finalSortedOrder.push_back(topArm.id);
@@ -330,7 +330,7 @@ public:
     // For brute force only
     std::vector<templateArm> bruteBestArms(){
         std::vector<templateArm> bestArms;
-        for( int i = 0 ; i < numberOfBestArms+numberOfExtraArms; i++){
+        for(unsigned long i = 0 ; i < numberOfBestArms+numberOfExtraArms; i++){
             templateArm bestArm = topValidArmBrute();
             armsBrute.pop();
             bestArms.push_back(bestArm);

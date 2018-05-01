@@ -100,7 +100,7 @@ public:
             UCB1.runUCB(20000*pointsVectorRight.size());
             std::chrono::system_clock::time_point timeMABEnd = std::chrono::system_clock::now();
 // Stats
-//#define Brute
+#define Brute
 #ifdef Brute
 //            std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
@@ -117,7 +117,7 @@ public:
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            if (index%1000 == 0){
+            if (index%1 == 0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                           << " init time " << initTime << " ms"
                         << " run time " << runTime << " ms"

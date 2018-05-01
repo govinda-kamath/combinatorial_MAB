@@ -12,6 +12,7 @@
 #include "Points.h"
 #include "INIReader.h"
 #include "kmeans.h"
+#include "tenXReader.h"
 #define DEBUG
 
 int main(int argc, char *argv[]){
@@ -31,38 +32,40 @@ int main(int argc, char *argv[]){
         return 1;
     }
     std::string directoryPath = reader.Get("path", "directory", "");
-    std::string saveFileFolder =reader.Get("path", "saveFileFolderkmean", "../experiments/kmeans/imagement/");
-    std::string fileSuffix = reader.Get("path", "suffix", "");
+    std::string saveFileFolder =reader.Get("path", "saveFileFolderkmean10x", "../experiments/kmeans/10x/");
+    std::string fileName = reader.Get("path", "h5path", "test_dataset/1M_neurons_matrix_subsampled_2k.h5");
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
-    unsigned k = (unsigned) reader.GetInteger("UCB", "k", 50);
-    float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
+    unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
+    float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     long n = (unsigned) reader.GetInteger("UCB", "n", -1);
 
 
-    std::cout << "Running "<<k<< "-means for " << endIndex-startIndex << " points" << std::endl;
-    std::cout << numberOfInitialPulls << std::endl;
+    // Loading 10x data shape
+    std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
 
-    // Data
-    std::vector<std::string>  pathsToImages;
-    utils::getPathToFile(pathsToImages, directoryPath, fileSuffix);
+    // Loading Sparse matrix
+    std::cout << "Reading normalised data sparsely" << std::endl;
+    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
+    tenXReader::get10xNormalisedSparseMatrix(fileName, sparseNormalisedDataMatrix);
 
-    //Points
-    std::vector<SquaredEuclideanPoint> allPointsVec;
-    utils::vectorsToPoints(allPointsVec, pathsToImages, n);
-    std::vector<SquaredEuclideanPoint> centersVec;
-    std::vector<SquaredEuclideanPoint> pointsVec;
-    for(unsigned long i(0); i < allPointsVec.size() ; i++)
+    //Arms
+    std::vector<SparseL1Point> allPointsVec;
+    utils::unorderedMapToPoints(allPointsVec, sparseNormalisedDataMatrix, shapeData[0]);
+    
+    std::vector<SparseL1Point> centersVec;
+    std::vector<SparseL1Point> pointsVec;
+    for(unsigned long i(0); i < n ; i++)
         pointsVec.push_back(allPointsVec[i]);
     //Choosing random points as my cluster centers
     for(unsigned long i(0); i < k ; i++){
-        unsigned long index = std::rand()%allPointsVec.size();
+        unsigned long index = std::rand()%n;
         centersVec.push_back(allPointsVec[index]);
     }
 
     //Running one step of kmeans, the maximization step.
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
-    Kmeans<SquaredEuclideanPoint> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta, sampleSize, saveFileFolder);
+    Kmeans<SparseL1Point> kMeans( pointsVec, centersVec, numberOfInitialPulls, delta, sampleSize, saveFileFolder);
     kMeans.maximization();
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
 
