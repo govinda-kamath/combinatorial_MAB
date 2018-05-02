@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+    long n = (unsigned) reader.GetInteger("UCB", "n", -1);
 
 
     // Loading 10x data shape
@@ -48,7 +49,7 @@ int main(int argc, char *argv[]){
 
     //Arms
     std::vector<SparseL1Point> pointsVec;
-    utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0]);
+    utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0], n);
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << "n = " << pointsVec.size() << std::endl;
@@ -60,7 +61,7 @@ int main(int argc, char *argv[]){
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
     std::cout << "Running" <<std::endl;
-    knn.run(indices);
+    knn.run();
 
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
     std::cout << "Average time (ms) "

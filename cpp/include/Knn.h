@@ -100,7 +100,7 @@ public:
             UCB1.runUCB(20000*pointsVectorRight.size());
             std::chrono::system_clock::time_point timeMABEnd = std::chrono::system_clock::now();
 // Stats
-#define Brute
+//#define Brute
 #ifdef Brute
 //            std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
@@ -210,18 +210,18 @@ public:
         }
         saveFile << std::endl;
 
-        // Saving stats for all the arms
-        saveFile << "AllPullsNumber";
-        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-            saveFile <<  "," << finalNumberOfPulls[i];
-        }
-        saveFile << std::endl;
-
-        saveFile << "AllPullsIndex";
-        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-            saveFile <<  "," << finalSortedOrder[i];
-        }
-        saveFile << std::endl;
+//        // Saving stats for all the arms
+//        saveFile << "AllPullsNumber";
+//        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
+//            saveFile <<  "," << finalNumberOfPulls[i];
+//        }
+//        saveFile << std::endl;
+//
+//        saveFile << "AllPullsIndex";
+//        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
+//            saveFile <<  "," << finalSortedOrder[i];
+//        }
+//        saveFile << std::endl;
 //        std::cout << "\nPoint number " << index  << " Av:" << avgNumberOfPulls[index] << "\n";
 
 #endif

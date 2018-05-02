@@ -95,11 +95,12 @@ namespace utils{
     template <class templatePoint>
     void unorderedMapToPoints(std::vector<templatePoint> &pointsVec,
                          std::vector<std::unordered_map<unsigned long, float> > &sparseDataMatrix,
-                              unsigned long dimension) {
+                              unsigned long dimension, unsigned long n = -1) {
 
         //Each row in the data-matrix is a point
-
-        for (unsigned long i(0); i < sparseDataMatrix.size(); i++) {
+        if (n==-1)
+            n = sparseDataMatrix.size();
+        for (unsigned long i(0); i < n; i++) {
             templatePoint tmpPoint(sparseDataMatrix[i], dimension);
             pointsVec.push_back(tmpPoint);
         }
