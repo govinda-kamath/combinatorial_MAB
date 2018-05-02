@@ -60,8 +60,8 @@ int main(int argc, char *argv[]){
     Knn<SparseL1Point> knn(pointsVec, k, numberOfInitialPulls, delta, sampleSize, saveFileFolder);
     std::vector<unsigned long> indices(endIndex-startIndex);
     std::iota(indices.begin(), indices.end(), startIndex);
-    std::cout << "Running" <<std::endl;
-    knn.run();
+    std::cout << "Running from" << startIndex << "to " << endIndex << std::endl;
+    knn.run(indices);
 
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
     std::cout << "Average time (ms) "
