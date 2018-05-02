@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
 
     //Arms
     std::vector<SparseL1Point> allPointsVec;
-    utils::unorderedMapToPoints(allPointsVec, sparseNormalisedDataMatrix, shapeData[0]);
+    utils::unorderedMapToPoints(allPointsVec, sparseNormalisedDataMatrix, shapeData[0], n);
     
     std::vector<SparseL1Point> centersVec;
     std::vector<SparseL1Point> pointsVec;
