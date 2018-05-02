@@ -100,24 +100,24 @@ public:
             UCB1.runUCB(20000*pointsVectorRight.size());
             std::chrono::system_clock::time_point timeMABEnd = std::chrono::system_clock::now();
 // Stats
-//#define Brute
+#define Brute
 #ifdef Brute
 //            std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
 #endif
             std::chrono::system_clock::time_point timeBruteEnd = std::chrono::system_clock::now();
 
-            initTime = std::chrono::duration_cast<std::chrono::microseconds>
+            initTime = std::chrono::duration_cast<std::chrono::milliseconds>
                     (timeRunStart - timeStart).count();
-            runTime = std::chrono::duration_cast<std::chrono::microseconds>
+            runTime = std::chrono::duration_cast<std::chrono::milliseconds>
                     (timeMABEnd - timeRunStart).count();
-            float bruteTime = std::chrono::duration_cast<std::chrono::microseconds>
+            float bruteTime = std::chrono::duration_cast<std::chrono::milliseconds>
                     (timeBruteEnd - timeMABEnd).count();
 
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            if (index%100 == 0){
+            if (index%1 == 0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                           << " init time " << initTime << " ms"
                         << " run time " << runTime << " ms"
@@ -227,6 +227,7 @@ public:
 #endif
 #ifdef Brute
         bool flag = true;
+        unsigned badboy = 0;
         for (unsigned i = 0; i < k; i++) {
             if (topKArms[i].id!=topKArmsBrute[i].id)
                 flag = false;
