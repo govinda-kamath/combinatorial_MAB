@@ -131,14 +131,14 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
 #    target_link_libraries( kmeans10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 #
-#
-#    add_executable(knn10x cpp/src/Knn_10x.cpp
-#            cpp/include/Points.h cpp/include/Arms.h
-#            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-#            cpp/lib/Points.cpp
-#            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-#            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
-#    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
+
+    add_executable(knn10x cpp/src/Knn_10x.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+            cpp/lib/Points.cpp
+            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/tenXReader.h cpp/lib/tenXReader.cpp)
+    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 #
 #
 #
