@@ -21,7 +21,6 @@
 
 int main(int argc, char *argv[]) {
     std::string nameConfig = argv[1];
-    char algo = argv[2][0]; //m - for mab and b for brute
 
 
     // Parameters
@@ -40,6 +39,7 @@ int main(int argc, char *argv[]) {
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+    long n = (unsigned) reader.GetInteger("UCB", "n", -1);
 
     // Loading 10x data shape
     std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
@@ -49,14 +49,13 @@ int main(int argc, char *argv[]) {
     tenXReader::get10xNormalisedSparseMatrix(fileName, sparseNormalisedDataMatrix);
     //Arms
     std::vector<SparseL1Point> pointsVec;
-    unsigned long n = pointsVec.size();
     delta = delta / (n);
-    utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0]);
+    utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0], n);
 
     //UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     Heirarchical<SparseL1Point> heirar(pointsVec, numberOfInitialPulls, delta, sampleSize,
-                                               saveFilePath, graphFilePath,  algo, pointsVec.size());
+                                               saveFilePath, graphFilePath, pointsVec.size());
 
     std::cout << "Start!" << std::endl;
     heirar.run();

@@ -19,10 +19,8 @@
 
 
 int main(int argc, char *argv[]) {
-    std::string nameConfig = argv[1];
-    char algo = argv[2][0]; //m - for mab and b for brute
-//     For debugging mode in CLion
-//    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+//    std::string nameConfig = argv[1];
+    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     // Parameters
     INIReader reader(nameConfig);
@@ -51,7 +49,7 @@ int main(int argc, char *argv[]) {
     // Arms and UCB
     std::chrono::system_clock::time_point loopTimeStart = std::chrono::system_clock::now();
     Heirarchical<SquaredEuclideanPoint> heirar(pointsVec, numberOfInitialPulls, delta, sampleSize,
-                                               saveFilePath, graphFilePath,  algo, n);
+                                               saveFilePath, graphFilePath, n);
 
     std::cout << "Start!" << std::endl;
     heirar.run();

@@ -23,8 +23,6 @@ int main(int argc, char *argv[]){
 
 //     For debugging mode in CLion
 //    std::string nameConfig = "nominal.ini";
-    long startIndex(0); // Start index
-    long endIndex(100); // End index
 
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
@@ -73,17 +71,8 @@ int main(int argc, char *argv[]){
 
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
-                 (endIndex-startIndex) << std::endl;
+                 (k) << std::endl;
     kMeans.saveAnswers();
-
-    // Print the clusters
-//    for (unsigned i(0); i < k; i ++){
-//        std::cout<< "Cluster " << i  << std::endl;
-//        for(unsigned long j(0); j < kMeans.clusters[i].size(); j ++){
-//            std::cout<< i << " " << kMeans.clusters[i][j];
-//        }
-//        std::cout<< std::endl;
-//    }
 
 }
 

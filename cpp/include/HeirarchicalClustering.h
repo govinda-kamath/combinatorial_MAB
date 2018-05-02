@@ -1,6 +1,8 @@
 //
 // Created by Vivek Kumar Bagaria on 2/3/18.
 //
+#define Brute
+
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -30,7 +32,6 @@ public:
     float delta; // UCB Parameters
     unsigned int sampleSize; //UCB Parameters
     unsigned long n, d, armID, groupPointId;
-    char algo; //mab or brute?
 
 
     //Variables used
@@ -60,7 +61,7 @@ public:
     std::ofstream graphSaveFile; //Graph output file
 
     Heirarchical( const std::vector<templatePoint> &pVec, unsigned noOfInitialPulls, float deltaAccuracy,
-        unsigned int sSize, std::string sFilePath, std::string gFilePath, char alg, unsigned long nn) {
+        unsigned int sSize, std::string sFilePath, std::string gFilePath, unsigned long nn) {
 
         pointsVector = pVec;
         d = pointsVector[0].getVecSize();
@@ -68,18 +69,16 @@ public:
         delta = deltaAccuracy;
         sampleSize = sSize;
         n = nn;
-        algo = alg;
         gFilePath = gFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
         sFilePath = sFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
-
-        if (algo == 'm') {
+//        std::cout << "Save path"  << sFilePath << std::endl;
+#ifndef Brute
             graphSaveFile.open(gFilePath, std::ofstream::out | std::ofstream::trunc);
             saveFile.open(sFilePath, std::ofstream::out | std::ofstream::trunc);
-        } else {
+#else
             graphSaveFile.open(gFilePath + "brute", std::ofstream::out | std::ofstream::trunc);
             saveFile.open(sFilePath + "brute", std::ofstream::out | std::ofstream::trunc);
-        }
-
+#endif
         setup(); //Todo: Check
     }
 
@@ -131,14 +130,16 @@ public:
 
         UCBDynamic<ArmHeirarchical<templatePoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
 
-        if (algo == 'm') {
+        float leftSize, rightSize, f;
+
+#ifndef Brute
             std::cout << "Running MAB" << std::endl;
             UCB1.initialise(numberOfInitialPulls);
 
-        } else {
+#else
             std::cout << "Running Brute" << std::endl;
             UCB1.armsKeepFromArmsContainerBrute();
-        }
+#endif
         std::cout << "Init done "<< std::endl;
 
         std::chrono::system_clock::time_point timeStartStart = std::chrono::system_clock::now();
@@ -147,43 +148,59 @@ public:
         for (unsigned long i(0); i < n - 2; i++) {
 
             //Find the best group points to join
-            ArmHeirarchical<templatePoint> *bestArm;
-            if (algo == 'm') {
-                UCB1.runUCB(n * d);
-                bestArm = &UCB1.topKArms.back();
-            } else {
-                std::vector<ArmHeirarchical<templatePoint>> bestArms = UCB1.bruteBestArms();
-                bestArm = &bestArms[0];
-            }
-            auto left = bestArm->leftGroupID;
-            auto right = bestArm->rightGroupID;
+//            ArmHeirarchical<templatePoint> *bestArm;
+#ifndef Brute
+            UCB1.runUCB(n * d);
+            ArmHeirarchical<templatePoint> bestArm = UCB1.topKArms.back();
+#else
+            std::vector<ArmHeirarchical<templatePoint>> bestArms = UCB1.bruteBestArms();
+            ArmHeirarchical<templatePoint> bestArm = bestArms[0];
+            leftSize = bestArm.leftGroupPoint->noOfPoints;
+            rightSize = bestArm.rightGroupPoint->noOfPoints;
+            f = (leftSize) / (leftSize + rightSize);
+#endif
+            auto left = bestArm.leftGroupID;
+            auto right = bestArm.rightGroupID;
+
+
+            std::cout << "Step " << i
+                      //                      << "\tTrue. = " << bestArm.trueMean()
+                      //                << "\tSecond True. = " << UCB1.topValidArm().trueMean()
+                      << "\tEst. = " << bestArm.estimateOfMean
+                      << "\tId. 1= " << bestArm.leftGroupID
+                      << "\tId. 2= " << bestArm.rightGroupID
+                      << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
+                      << std::endl;
 
             // Removing left and right groups from the list of groups (nodes)
             activeGroups.erase(left);
             activeGroups.erase(right);
-            //Removing arms containing either of the above left and right group of points.
-            for (unsigned long index(0); index < groupPointId; index++) {
 
-                if (groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end()) {
+                //Removing arms containing either of the above left and right group of points.
+            for (const auto &index: activeGroups) {
+//          for (unsigned long index(0); index < groupPointId; index++) { //Old code
+
+                if (groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end())
                     UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
-                }
-                if (groupIDtoArmID.find(std::make_pair(index, left)) != groupIDtoArmID.end()) {
+                else if (groupIDtoArmID.find(std::make_pair(index, left)) != groupIDtoArmID.end())
                     UCB1.markForRemoval(groupIDtoArmID[std::make_pair(index, left)]);
-                }
-                if (groupIDtoArmID.find(std::make_pair(right, index)) != groupIDtoArmID.end()) {
+                else
+                    std::cout << "Problem when removing left, index " << left << " " << index << std::endl;
+
+                if (groupIDtoArmID.find(std::make_pair(right, index)) != groupIDtoArmID.end())
                     UCB1.markForRemoval(groupIDtoArmID[std::make_pair(right, index)]);
-                }
-                if (groupIDtoArmID.find(std::make_pair(index, right)) != groupIDtoArmID.end()) {
+                else if (groupIDtoArmID.find(std::make_pair(index, right)) != groupIDtoArmID.end())
                     UCB1.markForRemoval(groupIDtoArmID[std::make_pair(index, right)]);
-                }
+                else
+                    std::cout << "Problem when removing right, index " << right << " " << index << std::endl;
             }
 
 
             //Creating a new group by combining left and right group points
             std::vector<std::shared_ptr<templatePoint> > newGroupPoint;
-            newGroupPoint = bestArm->leftGroupPoint->groupPoint;
-            newGroupPoint.insert(newGroupPoint.end(), bestArm->rightGroupPoint->groupPoint.begin(),
-                                 bestArm->rightGroupPoint->groupPoint.end());
+            newGroupPoint = bestArm.leftGroupPoint->groupPoint;
+            newGroupPoint.insert(newGroupPoint.end(), bestArm.rightGroupPoint->groupPoint.begin(),
+                                 bestArm.rightGroupPoint->groupPoint.end());
             GroupPoint<templatePoint> newCombinedGroupPoint(newGroupPoint, d, groupPointId);
             groupPoints[groupPointId] = newCombinedGroupPoint;
             groupPointsNames[groupPointId] = groupPointsNames[left] + " " + groupPointsNames[right]; //Debug
@@ -193,8 +210,9 @@ public:
              * Remove old arms, add and initialise new arms.
              * For each active group, add an arm comprising of that group and the new group created above
              */
+            int tmp = 0;
             for (const auto &pointID: activeGroups) {
-
+                tmp ++;
                 ArmHeirarchical<templatePoint> tmpArm(armID, groupPoints[groupPointId], groupPoints[pointID]);
                 groupIDtoArmID[std::make_pair(groupPointId, pointID)] = armID;
 
@@ -220,43 +238,34 @@ public:
 
 
                 //Create a new arm
-                if (algo == 'm') {
-                    tmpArm.warmInitialise(0, 0, 0, INFINITY);
-                    UCB1.initialiseAndAddNewArm(tmpArm, numberOfInitialPulls);
-                } else {
-                    float leftSize = bestArm->leftGroupPoint->noOfPoints;
-                    float rightSize = bestArm->rightGroupPoint->noOfPoints;
-                    float f = (leftSize) / (leftSize + rightSize);
-                    float t1 = UCB1.armStates[leftArmRemovedId].trueMeanValue;
-                    float t2 = UCB1.armStates[rightArmRemovedId].trueMeanValue;
-                    float trueMeanValue =  f * t1 + (1 - f) * t2;
-                    tmpArm.trueMeanValue = trueMeanValue;
-                    tmpArm.lowerConfidenceBound = tmpArm.trueMeanValue;
-                    tmpArm.upperConfidenceBound = tmpArm.trueMeanValue;
-                    tmpArm.estimateOfMean = tmpArm.trueMeanValue;
-                    UCB1.initialiseAndAddNewArmBrute(tmpArm, 0);
-                }
-                armID++;
+#ifndef Brute
+                tmpArm.warmInitialise(0, 0, 0, INFINITY);
+                UCB1.initialiseAndAddNewArm(tmpArm, numberOfInitialPulls);
+#else
+                float t1 = UCB1.armStates[leftArmRemovedId].trueMeanValue;
+                float t2 = UCB1.armStates[rightArmRemovedId].trueMeanValue;
+                float trueMeanValue =  f * t1 + (1 - f) * t2;
+                tmpArm.trueMeanValue = trueMeanValue;
+                tmpArm.lowerConfidenceBound = tmpArm.trueMeanValue;
+                tmpArm.upperConfidenceBound = tmpArm.trueMeanValue;
+                tmpArm.estimateOfMean = tmpArm.trueMeanValue;
+                tmpArm.estimateOfSecondMoment = tmpArm.trueMeanValue*tmpArm.trueMeanValue;
+                UCB1.initialiseAndAddNewArmBrute(tmpArm, 0);
+//                std::cout << "Added arms with id= " << tmpArm.id << std::endl;
+
+#endif
+                    armID++;
             }
 
             //Adding inserted group point in the active group
             activeGroups.insert(groupPointId);
             groupPointId++;
 
-
-            std::cout << "Step " << i
-                      << "\tTrue. = " << bestArm->trueMean()
-                      //                << "\tSecond True. = " << UCB1.topValidArm().trueMean()
-                      << "\tEst. = " << bestArm->estimateOfMean
-                      << "\tId. 1= " << bestArm->leftGroupID
-                      << "\tId. 2= " << bestArm->rightGroupID
-                      << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
-                      << std::endl;
             saveFile << "Step " << i
-                         << "\tTrue. = " << bestArm->trueMean()
-                         << "\tEst. = " << bestArm->estimateOfMean
-                         << "\tId. 1= " << bestArm->leftGroupID
-                         << "\tId. 2= " << bestArm->rightGroupID
+//                         << "\tTrue. = " << bestArm.trueMean()
+                         << "\tEst. = " << bestArm.estimateOfMean
+                         << "\tId. 1= " << bestArm.leftGroupID
+                         << "\tId. 2= " << bestArm.rightGroupID
                          << "\tAverage number of Pulls = " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
                          << std::endl;
             graphSaveFile << groupPointId - 1 << "," << left << "," << right << std::endl;
@@ -279,15 +288,15 @@ public:
         saveFile   << "GlobalnumberofPulls," << UCB1.globalNumberOfPulls << std::endl;
         saveFile   << "GlobalSigma," << UCB1.globalSigma  << std::endl;
 
-        if (algo == 'm') {
-            std::cout << "Average distances evaluated " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
-                         << ". Gain = " << d / (UCB1.globalNumberOfPulls / ((n-1) * (n-1))) << std::endl;
-            saveFile<< "AveragePulls," << UCB1.globalNumberOfPulls / ((n-1) * (n-1)) << std::endl;
+#ifndef Brute
+        std::cout << "Average distances evaluated " << UCB1.globalNumberOfPulls / ((n-1) * (n-1))
+                     << ". Gain = " << d / (UCB1.globalNumberOfPulls / ((n-1) * (n-1))) << std::endl;
+        saveFile<< "AveragePulls," << UCB1.globalNumberOfPulls / ((n-1) * (n-1)) << std::endl;
 
-        } else {
-            std::cout << "Average distances evaluated " << d << std::endl;
-            saveFile<< "AveragePulls," << d << std::endl;
-        }
+#else
+        std::cout << "Average distances evaluated " << d << std::endl;
+        saveFile<< "AveragePulls," << d << std::endl;
+#endif
         UCB1.storeExtraTopArms();
         finalNumberOfPulls = UCB1.finalNumberOfPulls;
 

@@ -89,8 +89,10 @@ public:
 
     // Dynamic part of UCB. Uaed to add new arm
     void initialiseAndAddNewArm( templateArm &newArm, unsigned numberOfInitialPulls = 100){
-        initialiseSingleArm(newArm, numberOfInitialPulls);
-        newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+        if (numberOfInitialPulls>0){
+            initialiseSingleArm(newArm, numberOfInitialPulls);
+            newArm.updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+        }
         armStates[newArm.id] = utils::ArmConditions(newArm.numberOfPulls, newArm.sumOfPulls,
                                            newArm.sumOfSquaresOfPulls, newArm.trueMeanValue);
         armsToKeep.insert(newArm.id);
@@ -102,6 +104,9 @@ public:
         auto search = armsToKeep.find(armID);
         if (search != armsToKeep.end())
             armsToKeep.erase(armID);
+        else{
+            std::cout << "Not able to erase armID " << armID << std::endl;
+        }
     }
 
     // Dynamic part of UCB. Returns top arm (which has not been removed)
@@ -315,12 +320,13 @@ public:
         bool topValidArmFound(false);
         do {
             unsigned  long topArmID = armsBrute.top().id;
-            if (armsToKeep.find(topArmID) != armsToKeep.end())
+            if (armsToKeep.find(topArmID) != armsToKeep.end()){
                 topValidArmFound=true;
+            }
             else{
                 armsBrute.pop();
             }
-        } while((!topValidArmFound) or (armsBrute.empty()) );
+        } while((!topValidArmFound) and (!armsBrute.empty()) );
         if (armsBrute.empty()){
             throw std::runtime_error("[Unexpected behaviour]: Arms Priority Queue empty.");
         }
@@ -329,14 +335,16 @@ public:
 
     // For brute force only
     std::vector<templateArm> bruteBestArms(){
-        std::vector<templateArm> bestArms;
+        std::vector<templateArm> topArms;
         for(unsigned long i = 0 ; i < numberOfBestArms+numberOfExtraArms; i++){
-            templateArm bestArm = topValidArmBrute();
+            templateArm topArm = topValidArmBrute();
             armsBrute.pop();
-            bestArms.push_back(bestArm);
+            topArms.push_back(topArm);
+            markForRemoval(topArm.id);
+
         }
-        std::cout<<"Returning " << bestArms.size()<<  std::endl;
-        return bestArms;
+//        std::cout<<"Returning " << topArms.size()<<  std::endl;
+        return topArms;
     }
 };
 
