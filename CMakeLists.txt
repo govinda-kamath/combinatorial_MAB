@@ -142,14 +142,14 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #
 #
 #
-#    add_executable(heirarchical10x cpp/src/Heirarchical_10x.cpp
-#            cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
-#            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-#            cpp/lib/Points.cpp cpp/include/tenXReader.h
-#            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-#            cpp/lib/tenXReader.cpp
-#            )
-#    target_link_libraries( heirarchical10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
+    add_executable(heirarchical10x cpp/src/Heirarchical_10x.cpp
+            cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
+            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+            cpp/lib/Points.cpp cpp/include/tenXReader.h
+            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/lib/tenXReader.cpp
+            )
+    target_link_libraries( heirarchical10x dlib::dlib ${HDF5_CXX_LIBRARIES} ${Boost_LIBRARIES})
 
 
 #    add_executable(medoid10x cpp/src/Medoid_10x.cpp
