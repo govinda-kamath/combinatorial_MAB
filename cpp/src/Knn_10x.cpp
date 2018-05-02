@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
     utils::unorderedMapToPoints(pointsVec, sparseNormalisedDataMatrix, shapeData[0]);
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
-    stdd::cout << "n = " pointsVec.size() << std::endl;
+    stdd::cout << "n = " << pointsVec.size() << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
 
     // Arms and UCB
