@@ -1,7 +1,7 @@
 //
 // Created by Vivek Kumar Bagaria on 2/3/18.
 //
-#define Brute
+//#define Brute
 
 #include <cmath>
 #include <iostream>

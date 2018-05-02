@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     long n = (unsigned) reader.GetInteger("UCB", "n", -1);
+    delta = delta / (n);
 
     // Loading 10x data shape
     std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
