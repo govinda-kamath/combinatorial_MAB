@@ -31,8 +31,8 @@ public:
     }
 
     L2Oracle(std::vector<SquaredEuclideanPoint> pointsVec_, float** dist_) {
-            pointsVec = pointsVec_;
-            dist = dist_;
+        pointsVec = pointsVec_;
+        dist = dist_;
     }
 
     inline float operator()(unsigned long id1, unsigned long id2) const {
@@ -71,44 +71,36 @@ int main(int argc, char *argv[]) {
     /*
      * Brute Method
      */
-    float** dist = new float*[n];
-    for(int i = 0; i < n; ++i)
+    int testnum = 500;
+    int* indices = new int[testnum];
+    for ( int i(0); i < testnum; i++) {
+        indices[i] = std::rand() % n;
+    }
+
+    float** dist = new float*[testnum];
+    for(int i = 0; i < testnum; ++i)
         dist[i] = new float[n];
 
     L2Oracle oracle(allPointsVec);
 
-//#define BruteComputed
-#ifndef BruteComputed
     std::cout << "Computing brute distances" << std::endl;
-    std::ofstream saveFile;
-    saveFile.open("../NNdescentBrute"+std::to_string(n), std::ofstream::out | std::ofstream::trunc);
-        std::vector<std::vector<int>> answers;
-        for( int i(0); i<n; i++){
-            dist[i][i] = 0;
-            for( int j(0); j<i; j++){
-                float tmp = oracle(i,j);
-                dist[i][j] = tmp;
-                dist[j][i] = tmp;
-            }
+    for( int i(0); i<testnum; i++){
+        int index = indices[i];
+        for( int j(0); j<n; j++){
+            float tmp = oracle(index,j);
+            dist[i][j] = tmp;
         }
-//        utils::serialize(saveFile, dist, n, n );
-#else
-        std::cout << "Reading off brute distances" << std::endl;
-
-        std::ifstream saveFile;
-        saveFile.open("NNdescentBrute"+std::to_string(n), std::ifstream::in);
-        long rowtmp, coltmp;
-        dist = utils::deserialize(saveFile, rowtmp, coltmp );
-#endif
+    }
 
 
     long totalCost = 0;
-    int testnum = 100;
     std::cout << "Starting NNdescent for " << n << " points" << std::endl;
     std::cout << "S = " << S << std::endl;
     similarity::NNDescent<L2Oracle> nndescent(n ,k , S, oracle);
-//    std::cout << "Initial cost " << nndescent.getCost() << std::endl;
-    for( int i(1); i< 30; i++){
+
+    std::cout << "Iterations " << std::endl;
+    // Iterations
+    for( int iter(1); iter< 30; iter++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         nndescent.iterate(true);
         std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
@@ -116,44 +108,26 @@ int main(int argc, char *argv[]) {
         long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (timeEnd - timeStart).count();
 
-//        std::cout << "Total cost " << totalCost/n << " with time " << totalTime <<  std::endl;
-//        std::cout << "Estimated cost " << i*S*S*k*k << std::endl;
-//        std::cout << "Ratio " <<  totalCost/(n*i*S*S*k*k+0.0) << std::endl;
+
         std::cout << "Scanrate: " <<  totalCost/(n*n*0.5);
 
         float errorRate = 0;
         std::vector<similarity::KNN> nn = nndescent.getNN();
-        for ( int index(0); index < testnum; index++){
-            int item = std::rand()%n;
-            std::vector<int> v(dist[item], dist[item] + n);
+        for ( int i(0); i < testnum; i++){
+            int item = indices[i];
+            std::vector<int> v(dist[i], dist[i] + n);
             std::vector<int> sort_item = utils::sort_indexes(v);
             std::vector<int>  nndes;
 
-//            std::cout << "Brute " << item <<" : ";
-//            for( int j(1); j<k+1 ; j++){
-//                std::cout << sort_item[j] << " ";
-//            }
-//            std::cout << std::endl;
-//            std::cout << "NNdes " << item <<" : ";
 
             for( int j(0); j<k ; j++)
-//            {
-//                std::cout << nn[item][j].key << " ";
                 nndes.push_back(nn[item][j].key);
 
-//            }
-//            std::cout << std::endl;
-//            std::cout << "Common " << item <<" : ";
-
             std::vector<int> v_intersection;
-            std::set_union(sort_item.begin()+1, sort_item.begin()+k+1,
-                           nndes.begin(), nndes.end(),
-                           std::back_inserter(v_intersection));
 
-//            for(int n : v_intersection)
-//                std::cout << n << ' ';
-//            std::cout << std::endl;
-//            std::cout << "Error: " << (v_intersection.size()-k)/(0.0+k) << std::endl;
+            std::set_union(sort_item.begin()+1, sort_item.begin()+k+1,
+                           nndes.begin(), nndes.end(),  std::back_inserter(v_intersection));
+
             errorRate += (v_intersection.size()-k)/(0.0+k);
         }
         errorRate /= testnum;
