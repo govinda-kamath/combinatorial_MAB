@@ -57,8 +57,6 @@ public:
         savefilePath = sFilePath;
     }
 
-
-
     void maximization(){
         for(unsigned j(0); j<k ;j++){
             clusters.push_back(std::vector<unsigned long>());
@@ -75,8 +73,6 @@ public:
         finalNumberOfPulls = knn.avgNumberOfPulls;
         totalTime = std::chrono::duration_cast<std::chrono::microseconds>
                 (timeStart - timeEnd).count();
-
-
 
     }
 

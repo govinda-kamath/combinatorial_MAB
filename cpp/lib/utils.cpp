@@ -77,11 +77,31 @@ void utils::getPathToFile(std::vector<std::string> & pathsToImages, const std::s
     glob(searchName.c_str(), GLOB_TILDE, NULL, &glob_result);
 
 
-    std::cout << "Number of files " << glob_result.gl_pathc << std::endl;
+    std::cout << "Number of Files is " << glob_result.gl_pathc << std::endl;
 
     pathsToImages.reserve(glob_result.gl_pathc);
     for (unsigned long i(0); i < glob_result.gl_pathc; i ++){
         pathsToImages.push_back(glob_result.gl_pathv[i]);
     }
     std::sort(pathsToImages.begin(), pathsToImages.end());
+}
+
+void utils::serialize(std::ostream& outfile, float** arr, long rows, long cols) {
+    outfile << rows << " ";
+    outfile << cols << " ";
+    for (long i = 0; i < rows; i++)
+        for(long j = 0; j < cols; j++)
+            outfile << arr[i][j] << " ";
+}
+
+float** utils::deserialize(std::istream& file, long& rows, long& cols) {
+    file >> rows;
+    file >> cols;
+    float **arr = new float *[rows];
+    for (long i = 0; i < rows; i++) {
+        arr[i] = new float[cols];
+        for (long j = 0; j < cols; j++)
+            file >> arr[i][j];
+        return arr;
+    }
 }

@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
     long n = (unsigned) reader.GetInteger("UCB", "n", -1);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+    delta = delta / (k);
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;

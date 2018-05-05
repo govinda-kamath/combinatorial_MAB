@@ -37,6 +37,7 @@ int main(int argc, char *argv[]){
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     long n = (unsigned) reader.GetInteger("UCB", "n", -1);
+    delta = delta / (k);
 
 
     // Loading 10x data shape

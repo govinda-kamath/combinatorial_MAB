@@ -38,6 +38,7 @@ int main(int argc, char *argv[]){
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     long n = (unsigned) reader.GetInteger("UCB", "n", -1);
+    delta = delta / (k);
 
 
     std::cout << "Running "<<k<< "-means for " << endIndex-startIndex << " points" << std::endl;

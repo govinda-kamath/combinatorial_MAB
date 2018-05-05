@@ -31,6 +31,8 @@ namespace utils{
 
     void getPathToFile(std::vector<std::string> & pathsToImages, const std::string directoryPath,
     const std::string  fileSuffix);
+    void serialize(std::ostream& outfile, float** arr, long rows, long cols);
+    float** deserialize(std::istream& file, long& rows, long& cols);
 
     template<typename T>
     void apply_permutation(
@@ -106,6 +108,20 @@ namespace utils{
         }
     }
 
+    template <typename T>
+    std::vector<int> sort_indexes(const std::vector<T> &v) {
+
+        // initialize original index locations
+        std::vector<int> idx(v.size());
+        std::iota(idx.begin(), idx.end(), 0);
+
+        // sort indexes based on comparing values in v
+        std::sort(idx.begin(), idx.end(),
+             [&v](int i1, int i2) {return v[i1] < v[i2];});
+
+        return idx;
+    }
+
     struct ArmConditions{
         unsigned long numberOfPulls;
         float sumOfPulls;
@@ -137,6 +153,7 @@ namespace utils{
             return h1 ^ h2;
         }
     };
+
 
 }
 #endif //COMBINATORIAL_MAB_UTILS_H
