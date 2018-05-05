@@ -46,8 +46,8 @@ public:
 
 
 int main(int argc, char *argv[]) {
-//    std::string nameConfig = argv[1];
-    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+    std::string nameConfig = argv[1];
+//    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
         std::cout << "Can't load "<< nameConfig << std::endl;
