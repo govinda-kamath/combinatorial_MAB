@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Iterations " << std::endl;
     // Iterations
-    for( int iter(1); iter< 50; iter++){
+    for( int iter(1); iter< 200; iter++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         nndescent.iterate(true);
         std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
