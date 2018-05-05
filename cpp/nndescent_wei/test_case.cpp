@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 #ifndef BruteComputed
     std::cout << "Computing brute distances" << std::endl;
     std::ofstream saveFile;
-    saveFile.open("NNdescentBrute"+std::to_string(n), std::ofstream::out | std::ofstream::trunc);
+    saveFile.open("../NNdescentBrute"+std::to_string(n), std::ofstream::out | std::ofstream::trunc);
         std::vector<std::vector<int>> answers;
         for( int i(0); i<n; i++){
             dist[i][i] = 0;
