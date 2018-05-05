@@ -47,6 +47,8 @@ public:
 
 int main(int argc, char *argv[]) {
     std::string nameConfig = argv[1];
+    long n(atol(argv[2]));
+    unsigned S(atol(argv[3]));
 //    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
@@ -55,9 +57,7 @@ int main(int argc, char *argv[]) {
     }
     std::string directoryPath = reader.Get("path", "directory", "");
     std::string fileSuffix = reader.Get("path", "suffix", "");
-    long n = (unsigned) reader.GetInteger("UCB", "n", -1);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 50);
-    unsigned S = (unsigned) reader.GetInteger("UCB", "S", 20);
     std::cout << "Running "<<k<< "-means for " << n<< " points" << std::endl;
 
 
@@ -71,7 +71,8 @@ int main(int argc, char *argv[]) {
     /*
      * Brute Method
      */
-    int testnum = 500;
+
+    int testnum = 1000;
     int* indices = new int[testnum];
     for ( int i(0); i < testnum; i++) {
         indices[i] = std::rand() % n;
@@ -98,6 +99,11 @@ int main(int argc, char *argv[]) {
     std::cout << "S = " << S << std::endl;
     similarity::NNDescent<L2Oracle> nndescent(n ,k , S, oracle);
 
+    std::string  d = std::to_string(allPointsVec[0].vecSize);
+    std::string saveFilePath = "../experiments/nndescent/Curve_n_"+std::to_string(n)+"_d_"+d+"_k_"+std::to_string(k)+"_S_"+std::to_string(S);
+    std::ofstream saveFile;
+    saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
+
     std::cout << "Iterations " << std::endl;
     // Iterations
     for( int iter(1); iter< 30; iter++){
@@ -109,7 +115,8 @@ int main(int argc, char *argv[]) {
                 (timeEnd - timeStart).count();
 
 
-        std::cout << "Scanrate: " <<  totalCost/(n*n*0.5);
+
+        float scanRate =  totalCost/(n*n+0.0);
 
         float errorRate = 0;
         std::vector<similarity::KNN> nn = nndescent.getNN();
@@ -131,7 +138,9 @@ int main(int argc, char *argv[]) {
             errorRate += (v_intersection.size()-k)/(0.0+k);
         }
         errorRate /= testnum;
+        saveFile << scanRate << "," << 1 - errorRate << std::endl;
         std::cout << "\t. Accuracy: " << 1- errorRate << "\n" << std::endl;
+
     }
 
     /*
