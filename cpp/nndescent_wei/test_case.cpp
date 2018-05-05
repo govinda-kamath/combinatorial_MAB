@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Iterations " << std::endl;
     // Iterations
-    for( int iter(1); iter< 30; iter++){
+    for( int iter(1); iter< 50; iter++){
         std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
         nndescent.iterate(true);
         std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
@@ -118,6 +118,8 @@ int main(int argc, char *argv[]) {
 
         float scanRate =  totalCost/(n*n+0.0);
 
+        if (scanRate>1.5)
+            break;
         float errorRate = 0;
         std::vector<similarity::KNN> nn = nndescent.getNN();
         for ( int i(0); i < testnum; i++){
