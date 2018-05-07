@@ -13,6 +13,7 @@
 #include <vector>
 #include <queue>
 #include <thread>
+#include <nanoflann.hpp>
 
 template <class templatePoint>
 class Arm {
@@ -315,9 +316,80 @@ public:
     }
 };
 
+//H(X_1,...,X_d)
 template <class templatePoint>
 class ArmEntropy: public Arm<templatePoint>{
+    std::vector<templatePoint> allPoints;
+    std::vector<templatePoint> sampledPoints;
+    std::vector<unsigned long> indices;
+    std::vector<float> nearestNeighbhourDistance;
+    std::vector<unsigned long> nearestNeighbhourIndex;
+    unsigned sampleIndex;
 
+//    typedef nanoflann::KDTreeSingleIndexDynamicAdaptor< nanoflann:: L2_Simple_Adaptor<float, GroupPoint<templatePoint>>,
+//    GroupPoint<templatePoint>, numberOfVariables> kd_tree;
+
+//    kd_tree *tree;
+
+    ArmEntropy(unsigned long id, std::vector<templatePoint> &allPoints_, std::vector<unsigned long> &indices_){
+        sampleIndex = 0;
+        indices = indices_;
+        allPoints = allPoints_;
+        std::random_shuffle(allPoints.begin(), allPoints.end());
+        templatePoint p = sample();
+        sampledPoints.push_back(p);
+        for(unsigned long i(0); i< allPoints.size(); i++) {
+            nearestNeighbhourIndex.push_back(INFINITY);
+            nearestNeighbhourDistance.push_back(INFINITY);
+        }
+        numberOfPulls = 1;
+//        kd_tree tmp(numberOfVariables, gp, nanoflann::KDTreeSingleIndexAdaptorParams(10));
+//        tree = &tmp;
+    }
+
+    templatePoint sample(){
+        std::vector<float> sampledVec = allPoints[numberOfPulls].point;
+        std::vector<float> v;
+        for(unsigned long i(0); i< indices.size(); i++){
+            v.push_back(sampledVec[indices[i]]);
+        }
+        numberOfPulls++;
+        return templatePoint(v);
+    }
+
+
+
+
+    using Arm<templatePoint>::pullArm;
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+                                            float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
+        for(unsigned i(0); i<sampleSize; i++){
+            templatePoint p = sample();
+            float minDistance = INFINITY;
+            unsigned long minDistIndex = -1;
+            for(unsigned j(0); j<numberOfPulls-1; j++){
+                float dist = p.distance(sampledPoints[j]);
+                if(dist < minDistance){
+                    dist = minDistance;
+                    minDistIndex = j;
+                }
+
+                if(dist < nearestNeighbhourDistance[j]){
+                    nearestNeighbhourDistance[j] = dist;
+                    nearestNeighbhourIndex[j] = numberOfPulls;
+                }
+            }
+            nearestNeighbhourDistance[numberOfPulls] = minDistance;
+            nearestNeighbhourIndex[numberOfPulls] = minDistIndex;
+            sampledPoints.push_back(p);
+        }
+
+        //Toreturn
+    }
+
+    void update(){
+        //Calculate the Entropy and update the confidence intervals
+    }
 
 };
 

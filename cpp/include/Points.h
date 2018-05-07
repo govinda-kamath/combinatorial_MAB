@@ -127,7 +127,22 @@ public:
         sample = groupPoint[i]->sampleDistance((templatePoint)*gp1.groupPoint[j], sampleSize);
         return sample;
     };
+
+    //For k-d trees
+    inline unsigned int kdtree_get_point_count() const  {
+        return noOfPoints ;
+    };
+
+    inline float kdtree_get_pt(const long idx, int dim) const {
+        return groupPoint[idx].point[dim];
+    };
+
+    void addNewPoint(const std::shared_ptr<templatePoint> &np){
+        groupPoint.push_back(np);
+        noOfPoints ++;
+    };
 };
+
 
 
 #endif //COMBINATORIAL_MAB_POINTS_H
