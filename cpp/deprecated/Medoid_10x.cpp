@@ -17,9 +17,9 @@
 #include <dlib/image_transforms.h>
 #include "tenXReader.h"
 #include "Points.h"
-#include "../utilities/INIReader.h"
+#include "INIReader.h"
 #include "utils.h"
-#include "../utilities/INIReader.h"
+#include "INIReader.h"
 #include "Medoid.h"
 
 int main(int argc, char *argv[]) {

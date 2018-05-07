@@ -67,7 +67,7 @@ public:
         return l.lowerConfidenceBound > r.lowerConfidenceBound;
     }
 
-    void updateConfidenceIntervals(float globalSigma, unsigned long long globalNumberOfPulls, float logDeltaInverse){
+    void updateConfidenceIntervals(float globalSigma, unsigned long globalNumberOfPulls, float logDeltaInverse){
 
 
         float compositeSigma, intervalWidth;
@@ -109,7 +109,7 @@ public:
     }
 
     virtual std::pair<float, float> pullArm(const templatePoint &p1, const templatePoint &p2, float globalSigma,
-                  unsigned long long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
+                  unsigned long globalNumberOfPulls,  float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         std::pair<float, float> sample;
         if (numberOfPulls >= dimension){
             float tMean(-INFINITY);
@@ -146,7 +146,7 @@ public:
         return sample;
     }
 
-    virtual std::pair<float, float> pullArm(const templatePoint &p1, float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(const templatePoint &p1, float globalSigma, unsigned long globalNumberOfPulls,
                   float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm) {
         return pullArm(p1, *point,  globalSigma,globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
 
@@ -188,7 +188,7 @@ public:
     }
 
     using Arm<templatePoint>::pullArm;
-    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long globalNumberOfPulls,
                   float logDeltaInverse, bool update , unsigned sampleSize, float LCBofSecondBestArm){
         return pullArm(*fixedPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
     }
@@ -238,7 +238,7 @@ public:
     }
 
     using Arm<templatePoint>::pullArm;
-    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long globalNumberOfPulls,
                   float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         //Choose a random point
         unsigned long randomCoOrdinate;
@@ -302,7 +302,7 @@ public:
     }
 
     using Arm<GroupPoint<templatePoint> >::pullArm;
-    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long globalNumberOfPulls,
                   float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
         return pullArm(*leftGroupPoint, *rightGroupPoint, globalSigma, globalNumberOfPulls, logDeltaInverse, update, sampleSize, LCBofSecondBestArm);
     }
@@ -326,37 +326,40 @@ class ArmEntropy: public Arm<templatePoint>{
     std::vector<unsigned long> indices;
     std::vector<float> nearestNeighbhourDistance;
     std::vector<unsigned long> nearestNeighbhourIndex;
-    unsigned sampleIndex;
-    float removedQuantityForUpdate, addedQuantityForUpdate;
+    std::vector<unsigned long> *shuffledIndices;
 
-    const float chi_d = 3.0;
-    //the constant multiplying the variance
+    using Arm<templatePoint>::numberOfPulls;
+    using Arm<templatePoint>::sumOfPulls;
+    using Arm<templatePoint>::sumOfSquaresOfPulls;
+    using Arm<templatePoint>::estimateOfMean;
+    using Arm<templatePoint>::estimateOfSecondMoment;
+    using Arm<templatePoint>::upperConfidenceBound;
+    using Arm<templatePoint>::lowerConfidenceBound;
+    using Arm<templatePoint>::localSigma;
+    using Arm<templatePoint>::trueMeanValue;
 
-//    typedef nanoflann::KDTreeSingleIndexDynamicAdaptor< nanoflann:: L2_Simple_Adaptor<float, GroupPoint<templatePoint>>,
-//    GroupPoint<templatePoint>, numberOfVariables> kd_tree;
+    const float chi_d = 3.0; //the constant multiplying the variance
 
-//    kd_tree *tree;
 
     ArmEntropy(unsigned long id, std::vector<templatePoint> &allPoints_, std::vector<unsigned long> &indices_){
-        sampleIndex = 0;
         indices = indices_;
         allPoints = allPoints_;
-        std::random_shuffle(allPoints.begin(), allPoints.end());
-        templatePoint p = sample();
+        std::vector<unsigned long> shuffledIndices_(allPoints.size());
+        std::iota(shuffledIndices_.begin(), shuffledIndices_.end(), 0);
+        std::random_shuffle(shuffledIndices_.begin(), shuffledIndices_.end());
+        shuffledIndices = &shuffledIndices_;
+        templatePoint p = samplePoint();
         sampledPoints.push_back(p);
         for(unsigned long i(0); i< allPoints.size(); i++) {
             nearestNeighbhourIndex.push_back(INFINITY);
             nearestNeighbhourDistance.push_back(INFINITY);
         }
         numberOfPulls = 1;
-        removedQuantityForUpdate = 0.0;
-        addedQuantityForUpdate = 0.0;
-//        kd_tree tmp(numberOfVariables, gp, nanoflann::KDTreeSingleIndexAdaptorParams(10));
-//        tree = &tmp;
+        trueMeanValue = INFINITY;
     }
 
-    templatePoint sample(){
-        std::vector<float> sampledVec = allPoints[numberOfPulls].point;
+    templatePoint samplePoint(){
+        std::vector<float> sampledVec = allPoints[shuffledIndices[numberOfPulls]].point;
         std::vector<float> v;
         for(unsigned long i(0); i< indices.size(); i++){
             v.push_back(sampledVec[indices[i]]);
@@ -365,20 +368,19 @@ class ArmEntropy: public Arm<templatePoint>{
         return templatePoint(v);
     }
 
-
-
-
     using Arm<templatePoint>::pullArm;
-    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
+    virtual std::pair<float, float> pullArm(float globalSigma, unsigned long globalNumberOfPulls,
                                             float logDeltaInverse, bool update, unsigned sampleSize,
                                             float LCBofSecondBestArm){
-        removedQuantityForUpdate = 0.0;
-        addedQuantityForUpdate = 0.0;
+        float sampleSum(0), sampleSquareSum(0);
+
         for(unsigned i(0); i<sampleSize; i++){
 
-            templatePoint p = sample();
+            templatePoint p = samplePoint();
             float minDistance = INFINITY;
             unsigned long minDistIndex = -1;
+
+            //Calculating the nearest neighbhour for the new sampled point.
             for(unsigned j(0); j<numberOfPulls-1; j++){
                 float dist = p.distance(sampledPoints[j]);
                 if(dist < minDistance){
@@ -387,28 +389,78 @@ class ArmEntropy: public Arm<templatePoint>{
                 }
 
                 if(dist < nearestNeighbhourDistance[j]){
-                    sumOfPulls = sumOfPulls
-                    removedQuantityForUpdate += std::log(nearestNeighbhourDistance[j]);
+                    sampleSum       -= std::log(nearestNeighbhourDistance[j]);
+                    sampleSquareSum -= std::pow(std::log(nearestNeighbhourDistance[j]), 2);
+                    sampleSum       += std::log(dist);
+                    sampleSquareSum += std::pow(std::log(dist), 2);
+
                     nearestNeighbhourDistance[j] = dist;
-                    addedQuantityForUpdate += std::log(nearestNeighbhourDistance[j]);
                     nearestNeighbhourIndex[j] = numberOfPulls;
                 }
             }
+            sampleSum += std::log(minDistance);
+            sampleSquareSum += std::pow(std::log(minDistance), 2);
             nearestNeighbhourDistance[numberOfPulls] = minDistance;
             nearestNeighbhourIndex[numberOfPulls] = minDistIndex;
             sampledPoints.push_back(p);
+            
+            sumOfPulls += sampleSum;
+            sumOfSquaresOfPulls += sampleSquareSum;
+            estimateOfMean = sumOfPulls / numberOfPulls;
+            estimateOfSecondMoment = sumOfSquaresOfPulls / numberOfPulls;
         }
 
-        //Toreturn
+        if (update){
+            updateConfidenceIntervals(globalSigma, globalNumberOfPulls, logDeltaInverse);
+        }
+        return std::make_pair(sampleSum, sampleSquareSum);
     }
 
-    void updateConfidence(){
-        //Calculate the Entropy and update the confidence intervals
-        sumOfPulls = sumOfPulls - removedQuantityForUpdate + addedQuantityForUpdate;
-        estimateOfMean = sumOfPulls/(numberOfPulls);
-
+    using Arm<templatePoint>::updateConfidenceIntervals;
+    void updateConfidenceIntervals(float globalSigma, unsigned long globalNumberOfPulls, float logDeltaInverse){
+        float compositeSigma, intervalWidth;
+        localSigma = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
+        if (localSigma<0){
+            std::cout << "Abort mission!! Fundamental error" <<std::endl;
+        }
+        float frac = numberOfPulls/allPoints.size();
+        if (frac>=1){
+            intervalWidth = 0;
+        }
+        else{
+            compositeSigma = std::sqrt( localSigma*localSigma*frac +  globalSigma*globalSigma*(1- frac)+ chi_d);
+            intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/(float)numberOfPulls);
+        }
+        upperConfidenceBound = estimateOfMean + intervalWidth;
+        lowerConfidenceBound = std::max((float)0.0, estimateOfMean - intervalWidth);
     }
 
+    using Arm<templatePoint>::trueMean;
+    float trueMean(const templatePoint &p1){
+        if (trueMeanValue == INFINITY){
+            float sampleSum(0);
+            for(unsigned i(0); i<allPoints.size(); i++){
+                float minDistance = INFINITY;
+                unsigned long minDistIndex = -1;
+                //Calculating the nearest neighbhour for the new sampled point.
+                for(unsigned j(0); j<allPoints.size(); j++){
+                    if (i==j)
+                        continue;
+                    float dist = allPoints[i].distance(sampledPoints[j]);
+                    if(dist < minDistance){
+                        dist = minDistance;
+                        minDistIndex = j;
+                    }
+
+                }
+                nearestNeighbhourDistance[i] = minDistance;
+                nearestNeighbhourIndex[i] = minDistIndex;
+                sampleSum  += std::log(nearestNeighbhourDistance[i]);
+            }
+            trueMeanValue = sampleSum/allPoints.size();
+        }
+        return trueMeanValue;
+    }
 
 };
 

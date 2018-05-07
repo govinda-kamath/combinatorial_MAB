@@ -12,7 +12,7 @@
 #include "Points.h"
 #include "Arms.h"
 #include "Medoid.h"
-#include "../utilities/INIReader.h"
+#include "INIReader.h"
 #include "utils.h"
 #define DEBUG
 
