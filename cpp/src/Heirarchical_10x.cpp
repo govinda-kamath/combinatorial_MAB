@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     Heirarchical<SparseL1Point> heirar(pointsVec, numberOfInitialPulls, delta, sampleSize,
                                                saveFilePath, graphFilePath, pointsVec.size());
 
-    std::cout << "Start!" << std::endl;
+    std::cout << "Start with n = " << n << std::endl;
     heirar.run();
     std::chrono::system_clock::time_point loopTimeEnd = std::chrono::system_clock::now();
 
