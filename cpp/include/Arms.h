@@ -16,6 +16,7 @@
 #include <queue>
 #include <thread>
 #include <random>
+#include <algorithm>
 
 //#include <nanoflann.hpp>
 
@@ -348,7 +349,11 @@ class ArmEntropy: public Arm<templatePoint>{
         allPoints = allPoints_;
         std::vector<unsigned long> shuffledIndices_(allPoints.size());
         std::iota(shuffledIndices_.begin(), shuffledIndices_.end(), 0);
-        std::random_shuffle(shuffledIndices_.begin(), shuffledIndices_.end());
+
+
+        std::random_device rd;
+        std::mt19937 g(9);
+        std::shuffle(shuffledIndices_.begin(), shuffledIndices_.end(), g);
         shuffledIndices = &shuffledIndices_;
         templatePoint p = samplePoint();
         sampledPoints.push_back(p);
