@@ -15,7 +15,7 @@
 #include <vector>
 #include <queue>
 #include <thread>
-#include <nanoflann.hpp>
+//#include <nanoflann.hpp>
 
 template <class templatePoint>
 class Arm {
