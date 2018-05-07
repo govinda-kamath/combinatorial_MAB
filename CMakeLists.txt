@@ -23,7 +23,7 @@ include_directories(cpp/utilities)
 #Can manually add the sources using the set command as follows:
 #set(SOURCES src/mainapp.cpp src/Student.cpp)
 add_subdirectory(dlib/dlib dlib_build)
-add_subdirectory(nanoflann nanoflann )
+#add_subdirectory(nanoflann nanoflann )
 add_subdirectory(cpp/lib lib)
 
 find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
@@ -160,7 +160,7 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
             cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
             cpp/lib/tenXReader.cpp
             )
-    target_link_libraries(nndescent dlib::dlib pthread ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} nanoflann)
+    target_link_libraries(nndescent dlib::dlib pthread ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 
 #    add_executable(medoid10x cpp/src/Medoid_10x.cpp
 #            cpp/include/Points.h cpp/include/Arms.h

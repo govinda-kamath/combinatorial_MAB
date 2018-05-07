@@ -15,6 +15,8 @@
 #include <vector>
 #include <queue>
 #include <thread>
+#include <random>
+
 //#include <nanoflann.hpp>
 
 template <class templatePoint>
