@@ -5,6 +5,8 @@
 #ifndef COMBINATORIAL_MAB_ARMS_H
 #define COMBINATORIAL_MAB_ARMS_H
 
+
+
 #include "Points.h"
 #include <cmath>
 #include <iostream>
@@ -325,6 +327,10 @@ class ArmEntropy: public Arm<templatePoint>{
     std::vector<float> nearestNeighbhourDistance;
     std::vector<unsigned long> nearestNeighbhourIndex;
     unsigned sampleIndex;
+    float removedQuantityForUpdate, addedQuantityForUpdate;
+
+    const float chi_d = 3.0;
+    //the constant multiplying the variance
 
 //    typedef nanoflann::KDTreeSingleIndexDynamicAdaptor< nanoflann:: L2_Simple_Adaptor<float, GroupPoint<templatePoint>>,
 //    GroupPoint<templatePoint>, numberOfVariables> kd_tree;
@@ -343,6 +349,8 @@ class ArmEntropy: public Arm<templatePoint>{
             nearestNeighbhourDistance.push_back(INFINITY);
         }
         numberOfPulls = 1;
+        removedQuantityForUpdate = 0.0;
+        addedQuantityForUpdate = 0.0;
 //        kd_tree tmp(numberOfVariables, gp, nanoflann::KDTreeSingleIndexAdaptorParams(10));
 //        tree = &tmp;
     }
@@ -362,8 +370,12 @@ class ArmEntropy: public Arm<templatePoint>{
 
     using Arm<templatePoint>::pullArm;
     virtual std::pair<float, float> pullArm(float globalSigma, unsigned long long globalNumberOfPulls,
-                                            float logDeltaInverse, bool update, unsigned sampleSize, float LCBofSecondBestArm){
+                                            float logDeltaInverse, bool update, unsigned sampleSize,
+                                            float LCBofSecondBestArm){
+        removedQuantityForUpdate = 0.0;
+        addedQuantityForUpdate = 0.0;
         for(unsigned i(0); i<sampleSize; i++){
+
             templatePoint p = sample();
             float minDistance = INFINITY;
             unsigned long minDistIndex = -1;
@@ -375,7 +387,10 @@ class ArmEntropy: public Arm<templatePoint>{
                 }
 
                 if(dist < nearestNeighbhourDistance[j]){
+                    sumOfPulls = sumOfPulls
+                    removedQuantityForUpdate += std::log(nearestNeighbhourDistance[j]);
                     nearestNeighbhourDistance[j] = dist;
+                    addedQuantityForUpdate += std::log(nearestNeighbhourDistance[j]);
                     nearestNeighbhourIndex[j] = numberOfPulls;
                 }
             }
@@ -387,9 +402,13 @@ class ArmEntropy: public Arm<templatePoint>{
         //Toreturn
     }
 
-    void update(){
+    void updateConfidence(){
         //Calculate the Entropy and update the confidence intervals
+        sumOfPulls = sumOfPulls - removedQuantityForUpdate + addedQuantityForUpdate;
+        estimateOfMean = sumOfPulls/(numberOfPulls);
+
     }
+
 
 };
 
