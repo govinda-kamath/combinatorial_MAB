@@ -130,7 +130,6 @@ public:
 
         UCBDynamic<ArmHeirarchical<templatePoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
 
-        float leftSize, rightSize, f;
 
 #ifndef Brute
             std::cout << "Running MAB" << std::endl;
@@ -153,6 +152,7 @@ public:
             UCB1.runUCB(n * d);
             ArmHeirarchical<templatePoint> bestArm = UCB1.topKArms.back();
 #else
+            float leftSize, rightSize, f;
             std::vector<ArmHeirarchical<templatePoint>> bestArms = UCB1.bruteBestArms();
             ArmHeirarchical<templatePoint> bestArm = bestArms[0];
             leftSize = bestArm.leftGroupPoint->noOfPoints;
@@ -216,8 +216,8 @@ public:
                 ArmHeirarchical<templatePoint> tmpArm(armID, groupPoints[groupPointId], groupPoints[pointID]);
                 groupIDtoArmID[std::make_pair(groupPointId, pointID)] = armID;
 
-                unsigned long leftArmRemovedId;
-                unsigned long rightArmRemovedId;
+                unsigned long leftArmRemovedId(-1);
+                unsigned long rightArmRemovedId(-1);
 
                 // Removing arms
                 if (groupIDtoArmID.find(std::make_pair(left, pointID)) != groupIDtoArmID.end()) {
