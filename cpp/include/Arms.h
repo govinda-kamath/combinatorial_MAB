@@ -4,9 +4,6 @@
 
 #ifndef COMBINATORIAL_MAB_ARMS_H
 #define COMBINATORIAL_MAB_ARMS_H
-
-# define M_PI           3.14159265358979323846  /* pi */
-
 #include "Points.h"
 #include <cmath>
 #include <iostream>
@@ -21,6 +18,7 @@
 #include <boost/math/special_functions/digamma.hpp>
 
 //#include <nanoflann.hpp>
+#define chi_d 3.0 //the constant multiplying the variance
 
 template <class templatePoint>
 class Arm {
@@ -326,19 +324,17 @@ public:
 //H(X_1,...,X_d)
 template <class templatePoint>
 class ArmEntropyContinuous: public Arm<templatePoint>{
-//    std::vector<templatePoint> allPoints;
 public:
     std::vector<templatePoint> sampledPoints;
     std::vector<float> nearestNeighbhourDistance;
     std::vector<unsigned long> nearestNeighbhourIndex;
     unsigned long maxSize;
-//    float sumOfPullsNoSize, sumOfSquaresOfPullsNoSize; //summation ln(pi) , summation ln^2(pi)
     float constant;
     unsigned dimension;
 
     using Arm<templatePoint>::numberOfPulls;
-    using Arm<templatePoint>::sumOfPulls; //summation ln(npi) = summation ln(n) + ln(pi)
-    using Arm<templatePoint>::sumOfSquaresOfPulls;//sumation ln^2(npi) = summation ln^2(n) + 2ln(n)*ln(pi)+ln^2(pi)
+    using Arm<templatePoint>::sumOfPulls; //summation ln(pi)
+    using Arm<templatePoint>::sumOfSquaresOfPulls;//summation ln^2(pi)
     using Arm<templatePoint>::estimateOfMean;
     using Arm<templatePoint>::estimateOfSecondMoment;
     using Arm<templatePoint>::upperConfidenceBound;
@@ -347,7 +343,6 @@ public:
     using Arm<templatePoint>::trueMeanValue;
     using Arm<templatePoint>::id;
 
-    const float chi_d = 3.0; //the constant multiplying the variance
 
     ArmEntropyContinuous() : Arm<templatePoint>(){
         estimateOfMean = 0;
@@ -355,8 +350,10 @@ public:
         lowerConfidenceBound = 0;
         sumOfPulls = 0;
         sumOfSquaresOfPulls = 0;
-//        sumOfPullsNoSize = 0;
-//        sumOfSquaresOfPullsNoSize=0;
+    }
+
+    ArmEntropyContinuous(unsigned long armNumber) : Arm<templatePoint>(){
+        id = armNumber;
     }
 
     void initialize(unsigned long id_, unsigned long maxSize_, float dimension_){
@@ -414,8 +411,6 @@ public:
 
         if (sampleSum != 0)
         {
-//            sumOfPullsNoSize += sampleSum;
-//            sumOfSquaresOfPullsNoSize += sampleSquareSum;
             sumOfPulls += sampleSum;
             sumOfSquaresOfPulls += sampleSquareSum;
             estimateOfMean = dimension*sumOfPulls/numberOfPulls;
@@ -485,12 +480,13 @@ public:
 */
 };
 
+
 template <class templatePoint>
 class Arm2DMutualInformation: public Arm<templatePoint>{
 public:
     std::vector<templatePoint> allPoints;
     std::vector<unsigned long> indices;
-    std::vector<unsigned long> *shuffledRows;
+//    std::vector<unsigned long> *shuffledRows;
     unsigned long maxSize;
 
 //    ArmEntropyContinuous<templatePoint> *Arm11, *Arm10, *Arm01, *Arm1x, *Arm1y;
@@ -513,7 +509,7 @@ public:
     using Arm<templatePoint>::trueMeanValue;
 
     Arm2DMutualInformation(unsigned long id, std::vector<templatePoint> &allPoints_,
-                           std::vector<unsigned long> &indices_) {
+                           std::vector<unsigned long> indices_) {
         indices = indices_;
         allPoints = allPoints_;
         maxSize = allPoints_.size();
@@ -523,7 +519,7 @@ public:
         std::random_device rd;
         std::mt19937 g(9);
         std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
-        shuffledRows = &shuffledRows_;
+//        shuffledRows = &shuffledRows_;
         Arm11.initialize(10*id+0, maxSize, 2);
         Arm10.initialize(10*id+1, maxSize, 1);
         Arm01.initialize(10*id+2, maxSize, 1);

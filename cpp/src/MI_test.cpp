@@ -20,13 +20,34 @@ int main(int argc, char *argv[]){
     std::default_random_engine generator;
     std::normal_distribution<double> distribution1(0,1.0);
     std::normal_distribution<double> distribution2(0,2);
+    std::string nameConfig = argv[1];
+//    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+
+//     Parameters
+    INIReader reader(nameConfig);
+    if (reader.ParseError() < 0) {
+        std::cout << "Can't load " << nameConfig << std::endl;
+        return 1;
+    }
+
+    // Loading Hyper parameters and data sizes
+    unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
+    float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+//    unsigned long n = (unsigned) reader.GetInteger("UCB", "n_h", 100);
+//    delta = delta / (n);
+
+    delta = 0.1;
+    sampleSize = 100;
+
     std::cout << "Started!" << std::endl;
     std::string str;
     float tmp;
 
+
     long n = 20000;
     long m =10;
     std::vector<SquaredEuclideanPoint> dataMatrix;
+    std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
 
     std::ifstream file("/Users/vivekkumarbagaria/Code/test_dataset/gene_data_MMI.txt", std::ios::binary);
     int i = 0;
@@ -36,15 +57,15 @@ int main(int argc, char *argv[]){
         std::vector<float> tmpVec;
         for (long j = 0; j < m; j++){//5000
             ss >> tmp;
-            tmpVec.push_back(tmp);
+            tmpVec.push_back(0);
         }
         dataMatrix.push_back(SquaredEuclideanPoint(tmpVec));
-        if(i>100)
+        if(i>1000)
             break;
     }
     std::cout << std::endl;
 
-    std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
+
     for(unsigned i(1); i< m ; i ++) {
         for (unsigned j(0); j < m; j++) {
             std::vector<unsigned long> indices = {i, j};
@@ -52,6 +73,9 @@ int main(int argc, char *argv[]){
             armsVec.push_back(arm);
         }
     }
+    UCBDynamic<Arm2DMutualInformation<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
+    UCB1.initialise(100);
+
 
     //Arm1
 //    std::vector<SquaredEuclideanPoint> arm1vec, arm2vec;
