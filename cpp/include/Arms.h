@@ -330,7 +330,7 @@ public:
     std::vector<unsigned long> nearestNeighbhourIndex;
     unsigned long maxSize;
     float constant;
-    unsigned dimension;
+    unsigned dim;
 
     using Arm<templatePoint>::numberOfPulls;
     using Arm<templatePoint>::sumOfPulls; //summation ln(pi)
@@ -363,7 +363,7 @@ public:
             nearestNeighbhourIndex.push_back(-1);
             nearestNeighbhourDistance.push_back(INFINITY);
         }
-        dimension = (unsigned) dimension_;
+        dim = (unsigned) dimension_;
         constant = (float)std::log( std::pow(M_PI,dimension_/2)/std::tgamma(dimension_/2+1) );
 
     }
@@ -413,18 +413,18 @@ public:
         {
             sumOfPulls += sampleSum;
             sumOfSquaresOfPulls += sampleSquareSum;
-            estimateOfMean = dimension*sumOfPulls/numberOfPulls;
-            estimateOfSecondMoment = dimension*dimension*sumOfSquaresOfPulls/numberOfPulls;
+            estimateOfMean = dim*sumOfPulls/numberOfPulls;
+            estimateOfSecondMoment = dim*dim*sumOfSquaresOfPulls/numberOfPulls;
             float tmpSum = 0;
             for( int jj(0); jj < numberOfPulls; jj++){
                 tmpSum += nearestNeighbhourDistance[jj];
             }
         }
 
-        if (update and (numberOfPulls>0)){
+        if (numberOfPulls>0){
             updateConfidenceIntervals(globalSigma, logDeltaInverse);
         }
-        std::cout << "Id " << id << " estimate " << estimateOfMean << std::endl;
+//        std::cout << "Id " << id << " estimate " << estimateOfMean << std::endl;
         return std::make_pair(sampleSum, sampleSquareSum);
     }
 
@@ -432,17 +432,22 @@ public:
     using Arm<templatePoint>::updateConfidenceIntervals;
     void updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
         float compositeSigma, intervalWidth;
-        localSigma = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean,2));
+        float tmp = std::abs(estimateOfSecondMoment - std::pow(estimateOfMean,2));
+        if( numberOfPulls==2)
+            compositeSigma = 0;
+        else {
+            localSigma = std::sqrt(estimateOfSecondMoment - std::pow(estimateOfMean, 2));
+            compositeSigma = std::sqrt(localSigma * localSigma + chi_d);
+        }
         if (localSigma<0){
             std::cout << "Abort mission!! Fundamental error" <<std::endl;
         }
-        float frac = numberOfPulls/maxSize;
+        float frac = (float) numberOfPulls/maxSize;
         if (frac>=1){
             intervalWidth = 0;
         }
         else{
 //            compositeSigma = std::sqrt(localSigma*localSigma*frac +  globalSigma*globalSigma*(1- frac)+ chi_d);
-            compositeSigma = std::sqrt(localSigma*localSigma + chi_d);
             intervalWidth = std::sqrt((compositeSigma * compositeSigma * logDeltaInverse)/(float)numberOfPulls);
         }
         estimateOfMean += boost::math::digamma(numberOfPulls)-boost::math::digamma(1)+constant;
@@ -486,7 +491,7 @@ class Arm2DMutualInformation: public Arm<templatePoint>{
 public:
     std::vector<templatePoint> allPoints;
     std::vector<unsigned long> indices;
-//    std::vector<unsigned long> *shuffledRows;
+    std::vector<unsigned long> shuffledRows;
     unsigned long maxSize;
 
 //    ArmEntropyContinuous<templatePoint> *Arm11, *Arm10, *Arm01, *Arm1x, *Arm1y;
@@ -507,19 +512,19 @@ public:
     using Arm<templatePoint>::lowerConfidenceBound;
     using Arm<templatePoint>::localSigma;
     using Arm<templatePoint>::trueMeanValue;
+    using Arm<templatePoint>::id;
 
-    Arm2DMutualInformation(unsigned long id, std::vector<templatePoint> &allPoints_,
-                           std::vector<unsigned long> indices_) {
+    Arm2DMutualInformation(unsigned long id_) {
+        id = id_;
+    }
+
+    Arm2DMutualInformation(unsigned long id_, std::vector<templatePoint> &allPoints_,
+                           std::vector<unsigned long> indices_, std::vector<unsigned long> shuffledRows_) {
+        id = id_;
         indices = indices_;
         allPoints = allPoints_;
         maxSize = allPoints_.size();
-
-        std::vector<unsigned long> shuffledRows_(maxSize);
-        std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
-        std::random_device rd;
-        std::mt19937 g(9);
-        std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
-//        shuffledRows = &shuffledRows_;
+        shuffledRows = shuffledRows_;
         Arm11.initialize(10*id+0, maxSize, 2);
         Arm10.initialize(10*id+1, maxSize, 1);
         Arm01.initialize(10*id+2, maxSize, 1);
@@ -532,7 +537,7 @@ public:
     }
 
     templatePoint samplePoint(){
-        std::vector<float> sampledVec = allPoints[numberOfPulls].point;
+        std::vector<float> sampledVec = allPoints[shuffledRows[numberOfPulls]].point;
         std::vector<float> v;
         for(unsigned long i(0); i< indices.size(); i++){
             v.push_back(sampledVec[indices[i]]);
@@ -554,28 +559,36 @@ public:
                                             float LCBofSecondBestArm) {
         std::vector<templatePoint> pointsVec11, pointsVec01, pointsVec10, pointsVec1x, pointsVec1y ;
         std::pair<float, float> sample11, sample01, sample10, sample1x, sample1y;
-
+        unsigned Lp00 = 0;
+        unsigned Lp10 = 0;
+        unsigned Lp01 = 0;
+        unsigned Lp11 = 0;
         for(unsigned i(0); i<sampleSize; i++){
             templatePoint p = samplePoint();
             float x = p.point[0];
             float y = p.point[1];
+//            std::cout << x << " " << y << std::endl;
             std::vector<float> tmpx = {x};
             std::vector<float> tmpy = {y};
             if( (x==0) and (y==0)){
                 p00 ++;
+                Lp00 ++;
             }
             else if((y!=0) and (x==0)){
                 p01 ++;
+                Lp01 ++;
                 pointsVec01.push_back(templatePoint(tmpy));//H(X,Y)
                 pointsVec1y.push_back(templatePoint(tmpy));//H(Y)
             }
             else if((x!=0) and (y==0)){
                 p10 ++;
+                Lp10 ++;
                 pointsVec10.push_back(templatePoint(tmpx));//H(X,Y)
                 pointsVec1x.push_back(templatePoint(tmpx));//H(X)
             }
             else{
                 p11 ++;
+                Lp11 ++;
                 pointsVec11.push_back(p);//H(X,Y)
                 pointsVec1x.push_back(templatePoint(tmpx));//H(X)
                 pointsVec1y.push_back(templatePoint(tmpy));//H(Y)
@@ -583,15 +596,17 @@ public:
         }
 
         sample11 = Arm11.pullArm(pointsVec11, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
-        sample10 = Arm10.pullArm(pointsVec10, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
-        sample01 = Arm01.pullArm(pointsVec01, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
+        if(p10>=2)
+            sample10 = Arm10.pullArm(pointsVec10, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
+        if(p01>=2)
+            sample01 = Arm01.pullArm(pointsVec01, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         sample1x = Arm1x.pullArm(pointsVec1x, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         sample1y = Arm1y.pullArm(pointsVec1y, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
 
 //        if (true){ //other arms
         float sumOfPullsPrev = sumOfPulls;
         float sumOfSquaresOfPullsPrev = sumOfSquaresOfPulls;
-        updateConfidenceIntervals(globalSigma, logDeltaInverse);
+        updateConfidenceIntervals(globalSigma, 0, logDeltaInverse);
         float first = sumOfPulls - sumOfPullsPrev;
         float second = sumOfSquaresOfPulls - sumOfSquaresOfPullsPrev;
 
@@ -599,7 +614,7 @@ public:
 //        };
     }
     using Arm<templatePoint>::updateConfidenceIntervals;
-    void updateConfidenceIntervals(float globalSigma, float logDeltaInverse){
+    void updateConfidenceIntervals(float globalSigma, unsigned long globalNumberOfPulls, float logDeltaInverse){
         float compositeSigma, intervalWidth;
         estimateOfMean = -(-xlogx((p00+0.0)/numberOfPulls)
                            +((p01+0.0)/numberOfPulls)*Arm01.estimateOfMean
@@ -635,6 +650,10 @@ public:
         estimateOfSecondMoment = estimateOfMean+intervalWidth;
         sumOfPulls = estimateOfMean*numberOfPulls;
         sumOfSquaresOfPulls = estimateOfSecondMoment*numberOfPulls;
+
+        estimateOfMean *= -1;
+        upperConfidenceBound *= -1;
+        lowerConfidenceBound *= -1;
     }
 
 

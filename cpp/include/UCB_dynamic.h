@@ -71,7 +71,7 @@ public:
     // Used by Step 1 of UCB
     void initialiseSingleArm( templateArm &singleArm, unsigned numberOfInitialPulls = 100){
         std::pair<float, float> sample;
-        sample = singleArm.pullArm(0, NAN, 0, false, numberOfInitialPulls, -1);
+        sample = singleArm.pullArm(0, NAN, logDeltaInverse, false, numberOfInitialPulls, -1); // Huge change made here
         globalSumOfPulls += sample.first;
         globalSumOfSquaresOfPulls += sample.second;
         globalNumberOfPulls += numberOfInitialPulls;
@@ -209,6 +209,7 @@ public:
         float UCBofBestArm, LCBofSecondBestArm;
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
+        float del = UCBofBestArm-LCBofSecondBestArm;
 
         if (UCBofBestArm == NAN){
             std::cout << "Damn Nan" << bestArm.id << std::endl;

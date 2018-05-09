@@ -17,105 +17,130 @@
 
 int main(int argc, char *argv[]){
 
-    std::default_random_engine generator;
-    std::normal_distribution<double> distribution1(0,1.0);
-    std::normal_distribution<double> distribution2(0,2);
-    std::string nameConfig = argv[1];
+//    std::string nameConfig = argv[1];
 //    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
-
-//     Parameters
-    INIReader reader(nameConfig);
-    if (reader.ParseError() < 0) {
-        std::cout << "Can't load " << nameConfig << std::endl;
-        return 1;
-    }
+//
+////     Parameters
+//    INIReader reader(nameConfig);
+//    if (reader.ParseError() < 0) {
+//        std::cout << "Can't load " << nameConfig << std::endl;
+//        return 1;
+//    }
 
     // Loading Hyper parameters and data sizes
-    unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
-    float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+//    unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
+//    float delta = (float) reader.GetReal("UCB", "delta", 0.1);
 //    unsigned long n = (unsigned) reader.GetInteger("UCB", "n_h", 100);
 //    delta = delta / (n);
 
-    delta = 0.1;
-    sampleSize = 100;
+    float delta = 0.1;
+    unsigned sampleSize = 100;
 
+    std::random_device rd;
+    std::mt19937 g(9);
     std::cout << "Started!" << std::endl;
     std::string str;
     float tmp;
 
+    std::unordered_map<std::pair<unsigned long, unsigned long>, unsigned long, utils::pair_hash> groupIDtoArmID;
+    std::vector<std::pair<unsigned long, unsigned long>> armIDtoGroupID;
+    //Maintains the valid group points currently and used while creating new arms
+    std::unordered_set<unsigned long> verticesAdded;
 
-    long n = 20000;
-    long m =10;
+    long n = 10000;
+    long m = 10;
+    unsigned long armID = 0;
     std::vector<SquaredEuclideanPoint> dataMatrix;
     std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
 
     std::ifstream file("/Users/vivekkumarbagaria/Code/test_dataset/gene_data_MMI.txt", std::ios::binary);
-    int i = 0;
+    int ii = 0;
     while (getline(file, str)) {
         std::stringstream ss(str);
-        std::cout << i++ << " ";
+        std::cout << ii++ << " ";
         std::vector<float> tmpVec;
         for (long j = 0; j < m; j++){//5000
             ss >> tmp;
-            tmpVec.push_back(0);
+            tmpVec.push_back(tmp);
         }
         dataMatrix.push_back(SquaredEuclideanPoint(tmpVec));
-        if(i>1000)
+        if(ii>1000)
             break;
     }
     std::cout << std::endl;
 
-
+    armIDtoGroupID.reserve((int)0.5*m*(m-1));
     for(unsigned i(1); i< m ; i ++) {
-        for (unsigned j(0); j < m; j++) {
+        for (unsigned j(0); j < i; j++) {
             std::vector<unsigned long> indices = {i, j};
-            Arm2DMutualInformation<SquaredEuclideanPoint> arm(1, dataMatrix, indices);
+            groupIDtoArmID[std::make_pair(i, j)] = armID;
+            armIDtoGroupID.push_back(std::make_pair(i, j));
+            std::vector<unsigned long> shuffledRows_(dataMatrix.size());
+            std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
+            std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
+            Arm2DMutualInformation<SquaredEuclideanPoint> arm(armID, dataMatrix, indices,shuffledRows_);
             armsVec.push_back(arm);
+            std::cout << armID << " " << armIDtoGroupID.size()
+                      <<  " " << armIDtoGroupID[armID].first
+                       << " " << armIDtoGroupID[armID].second  << std::endl;
+            armID++;
         }
     }
     UCBDynamic<Arm2DMutualInformation<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
     UCB1.initialise(100);
+    for (unsigned long i(0); i < m - 2; i++) {
+
+        //Find the best group points to join
+//            ArmHeirarchical<templatePoint> *bestArm;
+#ifndef Brute
+        UCB1.runUCB(n * 10);
+        Arm2DMutualInformation<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
+#else
+        float leftSize, rightSize, f;
+            std::vector<ArmHeirarchical<templatePoint>> bestArms = UCB1.bruteBestArms();
+            ArmHeirarchical<templatePoint> bestArm = bestArms[0];
+            leftSize = bestArm.leftGroupPoint->noOfPoints;
+            rightSize = bestArm.rightGroupPoint->noOfPoints;
+            f = (leftSize) / (leftSize + rightSize);
+#endif
+
+        auto left = armIDtoGroupID[bestArm.id].first;
+        auto right = armIDtoGroupID[bestArm.id].second;
 
 
-    //Arm1
-//    std::vector<SquaredEuclideanPoint> arm1vec, arm2vec;
-//    for (int i=0; i<n; ++i) {
-//
-//        float number1 = (float) distribution1(generator);
-//        float number2 = (float) distribution1(generator);
-//        std::vector<float> tmp1 = {number1, number1+number2};
-//        arm1vec.push_back(SquaredEuclideanPoint(tmp1));
-//
-//
-//        number1 = (float) distribution2(generator);
-//        number2 = (float) distribution2(generator);
-//        std::vector<float> tmp2 = {number1, 2*number1+number2};
-//        arm2vec.push_back(SquaredEuclideanPoint(tmp2));
-//    }
-//    std::ofstream file2;
-//    file2.open("/Users/vivekkumarbagaria/Code/combinatorial_MAB/gaussians", std::ofstream::out | std::ofstream::trunc);
-//
-//    for (long i = 0; i < n; i++) {
-//        file2 << arm1vec[i].point[0] << "," << arm1vec[i].point[1] <<std::endl;
-////        return arr;
-//    }
-//
-//    Arm2DMutualInformation<SquaredEuclideanPoint> arm1(1, arm1vec, indices);
-//    Arm2DMutualInformation<SquaredEuclideanPoint> arm2(1, arm2vec, indices);
-//
-//    std::vector<Arm2DMutualInformation<SquaredEuclideanPoint>> allArmsVec;
-//    allArmsVec.push_back(arm1);
-//    allArmsVec.push_back(arm2);
-//
-//    for(int i=0;i < 5; i++){
-//        arm1.pullArm(0, 0, 1, true, (int) n/4, -1);
-//        arm2.pullArm(0, 0, 1, true, (int) n/4, -1);
-//        std::cout << "Arm 1 " << arm1.lowerConfidenceBound << " "
-//                  << arm1.estimateOfMean << " " << arm1.upperConfidenceBound << " " << "0.346" << std::endl;
-//        std::cout << "Arm 2 " << arm2.lowerConfidenceBound << " "
-//                  << arm2.estimateOfMean << " " << arm2.upperConfidenceBound << " " << 0.80 << std::endl;
-//        std::cout << arm2.estimateOfMean - arm1.estimateOfMean << " 0.454\n" <<std::endl;
-//
-//    }
+        std::cout << "Step " << i
+                  //                      << "\tTrue. = " << bestArm.trueMean()
+                  //                << "\tSecond True. = " << UCB1.topValidArm().trueMean()
+                  << "\tEst. = " << bestArm.estimateOfMean
+                  << "\tId. 1= " << left
+                  << "\tId. 2= " << right
+                  << "\tAverage number of Pulls = " << 2*UCB1.globalNumberOfPulls / ((n - 1) * (n - 1))
+                  << std::endl;
+
+        // Removing left and right groups from the list of groups (nodes)
+
+
+        //Removing arms containing either of the above left and right group of points.
+        std::cout << "Removing ";
+        for (const auto &index: verticesAdded) {
+            std::cout << index << " " ;
+            if (groupIDtoArmID.find(std::make_pair(left, index)) != groupIDtoArmID.end())
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(left, index)]);
+            else if (groupIDtoArmID.find(std::make_pair(index, left)) != groupIDtoArmID.end())
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(index, left)]);
+            else
+                std::cout << "Problem when removing left, index " << left << " " << index << std::endl;
+
+            if (groupIDtoArmID.find(std::make_pair(right, index)) != groupIDtoArmID.end())
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(right, index)]);
+            else if (groupIDtoArmID.find(std::make_pair(index, right)) != groupIDtoArmID.end())
+                UCB1.markForRemoval(groupIDtoArmID[std::make_pair(index, right)]);
+            else
+                std::cout << "Problem when removing right, index " << right << " " << index << std::endl;
+        }
+        std::cout << std::endl;
+        verticesAdded.insert(left);
+        verticesAdded.insert(right);
+    }
 
 }
