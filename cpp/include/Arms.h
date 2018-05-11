@@ -668,7 +668,6 @@ public:
                 pointsVec1y.push_back(SquaredEuclideanPoint(tmpy));//H(Y)
             }
         }
-        std::cout << std::endl;
         sample11 = Arm11.pullArm(pointsVec11, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         if(p10>=2)
             sample10 = Arm10.pullArm(pointsVec10, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
