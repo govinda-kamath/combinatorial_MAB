@@ -214,7 +214,7 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         float del = UCBofBestArm-LCBofSecondBestArm;
-        if ( bestArm.id%10 = 1 ) {
+        if ( bestArm.id%10 == 1 ) {
             std::cout << "POW! \n\t"
                       << bestArm.id << " "
                       << bestArm.lowerConfidenceBound << " "
