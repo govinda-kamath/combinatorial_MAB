@@ -267,6 +267,12 @@ public:
             globalSumOfPulls += sample.first;
             globalSumOfSquaresOfPulls += sample.second;
             globalNumberOfPulls += sampleSize;
+
+            sample = secondBestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize, LCBofSecondBestArm);
+
+            globalSumOfPulls += sample.first;
+            globalSumOfSquaresOfPulls += sample.second;
+            globalNumberOfPulls += sampleSize;
             float a, b, c;
             a = globalSumOfSquaresOfPulls / globalNumberOfPulls;
             b = globalSumOfPulls / globalNumberOfPulls;
@@ -275,6 +281,7 @@ public:
             if (globalSigma == NAN){
                 std::cout << "second point is NAN" << std::endl;
             }
+
             arms.push(bestArm);
             //Update arm status
             unsigned long numArmPulls = bestArm.numberOfPulls;
