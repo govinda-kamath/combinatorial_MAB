@@ -640,7 +640,7 @@ public:
         std::cout<<"things " ;
         for(unsigned i(0); i<sampleSize; i++){
             if(i%100==0)
-                std::cout<<","<<i;
+                std::cout<<","<<numberOfPulls;
             SquaredEuclideanPoint p = samplePoint();
             float x = p.point[0];
             float y = p.point[1];
@@ -722,7 +722,8 @@ public:
                     << " " <<      Arm1y.upperConfidenceBound
                    << "\nF\t" <<   lowerConfidenceBound
                    << " " <<      estimateOfMean
-                   << " " <<      upperConfidenceBound
+                << " " <<      upperConfidenceBound
+                << "\tNoP" <<      numberOfPulls
                            <<std::endl;
 
         return std::make_pair(first, second);
