@@ -640,7 +640,7 @@ public:
         std::cout<<"things " ;
         for(unsigned i(0); i<sampleSize; i++){
             if(i%100==0)
-                std::cout<<","<<"i";
+                std::cout<<","<<i;
             SquaredEuclideanPoint p = samplePoint();
             float x = p.point[0];
             float y = p.point[1];
