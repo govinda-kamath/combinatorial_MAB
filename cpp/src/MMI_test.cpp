@@ -75,7 +75,7 @@ int main(int argc, char *argv[]){
         std::vector<unsigned long> shuffledRows_(allPointsVec.size());
         std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
         std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
-        Arm2DMutualInformation<SquaredEuclideanPoint> arm(armID, allPointsVec, indices, shuffledRows_);
+        Arm2DMutualInformation<SquaredEuclideanPoint> arm(i, allPointsVec, indices, shuffledRows_);
         std::chrono::system_clock::time_point eTime = std::chrono::system_clock::now();
         long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (eTime - sTime).count();
