@@ -83,7 +83,7 @@ int main(int argc, char *argv[]){
         std::cout << totalTime << " " << i << std::endl;
     }
 
-    std::cout << "UCB go! for steps " << m-1 << "with arms " << armID << std::endl;
+    std::cout << "UCB go! for steps " << m-1 << " with arms " << armID << std::endl;
     UCBDynamic<Arm2DMutualInformation<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
     UCB1.initialise(numberOfInitialPulls);
 

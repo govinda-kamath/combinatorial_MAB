@@ -222,7 +222,8 @@ public:
                 << secondBestArm.estimateOfMean << " "
                 << secondBestArm.upperConfidenceBound << " "
                 << secondBestArm.numberOfPulls << " "
-                << del <<std::endl;
+                << globalNumberOfPulls/arms.size()
+                << " " << del <<std::endl;
 
         if (del == NAN){
             std::cout << "Damn the NAN" << bestArm.id << std::endl;
