@@ -631,6 +631,12 @@ public:
         unsigned Lp10 = 0;
         unsigned Lp01 = 0;
         unsigned Lp11 = 0;
+        if(maxSize-numberOfPulls <  sampleSize){
+            std::cout << "This arm is done with pulling. There in't points to pull no more" << std::endl;
+            lowerConfidenceBound = estimateOfMean;
+            upperConfidenceBound = estimateOfMean;
+            return std::make_pair(0,0);
+        }
         for(unsigned i(0); i<sampleSize; i++){
             SquaredEuclideanPoint p = samplePoint();
             float x = p.point[0];
