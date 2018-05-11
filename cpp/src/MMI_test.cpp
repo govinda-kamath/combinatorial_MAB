@@ -20,6 +20,7 @@ int main(int argc, char *argv[]){
 
     std::string nameConfig;
     nameConfig = argv[1];
+    long m(atol(argv[2]));
 //    nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
 
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]){
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
-    unsigned long m = (unsigned) reader.GetInteger("UCB", "m", 100);
+//    unsigned long m = (unsigned) reader.GetInteger("UCB", "m", 100);
     unsigned long n = (unsigned) reader.GetInteger("UCB", "n", 100);
     std::string fileName = reader.Get("path", "h5path", "../test_dataset/1M_neurons_matrix_subsampled_20k_5kgenes.h5");
 
@@ -71,17 +72,17 @@ int main(int argc, char *argv[]){
     utils::vectorsToPoints(allPointsVec, DataMatrix,  n, m);
 
     for(unsigned i(1); i< m ; i ++) {
-        std::chrono::system_clock::time_point sTime = std::chrono::system_clock::now();
-        std::vector<unsigned long> indices = {0,i};
+//        std::chrono::system_clock::time_point sTime = std::chrono::system_clock::now();
 //        std::vector<unsigned long> shuffledRows_(allPointsVec.size());
 //        std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
 //        std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
+        std::vector<unsigned long> indices = {0,i};
         Arm2DMutualInformation<SquaredEuclideanPoint> arm(i, allPointsVec, indices);
-        std::chrono::system_clock::time_point eTime = std::chrono::system_clock::now();
-        long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
-                (eTime - sTime).count();
+//        std::chrono::system_clock::time_point eTime = std::chrono::system_clock::now();
+//        long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
+//                (eTime - sTime).count();
         armsVec.push_back(arm);
-        std::cout << totalTime << " " << i << std::endl;
+//        std::cout << totalTime << " " << i << std::endl;
     }
 
     std::cout << "UCB go! for steps " << m-1 << " with arms " << armID << std::endl;

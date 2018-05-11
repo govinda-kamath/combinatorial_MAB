@@ -63,12 +63,12 @@ public:
 //        updateGlobalSigma();
 //        std::cout << "Global sigma after initialization =  " << globalSigma << std::endl;
 //        std::cout << "Global Number Of Pulls =  " << globalNumberOfPulls << std::endl;
-        std::cout << "Adding to container ";
+//        std::cout << "Adding to container ";
         for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
             std::cout<< armIndex << " ";
             addSingleArm(armsContainer[armIndex]);
         }
-        std::cout<<std::endl;
+//        std::cout<<std::endl;
     }
 
     // Used by Step 1 of UCB
@@ -214,7 +214,7 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         float del = UCBofBestArm-LCBofSecondBestArm;
-        if (std::rand() < 0.1 ) {
+        if ( bestArm.id%10 = 1 ) {
             std::cout << "POW! \n\t"
                       << bestArm.id << " "
                       << bestArm.lowerConfidenceBound << " "

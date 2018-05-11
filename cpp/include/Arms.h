@@ -700,7 +700,7 @@ public:
         float first = sumOfPulls - sumOfPullsPrev;
         float second = sumOfSquaresOfPulls - sumOfSquaresOfPullsPrev;
 
-        if (std::rand() < 0.02 ) {
+        if ( id%20 == 0 ) {
             std::cout << "ID " << id
                       << "\n11\t" << Arm11.lowerConfidenceBound
                       << " " << Arm11.estimateOfMean
