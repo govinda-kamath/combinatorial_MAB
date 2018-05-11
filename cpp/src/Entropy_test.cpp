@@ -17,14 +17,12 @@
 
 int main(int argc, char *argv[]){
 
-//    std::string nameConfig = argv[1];
-    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
-//
-////     Parameters
+    std::string nameConfig;
+    nameConfig = argv[1];
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
         std::cout << "Can't load " << nameConfig << std::endl;
-        return 1;
+        nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
     }
 
     std::random_device rd;
