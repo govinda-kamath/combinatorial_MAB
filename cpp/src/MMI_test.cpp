@@ -57,7 +57,7 @@ int main(int argc, char *argv[]){
     // Loading Sparse matrix
     std::cout << "Reading normalised data" << std::endl;
 //    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
-    unsigned cells(20000), genes(5000);
+    unsigned cells(100000), genes(5000);
     std::vector<std::vector<float> > DataMatrix(cells);
     for(unsigned i(0); i< cells ; i ++)
         DataMatrix[i] = std::vector<float>(genes);
@@ -85,8 +85,9 @@ int main(int argc, char *argv[]){
 
     std::cout << "UCB go! for steps " << m-1 << " with arms " << armID << std::endl;
     UCBDynamic<Arm2DMutualInformation<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
+    std::cout<<"Going for initialization" << std::endl;
     UCB1.initialise(numberOfInitialPulls);
-
+    std::cout<<"Running UCB" << std::endl;
     UCB1.runUCB(n * 100);
 
     Arm2DMutualInformation<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
