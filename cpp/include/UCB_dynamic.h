@@ -60,12 +60,15 @@ public:
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
         }
-        updateGlobalSigma();
+//        updateGlobalSigma();
 //        std::cout << "Global sigma after initialization =  " << globalSigma << std::endl;
 //        std::cout << "Global Number Of Pulls =  " << globalNumberOfPulls << std::endl;
+        std::cout << "Adding to container ";
         for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
+            std::cout<< armIndex << " ";
             addSingleArm(armsContainer[armIndex]);
         }
+        std::endl;
     }
 
     // Used by Step 1 of UCB
