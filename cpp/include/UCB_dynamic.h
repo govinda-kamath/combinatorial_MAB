@@ -268,12 +268,6 @@ public:
                 globalSumOfSquaresOfPulls += sample.second;
                 globalNumberOfPulls += sampleSize;
             }
-            sample = secondBestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize, LCBofSecondBestArm);
-            if(sample.first!=0) {
-                globalSumOfPulls += sample.first;
-                globalSumOfSquaresOfPulls += sample.second;
-                globalNumberOfPulls += sampleSize;
-            }
             float a, b, c;
             a = globalSumOfSquaresOfPulls / globalNumberOfPulls;
             b = globalSumOfPulls / globalNumberOfPulls;
