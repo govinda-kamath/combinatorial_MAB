@@ -97,12 +97,18 @@ int main(int argc, char *argv[]){
 
     Arm2DMutualInformation<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
     Arm2DMutualInformation<SquaredEuclideanPoint> secondBestArm = UCB1.arms.top();
-    std::string sFilePath = "../experiments/MI/10x/n_"+std::to_string(n)+"_d_"+std::to_string(m);
+
+    auto id = bestArm.id;
+    auto id2 = secondBestArm.id;
+
+    std::string sFilePath = "../experiments/MI/10x/shuffled_n_"+std::to_string(cells)+"_d_"+std::to_string(m);
     std::ofstream saveFile(sFilePath, std::ofstream::out | std::ofstream::trunc);
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEnd - timeStart).count();
     saveFile   << "n," << n << std::endl;
     saveFile   << "m," << m << std::endl;
+    saveFile   << "id," << id << std::endl;
+    saveFile   << "secondbestid," << id2 << std::endl;
     std::cout << "Total Time = " << totalTime << "(ms)"
               << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
               << "\nGlobal Sigma= " << UCB1.globalSigma
