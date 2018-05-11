@@ -72,10 +72,10 @@ int main(int argc, char *argv[]){
     for(unsigned i(1); i< m ; i ++) {
         std::chrono::system_clock::time_point sTime = std::chrono::system_clock::now();
         std::vector<unsigned long> indices = {0,i};
-        std::vector<unsigned long> shuffledRows_(allPointsVec.size());
-        std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
-        std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
-        Arm2DMutualInformation<SquaredEuclideanPoint> arm(i, allPointsVec, indices, shuffledRows_);
+//        std::vector<unsigned long> shuffledRows_(allPointsVec.size());
+//        std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
+//        std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
+        Arm2DMutualInformation<SquaredEuclideanPoint> arm(i, allPointsVec, indices);
         std::chrono::system_clock::time_point eTime = std::chrono::system_clock::now();
         long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
                 (eTime - sTime).count();

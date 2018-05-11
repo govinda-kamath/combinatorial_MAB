@@ -559,7 +559,6 @@ class Arm2DMutualInformation: public Arm<SquaredEuclideanPoint>{
 public:
     std::vector<templatePoint> allPoints;
     std::vector<unsigned long> indices;
-    std::vector<unsigned long> shuffledRows;
     unsigned long maxSize;
     float intervalWidth;
 
@@ -588,12 +587,11 @@ public:
     }
 
     Arm2DMutualInformation(unsigned long id_, std::vector<templatePoint> &allPoints_,
-                           std::vector<unsigned long> indices_, std::vector<unsigned long> shuffledRows_) {
+                           std::vector<unsigned long> indices_) {
         id = id_;
         indices = indices_;
         allPoints = allPoints_;
         maxSize = allPoints_.size();
-        shuffledRows = shuffledRows_;
         Arm11.initialize(10*id+0, maxSize, 2);
         Arm10.initialize(10*id+1, maxSize, 1);
         Arm01.initialize(10*id+2, maxSize, 1);
@@ -607,7 +605,7 @@ public:
 
     SquaredEuclideanPoint samplePoint(){
 //        std::unordered_map <unsigned long, float> sampledVec = allPoints[shuffledRows[numberOfPulls]].sparsePoint;
-        std::vector<float> sampledVec = allPoints[shuffledRows[numberOfPulls]].point;
+        std::vector<float> sampledVec = allPoints[numberOfPulls].point;
         std::vector<float> v;
         for(unsigned long i(0); i< indices.size(); i++){
             v.push_back(sampledVec[indices[i]]);
