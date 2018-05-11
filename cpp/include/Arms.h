@@ -557,7 +557,7 @@ public:
 template <class templatePoint>
 class Arm2DMutualInformation: public Arm<SquaredEuclideanPoint>{
 public:
-    std::vector<templatePoint> allPoints;
+    std::vector<templatePoint> *allPoints;
     std::vector<unsigned long> indices;
     unsigned long maxSize;
     float intervalWidth;
@@ -590,7 +590,7 @@ public:
                            std::vector<unsigned long> indices_) {
         id = id_;
         indices = indices_;
-        allPoints = allPoints_;
+        allPoints = &allPoints_;
         maxSize = allPoints_.size();
         Arm11.initialize(10*id+0, maxSize, 2);
         Arm10.initialize(10*id+1, maxSize, 1);
@@ -605,7 +605,7 @@ public:
 
     SquaredEuclideanPoint samplePoint(){
 //        std::unordered_map <unsigned long, float> sampledVec = allPoints[shuffledRows[numberOfPulls]].sparsePoint;
-        std::vector<float> sampledVec = allPoints[numberOfPulls].point;
+        std::vector<float> sampledVec = allPoints->at(numberOfPulls).point;
         std::vector<float> v;
         for(unsigned long i(0); i< indices.size(); i++){
             v.push_back(sampledVec[indices[i]]);
@@ -661,13 +661,13 @@ public:
                 p10 ++;
                 Lp10 ++;
                 pointsVec10.push_back(SquaredEuclideanPoint(tmpx));//H(X,Y)
-                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
+//                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
             }
             else{
                 p11 ++;
                 Lp11 ++;
                 pointsVec11.push_back(p);//H(X,Y)
-                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
+//                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
                 pointsVec1y.push_back(SquaredEuclideanPoint(tmpy));//H(Y)
             }
         }
@@ -677,7 +677,7 @@ public:
             sample10 = Arm10.pullArm(pointsVec10, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         if(p01>=2)
             sample01 = Arm01.pullArm(pointsVec01, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
-        sample1x = Arm1x.pullArm(pointsVec1x, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
+//        sample1x = Arm1x.pullArm(pointsVec1x, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         sample1y = Arm1y.pullArm(pointsVec1y, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
 
 
@@ -714,9 +714,9 @@ public:
                     << "\n10\t" <<   Arm10.lowerConfidenceBound
                     << " " <<      Arm10.estimateOfMean
                     << " " <<      Arm10.upperConfidenceBound
-                    << "\nx\t" <<   Arm1x.lowerConfidenceBound
-                    << " " <<      Arm1x.estimateOfMean
-                    << " " <<      Arm1x.upperConfidenceBound
+//                    << "\nx\t" <<   Arm1x.lowerConfidenceBound
+//                    << " " <<      Arm1x.estimateOfMean
+//                    << " " <<      Arm1x.upperConfidenceBound
                     << "\ny\t" <<   Arm1y.lowerConfidenceBound
                     << " " <<      Arm1y.estimateOfMean
                     << " " <<      Arm1y.upperConfidenceBound
@@ -736,8 +736,8 @@ public:
                            + ((p10 + 0.0) / numberOfPulls) * Arm10.estimateOfMean
                            + ((p11 + 0.0) / numberOfPulls) * Arm11.estimateOfMean
         ) // H(X,Y) till here
-                         - (xlogx((p00 + p01 + 0.0) / numberOfPulls))
-                         + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.estimateOfMean
+//                         - (xlogx((p00 + p01 + 0.0) / numberOfPulls))
+//                         + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.estimateOfMean
                          - (xlogx((p00 + p10 + 0.0) / numberOfPulls))
                          + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.estimateOfMean;
 
@@ -747,9 +747,9 @@ public:
                   + ((p01 + 0.0) / numberOfPulls) * Arm01.lowerConfidenceBound
                   + ((p10 + 0.0) / numberOfPulls) * Arm10.lowerConfidenceBound
                   + ((p11 + 0.0) / numberOfPulls) * Arm11.lowerConfidenceBound)
-                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
-                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
-                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.upperConfidenceBound
+//                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
+//                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
+//                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.upperConfidenceBound
                 - (xlogx((p00 + p10 + 0.0) / numberOfPulls)) *
                   (1 + std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p10 + 0.0) / numberOfPulls))
                 + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.upperConfidenceBound;
@@ -759,9 +759,9 @@ public:
                   + ((p01 + 0.0) / numberOfPulls) * Arm01.upperConfidenceBound
                   + ((p10 + 0.0) / numberOfPulls) * Arm10.upperConfidenceBound
                   + ((p11 + 0.0) / numberOfPulls) * Arm11.upperConfidenceBound)
-                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
-                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
-                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.lowerConfidenceBound
+//                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
+//                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
+//                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.lowerConfidenceBound
                 - (xlogx((p00 + p10 + 0.0) / numberOfPulls)) *
                   (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p10 + 0.0) / numberOfPulls))
                 + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.lowerConfidenceBound;
