@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
     // Loading Sparse matrix
     std::cout << "Reading normalised data" << std::endl;
 //    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
-    unsigned cells(20000), genes(5000);
+    unsigned cells(100000), genes(5000);
     std::vector<std::vector<float> > DataMatrix(cells);
     for(unsigned i(0); i< cells ; i ++)
         DataMatrix[i] = std::vector<float>(genes);
