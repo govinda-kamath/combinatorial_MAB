@@ -68,7 +68,7 @@ public:
             std::cout<< armIndex << " ";
             addSingleArm(armsContainer[armIndex]);
         }
-        std::endl;
+        std::cout<<std::endl;
     }
 
     // Used by Step 1 of UCB
