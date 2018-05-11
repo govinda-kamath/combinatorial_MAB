@@ -637,7 +637,10 @@ public:
             upperConfidenceBound = estimateOfMean;
             return std::make_pair(0,0);
         }
+        std::cout<<"things " ;
         for(unsigned i(0); i<sampleSize; i++){
+            if(i%100==0)
+                std::cout<<","<<"i";
             SquaredEuclideanPoint p = samplePoint();
             float x = p.point[0];
             float y = p.point[1];
@@ -668,7 +671,7 @@ public:
                 pointsVec1y.push_back(SquaredEuclideanPoint(tmpy));//H(Y)
             }
         }
-
+        std::cout << std::endl;
         sample11 = Arm11.pullArm(pointsVec11, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         if(p10>=2)
             sample10 = Arm10.pullArm(pointsVec10, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);

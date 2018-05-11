@@ -96,7 +96,7 @@ int main(int argc, char *argv[]){
 
     Arm2DMutualInformation<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
     Arm2DMutualInformation<SquaredEuclideanPoint> secondBestArm = UCB1.arms.top();
-    std::string sFilePath = "../experiments/MI/10xn_"+std::to_string(n)+"_d_"+std::to_string(m);
+    std::string sFilePath = "../experiments/MI/10x/n_"+std::to_string(n)+"_d_"+std::to_string(m);
     std::ofstream saveFile(sFilePath, std::ofstream::out | std::ofstream::trunc);
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEnd - timeStart).count();
