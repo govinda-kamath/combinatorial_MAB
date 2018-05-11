@@ -78,9 +78,13 @@ namespace utils{
     }
 
     template <class templatePoint, class dataType>
-    void vectorsToPoints(std::vector<templatePoint> &pointsVec, std::vector<std::vector<dataType> > &dataMatrix) {
+    void vectorsToPoints(std::vector<templatePoint> &pointsVec, std::vector<std::vector<dataType> > &dataMatrix,
+                         long n = -1, long m = -1) {
         //Each row in the data-matrix is a point
-
+        if (n==-1)
+            n = dataMatrix.size();
+        if (m==-1)
+            m = dataMatrix[0].size();
         for (unsigned long i(0); i < dataMatrix.size(); i++) {
 
             std::vector<float> tmpVec;
@@ -96,7 +100,7 @@ namespace utils{
 
     template <class templatePoint>
     void unorderedMapToPoints(std::vector<templatePoint> &pointsVec,
-                         std::vector<std::unordered_map<unsigned long, float> > &sparseDataMatrix,
+                              std::vector<std::unordered_map<unsigned long, float> > &sparseDataMatrix,
                               unsigned long dimension, unsigned long n = 0) {
 
         //Each row in the data-matrix is a point

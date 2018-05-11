@@ -194,6 +194,7 @@ public:
                 markForRemoval(topArm.id);
             }
         }
+        std::cout << "Ran for " << i << " steps" << std::endl;
 #ifdef DEBUG_RUN
         std::cout << "Best arm number " << bestArmCount << " Position" << i
                   << " Max iter" << maxIterations  << std::endl;
@@ -210,13 +211,30 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         float del = UCBofBestArm-LCBofSecondBestArm;
+        std::cout << "POW! \n\t"
+                << bestArm.id << " "
+                << bestArm.lowerConfidenceBound << " "
+                << bestArm.estimateOfMean << " "
+                << bestArm.upperConfidenceBound << " "
+                << bestArm.numberOfPulls << "\n\t"
+                << secondBestArm.id << " "
+                << secondBestArm.lowerConfidenceBound << " "
+                << secondBestArm.estimateOfMean << " "
+                << secondBestArm.upperConfidenceBound << " "
+                << secondBestArm.numberOfPulls << " "
+                << del <<std::endl;
 
-        if (UCBofBestArm == NAN){
-            std::cout << "Damn Nan" << bestArm.id << std::endl;
+        if (del == NAN){
+            std::cout << "Damn the NAN" << bestArm.id << std::endl;
         }
         if (UCBofBestArm < LCBofSecondBestArm){
-
-            /* Evaluating true mean of best arm
+            std::cout << "WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! "
+                    ""
+                      << "\n" << bestArm.id << " "
+                      << secondBestArm.id << " "
+                      << UCBofBestArm << " "
+                      << LCBofSecondBestArm << "\t"
+                      << del <<std::endl;            /* Evaluating true mean of best arm
             std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
             bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
             bestArm.upperConfidenceBound = bestArm.estimateOfMean;
