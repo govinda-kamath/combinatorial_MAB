@@ -19,13 +19,18 @@
 int main(int argc, char *argv[]){
 
     std::string nameConfig;
-    nameConfig = argv[1];
+//    try{
+//        nameConfig = argv[1];
+//    }
+//    catch(int e){
+//    };
+    nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
+
+
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
         std::cout << "Can't load " << nameConfig << std::endl;
-        nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
     }
-
 
     // Loading Hyper parameters and data sizes
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
@@ -57,7 +62,7 @@ int main(int argc, char *argv[]){
     // Loading Sparse matrix
     std::cout << "Reading normalised data" << std::endl;
 //    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
-    unsigned cells(100000), genes(5000);
+    unsigned cells(20000), genes(5000);
     std::vector<std::vector<float> > DataMatrix(cells);
     for(unsigned i(0); i< cells ; i ++)
         DataMatrix[i] = std::vector<float>(genes);
@@ -86,11 +91,27 @@ int main(int argc, char *argv[]){
     std::cout << "UCB go! for steps " << m-1 << " with arms " << armID << std::endl;
     UCBDynamic<Arm2DMutualInformation<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
     std::cout<<"Going for initialization" << std::endl;
+    std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
+
     UCB1.initialise(numberOfInitialPulls);
     std::cout<<"Running UCB" << std::endl;
     UCB1.runUCB(n * 100);
+    std::chrono::system_clock::time_point timeEnd = std::chrono::system_clock::now();
 
     Arm2DMutualInformation<SquaredEuclideanPoint> bestArm = UCB1.topKArms.back();
     Arm2DMutualInformation<SquaredEuclideanPoint> secondBestArm = UCB1.arms.top();
+    std::string sFilePath = "../experiments/MI/10xn_"+std::to_string(n)+"_d_"+std::to_string(m);
+    std::ofstream saveFile(sFilePath, std::ofstream::out | std::ofstream::trunc);
+    long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
+            (timeEnd - timeStart).count();
+    saveFile   << "n," << n << std::endl;
+    saveFile   << "m," << m << std::endl;
+    std::cout << "Total Time = " << totalTime << "(ms)"
+              << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+              << "\nGlobal Sigma= " << UCB1.globalSigma
+              << std::endl;
+    saveFile   << "TotalTime," << totalTime << std::endl;
+    saveFile   << "GlobalnumberofPulls," << UCB1.globalNumberOfPulls << std::endl;
+    saveFile   << "GlobalSigma," << UCB1.globalSigma  << std::endl;
 
 }

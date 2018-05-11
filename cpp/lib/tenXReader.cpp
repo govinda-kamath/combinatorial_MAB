@@ -26,7 +26,6 @@ std::vector<unsigned> tenXReader::get10xMatrixSize(std::string &fileName) {
     hsize_t dimsShape[2];
 
     rankShape = dspaceShape.getSimpleExtentDims(dimsShape, NULL);
-//    std::cout << "ShapeSize: " << dimsShape[0] << " rank " << rankShape << std::endl;
 
     std::vector<unsigned> shapeData;
     shapeData.resize(dimsShape[0]);
@@ -191,7 +190,8 @@ void tenXReader::get10xMatrix(std::string &fileName, std::vector<std::vector<flo
 
     tenXReader::get10xDataSet(fileName, dataRead, indicesData, indptrData, shapeData);
 
-//    std::cout << denseDataMatrix.size() << " " << denseDataMatrix[0].size() << std::endl;
+    std::cout << denseDataMatrix.size() << " " << denseDataMatrix[0].size() << std::endl;
+    std::cout << shapeData[0] << " " << shapeData[1] << std::endl;
     assert(denseDataMatrix.size() == shapeData[0]);
     assert(denseDataMatrix[0].size() == shapeData[1]);
 
