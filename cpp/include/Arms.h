@@ -740,7 +740,7 @@ public:
 
         upperConfidenceBound =
                 -(-xlogx((p00 + 0.0) / numberOfPulls) *
-                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + 0.0) / numberOfPulls))
+                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt( ((p00 + 0.0) / numberOfPulls)*(1-(p00 + 0.0) / numberOfPulls) ))
                   + ((p01 + 0.0) / numberOfPulls) * Arm01.lowerConfidenceBound
                   + ((p10 + 0.0) / numberOfPulls) * Arm10.lowerConfidenceBound
                   + ((p11 + 0.0) / numberOfPulls) * Arm11.lowerConfidenceBound)
@@ -748,11 +748,12 @@ public:
 //                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
 //                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.upperConfidenceBound
                 - (xlogx((p00 + p10 + 0.0) / numberOfPulls)) *
-                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p10 + 0.0) / numberOfPulls))
+                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt( ((p00 + p10 + 0.0) / numberOfPulls)*(1-(p00 + p10 + 0.0) / numberOfPulls) ))
                 + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.upperConfidenceBound;
 
         lowerConfidenceBound =
-                -(-xlogx((p00 + 0.0) / numberOfPulls) * (1 + std::pow(numberOfPulls, -0.5))
+                -(-xlogx((p00 + 0.0) / numberOfPulls) *
+                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt( ((p00 + 0.0) / numberOfPulls)*(1-(p00 + 0.0) / numberOfPulls) ))
                   + ((p01 + 0.0) / numberOfPulls) * Arm01.upperConfidenceBound
                   + ((p10 + 0.0) / numberOfPulls) * Arm10.upperConfidenceBound
                   + ((p11 + 0.0) / numberOfPulls) * Arm11.upperConfidenceBound)
@@ -760,7 +761,7 @@ public:
 //                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
 //                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.lowerConfidenceBound
                 - (xlogx((p00 + p10 + 0.0) / numberOfPulls)) *
-                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p10 + 0.0) / numberOfPulls))
+                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt( ((p00 + p10 + 0.0) / numberOfPulls)*(1-(p00 + p10 + 0.0) / numberOfPulls) ))
                 + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.lowerConfidenceBound;
 
         intervalWidth = std::max(estimateOfMean - lowerConfidenceBound, upperConfidenceBound - estimateOfMean);
