@@ -637,10 +637,7 @@ public:
             upperConfidenceBound = estimateOfMean;
             return std::make_pair(0,0);
         }
-        std::cout<<"things " ;
         for(unsigned i(0); i<sampleSize; i++){
-            if(i%100==0)
-                std::cout<<","<<numberOfPulls;
             SquaredEuclideanPoint p = samplePoint();
             float x = p.point[0];
             float y = p.point[1];
@@ -704,28 +701,29 @@ public:
         float first = sumOfPulls - sumOfPullsPrev;
         float second = sumOfSquaresOfPulls - sumOfSquaresOfPullsPrev;
 
-        std::cout << "ID " << id
-                    << "\n11\t" <<   Arm11.lowerConfidenceBound
-                    << " " <<      Arm11.estimateOfMean
-                    << " " <<      Arm11.upperConfidenceBound
-                    << "\n01\t" <<   Arm01.lowerConfidenceBound
-                    << " " <<      Arm01.estimateOfMean
-                    << " " <<      Arm01.upperConfidenceBound
-                    << "\n10\t" <<   Arm10.lowerConfidenceBound
-                    << " " <<      Arm10.estimateOfMean
-                    << " " <<      Arm10.upperConfidenceBound
-//                    << "\nx\t" <<   Arm1x.lowerConfidenceBound
-//                    << " " <<      Arm1x.estimateOfMean
-//                    << " " <<      Arm1x.upperConfidenceBound
-                    << "\ny\t" <<   Arm1y.lowerConfidenceBound
-                    << " " <<      Arm1y.estimateOfMean
-                    << " " <<      Arm1y.upperConfidenceBound
-                   << "\nF\t" <<   lowerConfidenceBound
-                   << " " <<      estimateOfMean
-                << " " <<      upperConfidenceBound
-                << "\tNoP" <<      numberOfPulls
-                           <<std::endl;
-
+        if (std::rand() < 0.02 ) {
+            std::cout << "ID " << id
+                      << "\n11\t" << Arm11.lowerConfidenceBound
+                      << " " << Arm11.estimateOfMean
+                      << " " << Arm11.upperConfidenceBound
+                      << "\n01\t" << Arm01.lowerConfidenceBound
+                      << " " << Arm01.estimateOfMean
+                      << " " << Arm01.upperConfidenceBound
+                      << "\n10\t" << Arm10.lowerConfidenceBound
+                      << " " << Arm10.estimateOfMean
+                      << " " << Arm10.upperConfidenceBound
+                      //                    << "\nx\t" <<   Arm1x.lowerConfidenceBound
+                      //                    << " " <<      Arm1x.estimateOfMean
+                      //                    << " " <<      Arm1x.upperConfidenceBound
+                      << "\ny\t" << Arm1y.lowerConfidenceBound
+                      << " " << Arm1y.estimateOfMean
+                      << " " << Arm1y.upperConfidenceBound
+                      << "\nF\t" << lowerConfidenceBound
+                      << " " << estimateOfMean
+                      << " " << upperConfidenceBound
+                      << "\tNoP" << numberOfPulls
+                      << std::endl;
+        }
         return std::make_pair(first, second);
     }
     using Arm<SquaredEuclideanPoint>::updateConfidenceIntervals;

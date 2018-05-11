@@ -214,20 +214,21 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         float del = UCBofBestArm-LCBofSecondBestArm;
-        std::cout << "POW! \n\t"
-                << bestArm.id << " "
-                << bestArm.lowerConfidenceBound << " "
-                << bestArm.estimateOfMean << " "
-                << bestArm.upperConfidenceBound << " "
-                << bestArm.numberOfPulls << "\n\t"
-                << secondBestArm.id << " "
-                << secondBestArm.lowerConfidenceBound << " "
-                << secondBestArm.estimateOfMean << " "
-                << secondBestArm.upperConfidenceBound << " "
-                << secondBestArm.numberOfPulls << " "
-                << globalNumberOfPulls/arms.size()
-                << " " << del <<std::endl;
-
+        if (std::rand() < 0.1 ) {
+            std::cout << "POW! \n\t"
+                      << bestArm.id << " "
+                      << bestArm.lowerConfidenceBound << " "
+                      << bestArm.estimateOfMean << " "
+                      << bestArm.upperConfidenceBound << " "
+                      << bestArm.numberOfPulls << "\n\t"
+                      << secondBestArm.id << " "
+                      << secondBestArm.lowerConfidenceBound << " "
+                      << secondBestArm.estimateOfMean << " "
+                      << secondBestArm.upperConfidenceBound << " "
+                      << secondBestArm.numberOfPulls << " "
+                      << globalNumberOfPulls / arms.size()
+                      << " " << del << std::endl;
+        }
         if (del == NAN){
             std::cout << "Damn the NAN" << bestArm.id << std::endl;
         }
