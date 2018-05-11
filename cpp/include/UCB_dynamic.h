@@ -263,16 +263,17 @@ public:
         else {
             std::pair<float, float> sample;
             sample = bestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize, LCBofSecondBestArm);
-
-            globalSumOfPulls += sample.first;
-            globalSumOfSquaresOfPulls += sample.second;
-            globalNumberOfPulls += sampleSize;
-
+            if(sample.first!=0) {
+                globalSumOfPulls += sample.first;
+                globalSumOfSquaresOfPulls += sample.second;
+                globalNumberOfPulls += sampleSize;
+            }
             sample = secondBestArm.pullArm(globalSigma, globalNumberOfPulls, logDeltaInverse, true, sampleSize, LCBofSecondBestArm);
-
-            globalSumOfPulls += sample.first;
-            globalSumOfSquaresOfPulls += sample.second;
-            globalNumberOfPulls += sampleSize;
+            if(sample.first!=0) {
+                globalSumOfPulls += sample.first;
+                globalSumOfSquaresOfPulls += sample.second;
+                globalNumberOfPulls += sampleSize;
+            }
             float a, b, c;
             a = globalSumOfSquaresOfPulls / globalNumberOfPulls;
             b = globalSumOfPulls / globalNumberOfPulls;
