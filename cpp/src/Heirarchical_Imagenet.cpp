@@ -20,7 +20,7 @@
 
 int main(int argc, char *argv[]) {
     std::string nameConfig = argv[1];
-    std::srand(atoi(argv[2]);
+    std::srand(atoi(argv[2]));
     //    long n(atol(argv[3]));
 
 //    std::string nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
