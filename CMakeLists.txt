@@ -108,13 +108,13 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #            cpp/include/kmeans.h )
 #    target_link_libraries(kmeans dlib::dlib pthread ${Boost_LIBRARIES})
 
-#    add_executable(heirarchical cpp/src/Heirarchical_Imagenet.cpp
-#            cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
-#            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-#            cpp/lib/Points.cpp
-#            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-#            )
-#    target_link_libraries( heirarchical dlib::dlib )
+    add_executable(heirarchical cpp/src/Heirarchical_Imagenet.cpp
+            cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
+            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+            cpp/lib/Points.cpp
+            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            )
+    target_link_libraries( heirarchical dlib::dlib )
 
 #    add_executable(medoid cpp/src/Medoid_Imagenet.cpp
 #            cpp/include/Points.h cpp/include/Arms.h

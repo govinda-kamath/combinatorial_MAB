@@ -69,8 +69,9 @@ public:
         delta = deltaAccuracy;
         sampleSize = sSize;
         n = nn;
-        gFilePath = gFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
-        sFilePath = sFilePath+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+        std::string randomName = +std::to_string(std::rand()%1000);
+        gFilePath = gFilePath+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+        sFilePath = sFilePath+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
 //        std::cout << "Save path"  << sFilePath << std::endl;
 #ifndef Brute
             graphSaveFile.open(gFilePath, std::ofstream::out | std::ofstream::trunc);
@@ -259,7 +260,7 @@ public:
 
             //Adding inserted group point in the active group
             activeGroups.insert(groupPointId);
-            groupPointId++;
+            groupPointId++;saveAnswers
 
             saveFile << "Step " << i
 //                         << "\tTrue. = " << bestArm.trueMean()

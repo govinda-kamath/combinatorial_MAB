@@ -214,45 +214,46 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         float del = UCBofBestArm-LCBofSecondBestArm;
-        if ( globalNumberOfPulls%23==1 ) {
-            std::cout << "POW! \n\t"
-                      << bestArm.id << " "
-                      << bestArm.lowerConfidenceBound << " "
-                      << bestArm.estimateOfMean << " "
-                      << bestArm.upperConfidenceBound << " "
-                      << bestArm.numberOfPulls << "\n\t"
-                      << secondBestArm.id << " "
-                      << secondBestArm.lowerConfidenceBound << " "
-                      << secondBestArm.estimateOfMean << " "
-                      << secondBestArm.upperConfidenceBound << " "
-                      << secondBestArm.numberOfPulls << " "
-                      << globalNumberOfPulls / arms.size()
-                      << " " << del << std::endl;
-        }
+//        if ( globalNumberOfPulls%23==1 ) {
+//            std::cout << "POW! \n\t"
+//                      << bestArm.id << " "
+//                      << bestArm.lowerConfidenceBound << " "
+//                      << bestArm.estimateOfMean << " "
+//                      << bestArm.upperConfidenceBound << " "
+//                      << bestArm.numberOfPulls << "\n\t"
+//                      << secondBestArm.id << " "
+//                      << secondBestArm.lowerConfidenceBound << " "
+//                      << secondBestArm.estimateOfMean << " "
+//                      << secondBestArm.upperConfidenceBound << " "
+//                      << secondBestArm.numberOfPulls << " "
+//                      << globalNumberOfPulls / arms.size()
+//                      << " " << del << std::endl;
+//        }
         if (del == NAN){
             std::cout << "Damn the NAN" << bestArm.id << std::endl;
         }
         if (UCBofBestArm < LCBofSecondBestArm){
-            std::cout << "POW! \n\t"
-                      << bestArm.id << " "
-                      << bestArm.lowerConfidenceBound << " "
-                      << bestArm.estimateOfMean << " "
-                      << bestArm.upperConfidenceBound << " "
-                      << bestArm.numberOfPulls << "\n\t"
-                      << secondBestArm.id << " "
-                      << secondBestArm.lowerConfidenceBound << " "
-                      << secondBestArm.estimateOfMean << " "
-                      << secondBestArm.upperConfidenceBound << " "
-                      << secondBestArm.numberOfPulls << " "
-                      << globalNumberOfPulls / arms.size()
-                      << " " << del << std::endl;
-            std::cout << "WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! "
-                    ""
-                      << "\n" << bestArm.id << " "
-                      << secondBestArm.id << " "
-                      << UCBofBestArm << " "
-                      << LCBofSecondBestArm << "\t"
-                      << del <<std::endl;            /* Evaluating true mean of best arm
+//            std::cout << "POW! \n\t"
+//                      << bestArm.id << " "
+//                      << bestArm.lowerConfidenceBound << " "
+//                      << bestArm.estimateOfMean << " "
+//                      << bestArm.upperConfidenceBound << " "
+//                      << bestArm.numberOfPulls << "\n\t"
+//                      << secondBestArm.id << " "
+//                      << secondBestArm.lowerConfidenceBound << " "
+//                      << secondBestArm.estimateOfMean << " "
+//                      << secondBestArm.upperConfidenceBound << " "
+//                      << secondBestArm.numberOfPulls << " "
+//                      << globalNumberOfPulls / arms.size()
+//                      << " " << del << std::endl;
+//            std::cout << "BEST ARM ARM!!"
+//                    ""
+//                      << "\n" << bestArm.id << " "
+//                      << secondBestArm.id << " "
+//                      << UCBofBestArm << " "
+//                      << LCBofSecondBestArm << "\t"
+//                      << del <<std::endl;
+            /* Evaluating true mean of best arm
             std::unordered_map<std::string, float> result = bestArm.trueMeanUpdate();
             bestArm.estimateOfMean = result["sumOfPulls"]/result["effectiveDimension"];
             bestArm.upperConfidenceBound = bestArm.estimateOfMean;
