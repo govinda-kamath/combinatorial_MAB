@@ -18,7 +18,7 @@
 #include <boost/math/special_functions/digamma.hpp>
 
 //#include <nanoflann.hpp>
-#define chi_d 0.0 //the constant multiplying the variance
+#define chi_d 3.0 //the constant multiplying the variance
 
 template <class templatePoint>
 class Arm {
@@ -658,13 +658,13 @@ public:
                 p10 ++;
                 Lp10 ++;
                 pointsVec10.push_back(SquaredEuclideanPoint(tmpx));//H(X,Y)
-//                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
+                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
             }
             else{
                 p11 ++;
                 Lp11 ++;
                 pointsVec11.push_back(p);//H(X,Y)
-//                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
+                pointsVec1x.push_back(SquaredEuclideanPoint(tmpx));//H(X)
                 pointsVec1y.push_back(SquaredEuclideanPoint(tmpy));//H(Y)
             }
         }
@@ -673,7 +673,7 @@ public:
             sample10 = Arm10.pullArm(pointsVec10, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         if(p01>=2)
             sample01 = Arm01.pullArm(pointsVec01, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
-//        sample1x = Arm1x.pullArm(pointsVec1x, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
+        sample1x = Arm1x.pullArm(pointsVec1x, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
         sample1y = Arm1y.pullArm(pointsVec1y, globalSigma, logDeltaInverse, update,  LCBofSecondBestArm);
 
 
@@ -700,7 +700,8 @@ public:
         float first = sumOfPulls - sumOfPullsPrev;
         float second = sumOfSquaresOfPulls - sumOfSquaresOfPullsPrev;
 
-        if ( id%20 == 0 ) {
+        if ( id%1 == 1
+                ) {
             std::cout << "ID " << id
                       << "\n11\t" << Arm11.lowerConfidenceBound
                       << " " << Arm11.estimateOfMean
@@ -711,9 +712,9 @@ public:
                       << "\n10\t" << Arm10.lowerConfidenceBound
                       << " " << Arm10.estimateOfMean
                       << " " << Arm10.upperConfidenceBound
-                      //                    << "\nx\t" <<   Arm1x.lowerConfidenceBound
-                      //                    << " " <<      Arm1x.estimateOfMean
-                      //                    << " " <<      Arm1x.upperConfidenceBound
+                      << "\nx\t" << Arm1x.lowerConfidenceBound
+                      << " " << Arm1x.estimateOfMean
+                      << " " << Arm1x.upperConfidenceBound
                       << "\ny\t" << Arm1y.lowerConfidenceBound
                       << " " << Arm1y.estimateOfMean
                       << " " << Arm1y.upperConfidenceBound
@@ -733,8 +734,8 @@ public:
                            + ((p10 + 0.0) / numberOfPulls) * Arm10.estimateOfMean
                            + ((p11 + 0.0) / numberOfPulls) * Arm11.estimateOfMean
         ) // H(X,Y) till here
-//                         - (xlogx((p00 + p01 + 0.0) / numberOfPulls))
-//                         + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.estimateOfMean
+                         - (xlogx((p00 + p01 + 0.0) / numberOfPulls))
+                         + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.estimateOfMean
                          - (xlogx((p00 + p10 + 0.0) / numberOfPulls))
                          + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.estimateOfMean;
 
@@ -744,9 +745,9 @@ public:
                   + ((p01 + 0.0) / numberOfPulls) * Arm01.lowerConfidenceBound
                   + ((p10 + 0.0) / numberOfPulls) * Arm10.lowerConfidenceBound
                   + ((p11 + 0.0) / numberOfPulls) * Arm11.lowerConfidenceBound)
-//                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
-//                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
-//                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.upperConfidenceBound
+                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
+                  (1 + std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
+                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.upperConfidenceBound
                 - (xlogx((p00 + p10 + 0.0) / numberOfPulls)) *
                   (1 + std::pow(numberOfPulls, -0.5) * std::sqrt( ((p00 + p10 + 0.0) / numberOfPulls)*(1-(p00 + p10 + 0.0) / numberOfPulls) ))
                 + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.upperConfidenceBound;
@@ -757,9 +758,9 @@ public:
                   + ((p01 + 0.0) / numberOfPulls) * Arm01.upperConfidenceBound
                   + ((p10 + 0.0) / numberOfPulls) * Arm10.upperConfidenceBound
                   + ((p11 + 0.0) / numberOfPulls) * Arm11.upperConfidenceBound)
-//                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
-//                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
-//                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.lowerConfidenceBound
+                - (xlogx((p00 + p01 + 0.0) / numberOfPulls)) *
+                  (1 - std::pow(numberOfPulls, -0.5) * std::sqrt((p00 + p01 + 0.0) / numberOfPulls))
+                + ((p11 + p10 + 0.0) / numberOfPulls) * Arm1x.lowerConfidenceBound
                 - (xlogx((p00 + p10 + 0.0) / numberOfPulls)) *
                   (1 - std::pow(numberOfPulls, -0.5) * std::sqrt( ((p00 + p10 + 0.0) / numberOfPulls)*(1-(p00 + p10 + 0.0) / numberOfPulls) ))
                 + ((p11 + p01 + 0.0) / numberOfPulls) * Arm1y.lowerConfidenceBound;

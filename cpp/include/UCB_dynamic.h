@@ -214,7 +214,7 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         float del = UCBofBestArm-LCBofSecondBestArm;
-        if ( bestArm.id%10 == 1 ) {
+        if ( globalNumberOfPulls / arms.size()%100 == 1 ) {
             std::cout << "POW! \n\t"
                       << bestArm.id << " "
                       << bestArm.lowerConfidenceBound << " "
@@ -233,6 +233,19 @@ public:
             std::cout << "Damn the NAN" << bestArm.id << std::endl;
         }
         if (UCBofBestArm < LCBofSecondBestArm){
+            std::cout << "POW! \n\t"
+                      << bestArm.id << " "
+                      << bestArm.lowerConfidenceBound << " "
+                      << bestArm.estimateOfMean << " "
+                      << bestArm.upperConfidenceBound << " "
+                      << bestArm.numberOfPulls << "\n\t"
+                      << secondBestArm.id << " "
+                      << secondBestArm.lowerConfidenceBound << " "
+                      << secondBestArm.estimateOfMean << " "
+                      << secondBestArm.upperConfidenceBound << " "
+                      << secondBestArm.numberOfPulls << " "
+                      << globalNumberOfPulls / arms.size()
+                      << " " << del << std::endl;
             std::cout << "WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! "
                     ""
                       << "\n" << bestArm.id << " "

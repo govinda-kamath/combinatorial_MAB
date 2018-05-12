@@ -41,42 +41,63 @@ int main(int argc, char *argv[]){
 
     std::random_device rd;
     std::mt19937 g(9);
-    std::normal_distribution<> dist(0, 0.0005);
+    std::normal_distribution<> dist(0, 1);
     std::cout << "Started!" << std::endl;
     std::string str;
     float tmp;
-
-    std::unordered_map<std::pair<unsigned long, unsigned long>, unsigned long, utils::pair_hash> groupIDtoArmID;
-
-//    long n = 10000;
-    unsigned long armID = 0;
-    std::vector<SquaredEuclideanPoint> dataMatrix;
     std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
 
-    // Loading 10x data shape
-    std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
+    std::string sFilePath = "../experiments/MI/10x/Gas_n_"+std::to_string(n)+"_d_"+std::to_string(m);
+    std::cout<< "Saving in " << sFilePath << std::endl;
+////    long n = 10000;
+//
+//    // Loading 10x data shape
+//    std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
+//
+//    // Loading Sparse matrix
+//    std::cout << "Reading normalised data" << std::endl;
+////    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
+//    unsigned cells(100000), genes(5000);
+//    std::vector<std::vector<float> > DataMatrix(cells);
+//    for(unsigned i(0); i< cells ; i ++)
+//        DataMatrix[i] = std::vector<float>(genes);
+//
+//    tenXReader::get10xMatrix(fileName, DataMatrix);
+//
+//    //Arms
+//    std::vector<SquaredEuclideanPoint> allPointsVec;
+//
+//    std::cout << "Reading normalised data sparsely part 2" << std::endl;
+//    utils::vectorsToPoints(allPointsVec, DataMatrix,  n, m);
 
-    // Loading Sparse matrix
-    std::cout << "Reading normalised data" << std::endl;
-//    std::vector<std::unordered_map<unsigned long, float> > sparseNormalisedDataMatrix(shapeData[1] );
-    unsigned cells(100000), genes(5000);
-    std::vector<std::vector<float> > DataMatrix(cells);
-    for(unsigned i(0); i< cells ; i ++)
-        DataMatrix[i] = std::vector<float>(genes);
 
-    tenXReader::get10xMatrix(fileName, DataMatrix);
-
-    //Arms
     std::vector<SquaredEuclideanPoint> allPointsVec;
-    std::cout << "Reading normalised data sparsely part 2" << std::endl;
-    utils::vectorsToPoints(allPointsVec, DataMatrix,  n, m);
+    std::ifstream file("/Users/vivekkumarbagaria/Code/test_dataset/ghg_data.txt", std::ios::binary);
 
-    for(unsigned i(1); i< m ; i ++) {
+    int i = 0;
+    while (getline(file, str)) {
+        std::stringstream ss(str);
+        std::vector<float> tmpVec;
+        for (long j = 0; j < m; j++){//5000
+            ss >> tmp;
+//            tmp += dist(g);
+            tmpVec.push_back(tmp);
+        }
+        allPointsVec.push_back(SquaredEuclideanPoint(tmpVec));
+//        if(i>100)
+//            break;
+    }
+    std::cout << std::endl;
+    unsigned mainCol = 346;
+
+    for(unsigned i(0); i< m ; i ++) {
 //        std::chrono::system_clock::time_point sTime = std::chrono::system_clock::now();
 //        std::vector<unsigned long> shuffledRows_(allPointsVec.size());
 //        std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
 //        std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
-        std::vector<unsigned long> indices = {0,i};
+        if(i==mainCol)
+            continue;
+        std::vector<unsigned long> indices = {mainCol, i};
         Arm2DMutualInformation<SquaredEuclideanPoint> arm(i, allPointsVec, indices);
 //        std::chrono::system_clock::time_point eTime = std::chrono::system_clock::now();
 //        long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
@@ -85,7 +106,7 @@ int main(int argc, char *argv[]){
 //        std::cout << totalTime << " " << i << std::endl;
     }
 
-    std::cout << "UCB go! for steps " << m-1 << " with arms " << armID << std::endl;
+    std::cout << "UCB go! for steps " << m-1 << " with arms " << m << std::endl;
     UCBDynamic<Arm2DMutualInformation<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
     std::cout<<"Going for initialization" << std::endl;
     std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
@@ -101,16 +122,18 @@ int main(int argc, char *argv[]){
     auto id = bestArm.id;
     auto id2 = secondBestArm.id;
 
-    std::string sFilePath = "../experiments/MI/10x/shuffled_n_"+std::to_string(cells)+"_d_"+std::to_string(m);
     std::ofstream saveFile(sFilePath, std::ofstream::out | std::ofstream::trunc);
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEnd - timeStart).count();
     saveFile   << "n," << n << std::endl;
     saveFile   << "m," << m << std::endl;
     saveFile   << "id," << id << std::endl;
-    saveFile   << "secondbestid," << id2 << std::endl;
+    saveFile   << "secondBestId," << id2 << std::endl;
     std::cout << "Total Time = " << totalTime << "(ms)"
-              << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+            << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+            << "\nAverage number of Pulls = " << UCB1.globalNumberOfPulls/UCB1.arms.size()
+            << "\nm," << m
+            << "\nn," << allPointsVec.size()
               << "\nGlobal Sigma= " << UCB1.globalSigma
               << std::endl;
     saveFile   << "TotalTime," << totalTime << std::endl;
