@@ -70,8 +70,8 @@ public:
         sampleSize = sSize;
         n = nn;
         std::string randomName = +std::to_string(std::rand()%1000);
-        gFilePath = gFilePath+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
-        sFilePath = sFilePath+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+        gFilePath = gFilePath+"_"+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
+        sFilePath = sFilePath+"_"+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
 //        std::cout << "Save path"  << sFilePath << std::endl;
 #ifndef Brute
             graphSaveFile.open(gFilePath, std::ofstream::out | std::ofstream::trunc);
