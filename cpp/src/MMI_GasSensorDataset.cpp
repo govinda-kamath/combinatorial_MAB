@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
     std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(i)+"_d_"+std::to_string(m);
 
     unsigned mainCol = 0;
-    std::mt19937 g(std::time(nullptr));
+    std::mt19937 g(rrr);
     std::vector<unsigned long> shuffledRows_(allPointsVec.size());
     std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
     std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
