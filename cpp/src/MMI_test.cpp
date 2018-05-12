@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
 //    unsigned long m = (unsigned) reader.GetInteger("UCB", "m", 100);
     unsigned long n = (unsigned) reader.GetInteger("UCB", "n", 100);
     std::string fileName = reader.Get("path", "h5path", "../test_dataset/1M_neurons_matrix_subsampled_20k_5kgenes.h5");
+    std::string directoryPath = reader.Get("path", "gas_directory", "");
 
 //    delta = delta / (m);
 
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]){
 
 
     std::vector<SquaredEuclideanPoint> allPointsVec;
-    std::ifstream file("/Users/vivekkumarbagaria/Code/test_dataset/ghg_data.txt", std::ios::binary);
+    std::ifstream file(directoryPath, std::ios::binary);
 
     int i = 0;
     while (getline(file, str)) {
