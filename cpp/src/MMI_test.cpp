@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
     nameConfig = argv[1];
     long m(atol(argv[2]));
     long n(atol(argv[3]));
-    std::srand(atoi(argv[4]));
+    std::srand(std::time(nullptr));
 //    nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     INIReader reader(nameConfig);
@@ -92,7 +92,6 @@ int main(int argc, char *argv[]){
 //        std::chrono::system_clock::time_point sTime = std::chrono::system_clock::now();
 //        std::vector<unsigned long> shuffledRows_(allPointsVec.size());
 //        std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
-//        std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
         if(i==mainCol)
             continue;
         std::vector<unsigned long> indices = {mainCol, i};
@@ -104,6 +103,8 @@ int main(int argc, char *argv[]){
 //        std::cout << totalTime << " " << i << std::endl;
     }
 
+    std::mt19937 g(9);
+    std::shuffle(armsVec.begin(), armsVec.end(), g);
 
     std::cout << "UCB go! for steps " << m-1 << " with arms " << m << std::endl;
     std::chrono::system_clock::time_point timeE = std::chrono::system_clock::now();
