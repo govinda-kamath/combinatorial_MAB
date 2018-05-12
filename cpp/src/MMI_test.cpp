@@ -135,7 +135,7 @@ int main(int argc, char *argv[]){
     saveFile   << "id," << id << std::endl;
     saveFile   << "id2," << id2 << std::endl;
     saveFile   << "Average number of Pulls," << UCB1.globalNumberOfPulls/UCB1.arms.size()<< std::endl;
-    saveFile   << "Gain," << allPointsVec.size()/(UCB1.globalNumberOfPulls/UCB1.arms.size())<< std::endl;
+    saveFile   << "Gain," << (float) allPointsVec.size()/(UCB1.globalNumberOfPulls/UCB1.arms.size())<< std::endl;
     saveFile   << "secondBestId," << id2 << std::endl;
     saveFile   << "TotalTime," << totalTime << std::endl;
     saveFile   << "GlobalnumberofPulls," << UCB1.globalNumberOfPulls << std::endl;
