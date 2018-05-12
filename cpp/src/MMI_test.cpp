@@ -18,7 +18,7 @@
 
 int main(int argc, char *argv[]){
 
-    std::srand(std::time(nullptr));
+    std::chrono::system_clock::time_point timeS = std::chrono::system_clock::now();
     std::string nameConfig;
     nameConfig = argv[1];
     long m(atol(argv[2]));
@@ -104,7 +104,11 @@ int main(int argc, char *argv[]){
 //        std::cout << totalTime << " " << i << std::endl;
     }
 
+
     std::cout << "UCB go! for steps " << m-1 << " with arms " << m << std::endl;
+    std::chrono::system_clock::time_point timeE = std::chrono::system_clock::now();
+    long long int totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(timeE - timeS).count();
+    std::srand(totalTime%10000);
     UCBDynamic<Arm2DMutualInformation<SquaredEuclideanPoint> > UCB1(armsVec, delta, 1, 0, sampleSize);
     std::cout<<"Going for initialization" << std::endl;
     std::chrono::system_clock::time_point timeStart = std::chrono::system_clock::now();
