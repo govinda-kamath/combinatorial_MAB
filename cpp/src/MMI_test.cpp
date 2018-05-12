@@ -45,7 +45,7 @@ int main(int argc, char *argv[]){
     std::string str;
     float tmp;
     std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
-
+    std::srand(std::time(nullptr));
 ////    long n = 10000;
 //
 //    // Loading 10x data shape
