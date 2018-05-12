@@ -41,9 +41,6 @@ int main(int argc, char *argv[]){
 
 //    delta = delta / (m);
 
-    std::random_device rd;
-    std::mt19937 g(9);
-    std::normal_distribution<> dist(0, 1);
     std::cout << "Started!" << std::endl;
     std::string str;
     float tmp;
