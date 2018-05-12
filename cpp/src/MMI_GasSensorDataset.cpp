@@ -45,7 +45,6 @@ int main(int argc, char *argv[]){
     std::string str;
     float tmp;
     std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
-////    long n = 10000;
 //
 //    // Loading 10x data shape
 //    std::vector<unsigned> shapeData =  tenXReader::get10xMatrixSize(fileName);
@@ -86,7 +85,7 @@ int main(int argc, char *argv[]){
     }
     std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(i)+"_d_"+std::to_string(m);
 
-    unsigned mainCol = 346;
+    unsigned mainCol = 0;
     std::mt19937 g(9);
     std::vector<unsigned long> shuffledRows_(allPointsVec.size());
     std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);

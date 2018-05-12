@@ -214,7 +214,7 @@ public:
         UCBofBestArm = bestArm.upperConfidenceBound;
         LCBofSecondBestArm = secondBestArm.lowerConfidenceBound;
         float del = UCBofBestArm-LCBofSecondBestArm;
-        if ( true ) {
+        if ( globalNumberOfPulls%23==1 ) {
             std::cout << "POW! \n\t"
                       << bestArm.id << " "
                       << bestArm.lowerConfidenceBound << " "
@@ -246,7 +246,7 @@ public:
                       << secondBestArm.numberOfPulls << " "
                       << globalNumberOfPulls / arms.size()
                       << " " << del << std::endl;
-            std::cout << "WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW!"
+            std::cout << "WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! WOW! "
                     ""
                       << "\n" << bestArm.id << " "
                       << secondBestArm.id << " "
@@ -274,7 +274,7 @@ public:
 #endif
 
             arms.push(bestArm);
-            return false;
+            return true;
         }
         // Run a iteration if the top arm is not the best arm
         else {
