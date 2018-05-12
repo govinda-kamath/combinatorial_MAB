@@ -260,7 +260,7 @@ public:
 
             //Adding inserted group point in the active group
             activeGroups.insert(groupPointId);
-            groupPointId++;saveAnswers
+            groupPointId++;
 
             saveFile << "Step " << i
 //                         << "\tTrue. = " << bestArm.trueMean()
