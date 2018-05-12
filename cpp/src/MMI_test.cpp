@@ -37,6 +37,7 @@ int main(int argc, char *argv[]){
     unsigned long n = (unsigned) reader.GetInteger("UCB", "n", 100);
     std::string fileName = reader.Get("path", "h5path", "../test_dataset/1M_neurons_matrix_subsampled_20k_5kgenes.h5");
     std::string directoryPath = reader.Get("path", "gas_directory", "");
+    std::string saveFilePath = reader.Get("path", "saveFileFolderGas", "../experiments/MI/Gas/");
 
 //    delta = delta / (m);
 
@@ -48,8 +49,6 @@ int main(int argc, char *argv[]){
     float tmp;
     std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
 
-    std::string sFilePath = "../experiments/MI/10x/Gas_n_"+std::to_string(n)+"_d_"+std::to_string(m);
-    std::cout<< "Saving in " << sFilePath << std::endl;
 ////    long n = 10000;
 //
 //    // Loading 10x data shape
@@ -123,23 +122,30 @@ int main(int argc, char *argv[]){
     auto id = bestArm.id;
     auto id2 = secondBestArm.id;
 
+
+    std::string sFilePath = saveFilePath+"n_"+std::to_string(allPointsVec.size())+"_d_"+std::to_string(m);
+    std::cout<< "Saving in " << sFilePath << std::endl;
     std::ofstream saveFile(sFilePath, std::ofstream::out | std::ofstream::trunc);
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
             (timeEnd - timeStart).count();
-    saveFile   << "n," << n << std::endl;
+    saveFile   << "n," << allPointsVec.size() << std::endl;
     saveFile   << "m," << m << std::endl;
     saveFile   << "id," << id << std::endl;
+    saveFile   << "id2," << id2 << std::endl;
+    saveFile   << "Average number of Pulls," << UCB1.globalNumberOfPulls/UCB1.arms.size()<< std::endl;
+    saveFile   << "Gain," << allPointsVec.size()/(UCB1.globalNumberOfPulls/UCB1.arms.size())<< std::endl;
     saveFile   << "secondBestId," << id2 << std::endl;
-    std::cout << "Total Time = " << totalTime << "(ms)"
-            << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
-            << "\nAverage number of Pulls = " << UCB1.globalNumberOfPulls/UCB1.arms.size()
-            << "\nGain, = " << allPointsVec.size()/(UCB1.globalNumberOfPulls/UCB1.arms.size())
-            << "\nm," << m
-            << "\nn," << allPointsVec.size()
-              << "\nGlobal Sigma= " << UCB1.globalSigma
-              << std::endl;
     saveFile   << "TotalTime," << totalTime << std::endl;
     saveFile   << "GlobalnumberofPulls," << UCB1.globalNumberOfPulls << std::endl;
     saveFile   << "GlobalSigma," << UCB1.globalSigma  << std::endl;
 
+
+    std::cout << "Total Time = " << totalTime << "(ms)"
+              << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
+              << "\nAverage number of Pulls = " << UCB1.globalNumberOfPulls/UCB1.arms.size()
+              << "\nGain, = " << allPointsVec.size()/(UCB1.globalNumberOfPulls/UCB1.arms.size())
+              << "\nm," << m
+              << "\nn," << allPointsVec.size()
+              << "\nGlobal Sigma= " << UCB1.globalSigma
+              << std::endl;
 }
