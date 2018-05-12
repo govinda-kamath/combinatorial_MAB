@@ -133,7 +133,7 @@ int main(int argc, char *argv[]){
     std::cout << "Total Time = " << totalTime << "(ms)"
             << "\nGlobal number of Pulls = " << UCB1.globalNumberOfPulls
             << "\nAverage number of Pulls = " << UCB1.globalNumberOfPulls/UCB1.arms.size()
-            << "\nGain, = " << allPointsVec.size()(/UCB1.globalNumberOfPulls/UCB1.arms.size());
+            << "\nGain, = " << allPointsVec.size()/(UCB1.globalNumberOfPulls/UCB1.arms.size())
             << "\nm," << m
             << "\nn," << allPointsVec.size()
               << "\nGlobal Sigma= " << UCB1.globalSigma
