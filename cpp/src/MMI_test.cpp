@@ -88,14 +88,16 @@ int main(int argc, char *argv[]){
     std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(i)+"_d_"+std::to_string(m);
 
     unsigned mainCol = 346;
+    std::mt19937 g(9);
+    std::vector<unsigned long> shuffledRows_(allPointsVec.size());
+    std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
+    std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
+
     for(unsigned i(0); i< m ; i ++) {
-//        std::chrono::system_clock::time_point sTime = std::chrono::system_clock::now();
-//        std::vector<unsigned long> shuffledRows_(allPointsVec.size());
-//        std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
         if(i==mainCol)
             continue;
         std::vector<unsigned long> indices = {mainCol, i};
-        Arm2DMutualInformation<SquaredEuclideanPoint> arm(i, allPointsVec, indices);
+        Arm2DMutualInformation<SquaredEuclideanPoint> arm(i, allPointsVec, indices, shuffledRows_);
 //        std::chrono::system_clock::time_point eTime = std::chrono::system_clock::now();
 //        long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
 //                (eTime - sTime).count();
@@ -103,8 +105,6 @@ int main(int argc, char *argv[]){
 //        std::cout << totalTime << " " << i << std::endl;
     }
 
-    std::mt19937 g(9);
-    std::shuffle(armsVec.begin(), armsVec.end(), g);
 
     std::cout << "UCB go! for steps " << m-1 << " with arms " << m << std::endl;
     std::chrono::system_clock::time_point timeE = std::chrono::system_clock::now();
