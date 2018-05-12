@@ -81,6 +81,7 @@ int main(int argc, char *argv[]){
             tmpVec.push_back(tmp);
         }
         allPointsVec.push_back(SquaredEuclideanPoint(tmpVec));
+        i++;
         if(i>n)
             break;
     }
