@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
     long m(atol(argv[2]));
     long n(atol(argv[3]));
     long rrr(atol(argv[4]));
-    std::srand(rrr);
+    std::srand(std::time(nullptr));
 //    nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     INIReader reader(nameConfig);
@@ -86,8 +86,8 @@ int main(int argc, char *argv[]){
     }
     std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(i)+"_d_"+std::to_string(m);
 
-    unsigned mainCol = 346;
-    std::mt19937 g(9);
+    unsigned mainCol = 0;
+    std::mt19937 g(std::time(nullptr));
     std::vector<unsigned long> shuffledRows_(allPointsVec.size());
     std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
     std::shuffle(shuffledRows_.begin(), shuffledRows_.end(), g);
