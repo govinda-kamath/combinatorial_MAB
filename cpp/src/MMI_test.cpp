@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
     auto id2 = secondBestArm.id;
 
 
-    std::string sFilePath = saveFilePath+"n_"+std::to_string(allPointsVec.size())+"_d_"+std::to_string(m);
+    std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(allPointsVec.size())+"_d_"+std::to_string(m);
     std::cout<< "Saving in " << sFilePath << std::endl;
     std::ofstream saveFile(sFilePath, std::ofstream::out | std::ofstream::trunc);
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
