@@ -84,9 +84,9 @@ int main(int argc, char *argv[]){
         if(i>n)
             break;
     }
-    std::cout << std::endl;
-    unsigned mainCol = 346;
+    std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(i)+"_d_"+std::to_string(m);
 
+    unsigned mainCol = 346;
     for(unsigned i(0); i< m ; i ++) {
 //        std::chrono::system_clock::time_point sTime = std::chrono::system_clock::now();
 //        std::vector<unsigned long> shuffledRows_(allPointsVec.size());
@@ -120,7 +120,6 @@ int main(int argc, char *argv[]){
     auto id2 = secondBestArm.id;
 
 
-    std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(allPointsVec.size())+"_d_"+std::to_string(m);
     std::cout<< "Saving in " << sFilePath << std::endl;
     std::ofstream saveFile(sFilePath, std::ofstream::out | std::ofstream::trunc);
     long long int totalTime = std::chrono::duration_cast<std::chrono::milliseconds>
