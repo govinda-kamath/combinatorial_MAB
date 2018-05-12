@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
     long m(atol(argv[2]));
     long n(atol(argv[3]));
     long rrr(atol(argv[4]));
-    std::srand(std::time(nullptr));
+    std::srand(rrr);
 //    nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     INIReader reader(nameConfig);
