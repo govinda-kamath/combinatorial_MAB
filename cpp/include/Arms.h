@@ -634,7 +634,7 @@ public:
         unsigned Lp01 = 0;
         unsigned Lp11 = 0;
         if(maxSize-numberOfPulls <  sampleSize){
-            std::cout << "This arm is done with pulling. There in't points to pull no more" << std::endl;
+            std::cout << "This arm is done with pulling. There in't no more points to pull no more" << std::endl;
             lowerConfidenceBound = estimateOfMean;
             upperConfidenceBound = estimateOfMean;
             return std::make_pair(0,0);
@@ -702,18 +702,17 @@ public:
         float first = sumOfPulls - sumOfPullsPrev;
         float second = sumOfSquaresOfPulls - sumOfSquaresOfPullsPrev;
 
-        if ( id%1 == 1
-                ) {
+        if ( id%1 == 0 ) {
             std::cout << "ID " << id
                       << "\n11\t" << Arm11.lowerConfidenceBound
                       << " " << Arm11.estimateOfMean
                       << " " << Arm11.upperConfidenceBound
-                      << "\n01\t" << Arm01.lowerConfidenceBound
-                      << " " << Arm01.estimateOfMean
-                      << " " << Arm01.upperConfidenceBound
-                      << "\n10\t" << Arm10.lowerConfidenceBound
-                      << " " << Arm10.estimateOfMean
-                      << " " << Arm10.upperConfidenceBound
+//                      << "\n01\t" << Arm01.lowerConfidenceBound
+//                      << " " << Arm01.estimateOfMean
+//                      << " " << Arm01.upperConfidenceBound
+//                      << "\n10\t" << Arm10.lowerConfidenceBound
+//                      << " " << Arm10.estimateOfMean
+//                      << " " << Arm10.upperConfidenceBound
                       << "\nx\t" << Arm1x.lowerConfidenceBound
                       << " " << Arm1x.estimateOfMean
                       << " " << Arm1x.upperConfidenceBound
@@ -723,7 +722,7 @@ public:
                       << "\nF\t" << lowerConfidenceBound
                       << " " << estimateOfMean
                       << " " << upperConfidenceBound
-                      << "\tNoP" << numberOfPulls
+                      << "\tNoP\n" << numberOfPulls
                       << std::endl;
         }
         return std::make_pair(first, second);

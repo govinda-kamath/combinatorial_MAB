@@ -188,14 +188,24 @@ add_executable(mmi cpp/src/MMI_test.cpp
 target_link_libraries(mmi dlib::dlib pthread ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 
 
-add_executable(entropy cpp/src/Entropy_test.cpp
+add_executable(gasmmi cpp/src/MMI_GasSensorDataset.cpp
         cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
         cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
         cpp/lib/Points.cpp cpp/include/tenXReader.h
         cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
         cpp/lib/tenXReader.cpp
         )
-target_link_libraries(entropy dlib::dlib pthread ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES})
+target_link_libraries(gasmmi dlib::dlib pthread ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES})
+
+#
+#add_executable(entropy cpp/src/Entropy_test.cpp
+#        cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
+#        cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+#        cpp/lib/Points.cpp cpp/include/tenXReader.h
+#        cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+#        cpp/lib/tenXReader.cpp
+#        )
+#target_link_libraries(entropy dlib::dlib pthread ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 
 #endif()
 
