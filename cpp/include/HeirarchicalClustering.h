@@ -69,7 +69,7 @@ public:
         delta = deltaAccuracy;
         sampleSize = sSize;
         n = nn;
-        std::string randomName = std::to_string(std::rand()%1000);
+        std::string randomName =    std::to_string(std::rand()%1000);
         gFilePath = gFilePath+"_"+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
         sFilePath = sFilePath+"_"+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
 //        std::cout << "Save path"  << sFilePath << std::endl;
