@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
     }
     std::string sFilePath = saveFilePath+std::to_string(std::rand()%1000)+"n_"+std::to_string(i)+"_d_"+std::to_string(m);
 
-    unsigned mainCol = 0;
+    unsigned mainCol = 346;
     std::mt19937 g(9);
     std::vector<unsigned long> shuffledRows_(allPointsVec.size());
     std::iota(shuffledRows_.begin(), shuffledRows_.end(), 0);
@@ -138,6 +138,13 @@ int main(int argc, char *argv[]){
     saveFile   << "TotalTime," << totalTime << std::endl;
     saveFile   << "GlobalnumberofPulls," << UCB1.globalNumberOfPulls << std::endl;
     saveFile   << "GlobalSigma," << UCB1.globalSigma  << std::endl;
+    saveFile   << "Shuffled rows"
+            << "," << shuffledRows_[0]
+            << "," << shuffledRows_[1]
+            << "," << shuffledRows_[2]
+            << "," << shuffledRows_[3]
+            << std::endl;
+
 
 
     std::cout << "Total Time = " << totalTime << "(ms)"
@@ -148,4 +155,11 @@ int main(int argc, char *argv[]){
               << "\nn," << allPointsVec.size()
               << "\nGlobal Sigma= " << UCB1.globalSigma
               << std::endl;
+    std::cout   << "Shuffled rows"
+               << "," << shuffledRows_[0]
+               << "," << shuffledRows_[1]
+               << "," << shuffledRows_[2]
+               << "," << shuffledRows_[3]
+            << std::endl;
+
 }
