@@ -37,6 +37,7 @@ public:
 
     // Main Constructor
     UCBDynamic(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms, unsigned nOfExtraArms, unsigned sSize){
+        std::srand(std::time(nullptr));
         armsContainer = armsVec;
         numberOfArms = armsContainer.size();
         logDeltaInverse = std::log(1/delta);
