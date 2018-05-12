@@ -17,12 +17,12 @@
 
 
 int main(int argc, char *argv[]){
-    std::srand(std::time(nullptr));
     std::chrono::system_clock::time_point timeS = std::chrono::system_clock::now();
     std::string nameConfig;
     nameConfig = argv[1];
     long m(atol(argv[2]));
     long n(atol(argv[3]));
+    std::srand(atoi(argv[4]));
 //    nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
 
     INIReader reader(nameConfig);

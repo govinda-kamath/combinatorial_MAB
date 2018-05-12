@@ -56,7 +56,6 @@ float SquaredEuclideanPoint::distance(const SquaredEuclideanPoint &p1) const {
  * that dimension*/
 std::pair<float, float> SquaredEuclideanPoint::sampleDistance(const SquaredEuclideanPoint &p1, const unsigned sampleSize)  const {
     assert(("Sizes do notmatch", point.size() == p1.point.size()));
-    std::srand(std::time(nullptr));
     float sampleSum = 0;
     float sampleSquareSum = 0;
 //    unsigned int dimensionPointer = std::rand(); // Todo: Bad code
