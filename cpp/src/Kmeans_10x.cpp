@@ -16,6 +16,7 @@
 #define DEBUG
 
 int main(int argc, char *argv[]){
+    std::srand(std::time(nullptr));
     std::string nameConfig = argv[1];
 //    long startIndex(atol(argv[2])); // Start index
 //    long endIndex(atol(argv[3])); // End index

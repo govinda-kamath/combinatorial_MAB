@@ -18,23 +18,24 @@
 
 int main(int argc, char *argv[]){
 
+    std::srand(std::time(nullptr));
     std::string nameConfig;
     nameConfig = argv[1];
     long m(atol(argv[2]));
+    long n(atol(argv[3]));
 //    nameConfig = "/Users/vivekkumarbagaria/Code/combinatorial_MAB/nominal.ini";
-
 
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
         std::cout << "Can't load " << nameConfig << std::endl;
     }
 
-    // Loading Hyper parameters and data sizes
+//    Loading Hyper parameters and data sizes
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
     unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
 //    unsigned long m = (unsigned) reader.GetInteger("UCB", "m", 100);
-    unsigned long n = (unsigned) reader.GetInteger("UCB", "n", 100);
+//    unsigned long n = (unsigned) reader.GetInteger("UCB", "n", 100);
     std::string fileName = reader.Get("path", "h5path", "../test_dataset/1M_neurons_matrix_subsampled_20k_5kgenes.h5");
     std::string directoryPath = reader.Get("path", "gas_directory", "");
     std::string saveFilePath = reader.Get("path", "saveFileFolderGas", "../experiments/MI/Gas/");
@@ -45,7 +46,6 @@ int main(int argc, char *argv[]){
     std::string str;
     float tmp;
     std::vector<Arm2DMutualInformation<SquaredEuclideanPoint> > armsVec;
-    std::srand(std::time(nullptr));
 ////    long n = 10000;
 //
 //    // Loading 10x data shape
@@ -81,8 +81,8 @@ int main(int argc, char *argv[]){
             tmpVec.push_back(tmp);
         }
         allPointsVec.push_back(SquaredEuclideanPoint(tmpVec));
-//        if(i>100)
-//            break;
+        if(i>n)
+            break;
     }
     std::cout << std::endl;
     unsigned mainCol = 346;
