@@ -7,5 +7,5 @@ set(HDF5_USE_STATIC_LIBRARIES   ON)
 include_directories(${HDF5_INCLUDE_DIRS})
 add_library(Points Points.cpp)
 add_library(utils utils.cpp)
-add_library(tenXReader tenXReader.cpp)
+#add_library(tenXReader tenXReader.cpp)
 #
