@@ -24,7 +24,7 @@ template <class templatePoint>
 class Arm {
     /* A base class of arms */
 public:
-    unsigned long numberOfPulls;
+    unsigned numberOfPulls;
     float sumOfPulls;
     float upperConfidenceBound;
     float lowerConfidenceBound;
@@ -32,10 +32,10 @@ public:
     float estimateOfSecondMoment;
     float localSigma;
     float sumOfSquaresOfPulls;
-    unsigned long dimension;
+    unsigned dimension;
     std::unordered_map<std::string, float> misc;
     const templatePoint *point;
-    long id;
+    int id;
     float trueMeanValue;
 
     Arm(){
@@ -50,12 +50,12 @@ public:
         trueMeanValue = INFINITY;
     }
 
-    Arm(unsigned long armNumber, unsigned long d) : Arm() {
+    Arm(unsigned int armNumber, unsigned d) : Arm() {
         id = armNumber;
         dimension = d;
     }
 
-    Arm(unsigned long armNumber, const templatePoint &p, unsigned long d) : Arm() {
+    Arm(unsigned int armNumber, const templatePoint &p, unsigned d) : Arm() {
         id = armNumber;
         point = &p;
         dimension = d;
@@ -102,7 +102,7 @@ public:
         }
     }
 
-    void warmInitialise(unsigned long numArmPulls, float armSumOfPulls, float armSumOfSquaresOfPulls,
+    void warmInitialise(unsigned numArmPulls, float armSumOfPulls, float armSumOfSquaresOfPulls,
                         float tMeanValue){
         numberOfPulls = numArmPulls;
         sumOfPulls = armSumOfPulls;
@@ -180,7 +180,7 @@ public:
     ArmKNN(): Arm<templatePoint>(){}
 
     using Arm<templatePoint>::id;
-    ArmKNN(unsigned long armNumber){
+    ArmKNN(int armNumber){
         id = armNumber;
     }
 

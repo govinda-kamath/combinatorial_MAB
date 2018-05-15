@@ -16,7 +16,7 @@ public:
     float logDeltaInverse;
 
     float globalSigma;
-    unsigned long long  globalNumberOfPulls;
+    unsigned long  globalNumberOfPulls;
     float globalSumOfPulls;
     float globalSumOfSquaresOfPulls;
     unsigned numberOfBestArms;
