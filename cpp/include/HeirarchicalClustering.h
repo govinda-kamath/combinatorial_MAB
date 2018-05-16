@@ -73,6 +73,7 @@ public:
         gFilePath = gFilePath+"_"+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
         sFilePath = sFilePath+"_"+randomName+"n_"+std::to_string(n)+"_d_"+std::to_string(d);
 //        std::cout << "Save path"  << sFilePath << std::endl;
+#define Brute
 #ifndef Brute
             graphSaveFile.open(gFilePath, std::ofstream::out | std::ofstream::trunc);
             saveFile.open(sFilePath, std::ofstream::out | std::ofstream::trunc);
