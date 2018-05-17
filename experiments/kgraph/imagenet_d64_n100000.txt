@@ -1,0 +1,36 @@
+loading training data for synset 20 / 200
+loading training data for synset 40 / 200
+loading training data for synset 60 / 200
+loading training data for synset 80 / 200
+loading training data for synset 100 / 200
+loading training data for synset 120 / 200
+loading training data for synset 140 / 200
+loading training data for synset 160 / 200
+loading training data for synset 180 / 200
+loading training data for synset 200 / 200
+N  100000
+d  64
+(100000, 12288) (10000, 12288)
+Generating control...
+Initializing...
+iteration: 1 recall: 0.0036 accuracy: 0.639938 cost: 0.00380004 M: 10 delta: 1 time: 204.607 one-recall: 0 one-ratio: 1.35716
+iteration: 2 recall: 0.0588 accuracy: 0.237484 cost: 0.00968689 M: 10 delta: 0.890161 time: 297.618 one-recall: 0.04 one-ratio: 1.15856
+iteration: 3 recall: 0.366 accuracy: 0.0683706 cost: 0.0172591 M: 11.1467 delta: 0.838379 time: 409.786 one-recall: 0.34 one-ratio: 1.05493
+iteration: 4 recall: 0.6544 accuracy: 0.0212806 cost: 0.02439 M: 11.6955 delta: 0.556994 time: 527.162 one-recall: 0.75 one-ratio: 1.01727
+iteration: 5 recall: 0.8232 accuracy: 0.00860412 cost: 0.0349356 M: 14.4262 delta: 0.352762 time: 696.785 one-recall: 0.89 one-ratio: 1.00923
+iteration: 6 recall: 0.9116 accuracy: 0.00398375 cost: 0.0455534 M: 16.9727 delta: 0.247342 time: 811.847 one-recall: 0.94 one-ratio: 1.00598
+Graph completion with reverse edges...
+
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+Reranking edges...
+
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+N 100000 d 64 done.
+ 80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+N 100000 d 64 done.

@@ -1,0 +1,23 @@
+134.189
+N  100000
+d  48
+(100000, 6912) (10000, 6912)
+Generating control...
+Initializing...
+iteration: 1 recall: 0.0028 accuracy: 0.703362 cost: 0.00380004 M: 10 delta: 1 time: 158.366 one-recall: 0 one-ratio: 1.4008
+iteration: 2 recall: 0.0628 accuracy: 0.244464 cost: 0.00956085 M: 10 delta: 0.890763 time: 276.388 one-recall: 0.06 one-ratio: 1.16209
+iteration: 3 recall: 0.4092 accuracy: 0.0649812 cost: 0.0171479 M: 11.1314 delta: 0.838306 time: 438.907 one-recall: 0.51 one-ratio: 1.05367
+iteration: 4 recall: 0.6928 accuracy: 0.0208991 cost: 0.024475 M: 11.6754 delta: 0.563373 time: 615.825 one-recall: 0.8 one-ratio: 1.01932
+iteration: 5 recall: 0.8564 accuracy: 0.00641952 cost: 0.0353978 M: 14.4162 delta: 0.353308 time: 834.189 one-recall: 0.94 one-ratio: 1.00408
+iteration: 6 recall: 0.9208 accuracy: 0.00283547 cost: 0.0462572 M: 17.0968 delta: 0.242169 time: 976.636 one-recall: 0.99 one-ratio: 1.00002
+Graph completion with reverse edges...
+
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+Reranking edges...
+
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+N 100000 d 48 done.
