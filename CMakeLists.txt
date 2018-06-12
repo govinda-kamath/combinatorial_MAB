@@ -19,6 +19,7 @@ set(CMAKE_CXX_STANDARD 11)
 #Bring the headers, such as Student.h into the project
 include_directories(cpp/include)
 include_directories(cpp/utilities)
+include_directories(FFHT)
 
 #Can manually add the sources using the set command as follows:
 #set(SOURCES src/mainapp.cpp src/Student.cpp)
@@ -100,21 +101,21 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #            cpp/include/kmeans.h )
 #    target_link_libraries(knn dlib::dlib pthread ${Boost_LIBRARIES})
 #
-#    add_executable(kmeans cpp/src/Kmeans_Imagenet.cpp
-#            cpp/include/Points.h cpp/include/Arms.h
+    add_executable(kmeans cpp/src/Kmeans_Imagenet.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+            cpp/lib/Points.cpp 
+            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+            cpp/include/kmeans.h FFHT/fht.h)
+    target_link_libraries(kmeans dlib::dlib pthread ${Boost_LIBRARIES})
+
+#    add_executable(heirarchical cpp/src/Heirarchical_Imagenet.cpp
+#            cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
 #            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
 #            cpp/lib/Points.cpp
 #            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-#            cpp/include/kmeans.h )
-#    target_link_libraries(kmeans dlib::dlib pthread ${Boost_LIBRARIES})
-
-    add_executable(heirarchical cpp/src/Heirarchical_Imagenet.cpp
-            cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
-            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-            cpp/lib/Points.cpp
-            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-            )
-    target_link_libraries( heirarchical dlib::dlib )
+#            )
+#    target_link_libraries( heirarchical dlib::dlib )
 
 #    add_executable(medoid cpp/src/Medoid_Imagenet.cpp
 #            cpp/include/Points.h cpp/include/Arms.h

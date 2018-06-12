@@ -61,5 +61,5 @@ int main(int argc, char *argv[]) {
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
                  (n) << std::endl;
-    heirar.saveAnswers();
+//    heirar.saveAnswers();
 }

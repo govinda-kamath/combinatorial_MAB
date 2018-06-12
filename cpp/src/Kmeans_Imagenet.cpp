@@ -23,8 +23,8 @@ int main(int argc, char *argv[]){
 
 //     For debugging mode in CLion
 //    std::string nameConfig = "nominal.ini";
-    long startIndex(0); // Start index
-    long endIndex(100); // End index
+//    long startIndex(0); // Start index
+//    long endIndex(100); // End index
 
     INIReader reader(nameConfig);
     if (reader.ParseError() < 0) {
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
     delta = delta / (k);
 
 
-    std::cout << "Running "<<k<< "-means for " << endIndex-startIndex << " points" << std::endl;
+    std::cout << "Running "<<k<< "-means for " << n << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
 
     // Data
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
 
     std::cout << "Average time (ms) "
               << std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count()/
-                 (endIndex-startIndex) << std::endl;
+                 (n) << std::endl;
     kMeans.saveAnswers();
 
     // Print the clusters
