@@ -1,6 +1,6 @@
 ## Notes
 - Dependendices : g++-4.9, gcc-4.9,  cmake,  libboost-all-dev,  build-essential,  libhdf5-serial-dev.
-- git pull the dlib library.
+- git pull the dlib library in the home folder.
 - Run `./utils/build.sh` to build all the binaries.
 - `aws_server.ini` stores all the information (such as datapath, saveResultsPath) required by the  software.
 
