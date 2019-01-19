@@ -39,7 +39,7 @@ public:
     UCBDynamic(std::vector<templateArm> &armsVec, float delta, unsigned nOfBestArms, unsigned nOfExtraArms, unsigned sSize){
         armsContainer = armsVec;
         numberOfArms = armsContainer.size();
-        logDeltaInverse = std::log(1/delta);
+        logDeltaInverse = std::max( std::log(1/delta), (float)0.0 );
         globalSigma = NAN;
         globalNumberOfPulls = 0;
         globalSumOfPulls = 0;
