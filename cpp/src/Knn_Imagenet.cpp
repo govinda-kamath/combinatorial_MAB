@@ -23,6 +23,11 @@ int main(int argc, char *argv[]){
     long startIndex(atol(argv[2])); // Start index
     long endIndex(atol(argv[3])); // End index
 
+    unsigned numberOfInitialPulls = 0;
+    if(argc>3){
+        numberOfInitialPulls = atoi(argv[4]);
+    }
+
 
 //    std::string nameConfig = "/Users/vivekkumarbagaria/Code/ICML/combinatorial_MAB/vivek_server.ini";
 //    long startIndex(0); // Start index
@@ -37,11 +42,13 @@ int main(int argc, char *argv[]){
     std::string directoryPath = reader.Get("path", "directory", "");
     std::string saveFileFolder =reader.Get("path", "saveFileFolder", "experiments/knn/tmp");
     std::string fileSuffix = reader.Get("path", "suffix", "");
-    unsigned numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
     unsigned sampleSize = (unsigned) reader.GetInteger("UCB", "sampleSize", 32);
     long n = (unsigned) reader.GetInteger("UCB", "n", -1);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
+
+    if (numberOfInitialPulls==0)
+        numberOfInitialPulls = (unsigned) reader.GetInteger("UCB", "numberOfInitialPulls_knn", 100);
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;
