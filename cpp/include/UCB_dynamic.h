@@ -197,7 +197,7 @@ public:
                 markForRemoval(topArm.id);
             }
         }
-        std::cout << "Ran for " << i << " steps" << std::endl;
+//        std::cout << "Ran for " << i << " steps" << std::endl;
 #ifdef DEBUG_RUN
         std::cout << "Best arm number " << bestArmCount << " Position" << i
                   << " Max iter" << maxIterations  << std::endl;

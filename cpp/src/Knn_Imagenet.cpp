@@ -19,14 +19,14 @@
 
 int main(int argc, char *argv[]){
     std::srand(std::time(nullptr));
-//    std::string nameConfig = argv[1];
-//    long startIndex(atol(argv[2])); // Start index
-//    long endIndex(atol(argv[3])); // End index
+    std::string nameConfig = argv[1];
+    long startIndex(atol(argv[2])); // Start index
+    long endIndex(atol(argv[3])); // End index
 
 
-    std::string nameConfig = "/Users/vivekkumarbagaria/Code/ICML/combinatorial_MAB/aws_server.ini";
-    long startIndex(0); // Start index
-    long endIndex(10); // End index
+//    std::string nameConfig = "/Users/vivekkumarbagaria/Code/ICML/combinatorial_MAB/vivek_server.ini";
+//    long startIndex(0); // Start index
+//    long endIndex(10); // End index
 
     // Parameters
     INIReader reader(nameConfig);
@@ -42,7 +42,6 @@ int main(int argc, char *argv[]){
     long n = (unsigned) reader.GetInteger("UCB", "n", -1);
     unsigned k = (unsigned) reader.GetInteger("UCB", "k", 5);
     float delta = (float) reader.GetReal("UCB", "delta", 0.1);
-    delta = delta ;
 
     std::cout << "Running "<<k<< "-nn for " << endIndex-startIndex << " points" << std::endl;
     std::cout << numberOfInitialPulls << std::endl;

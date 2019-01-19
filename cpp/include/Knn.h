@@ -117,7 +117,7 @@ public:
 
             UCB1.storeExtraTopArms();
             avgNumberOfPulls[index] = UCB1.globalNumberOfPulls/UCB1.numberOfArms;
-            if (index%1 == 0){
+            if (index%100 == 0){
                 std::cout << "index " << indices[i] << " Avg Pulls " <<  avgNumberOfPulls[index]
                           << " init time " << initTime << " ms"
                         << " run time " << runTime << " ms"
@@ -167,7 +167,8 @@ public:
         //Variables
         std::string  n = std::to_string(pointsVectorLeft.size());
         std::string  d = std::to_string(nearestNeighbourIndex[0].dimension);
-        std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_k_"+std::to_string(k)+"_index_"+std::to_string(index);
+        std::string saveFilePath = saveFolderPath+"n_"+n+"_d_"+d+"_s_"+std::to_string(numberOfInitialPulls)+
+                "_k_"+std::to_string(k)+"_index_"+std::to_string(index);
         std::ofstream saveFile;
         saveFile.open (saveFilePath, std::ofstream::out | std::ofstream::trunc);
         std::vector<ArmKNN<templatePoint>> topKArms = nearestNeighbourIndex;
@@ -191,10 +192,10 @@ public:
         saveFile << "k," << k << "\n";
 
         // Saving k+4k nearest neighbhours
-        std::cout << "Answer:" << std::endl;
+//        std::cout << "Answer:" << std::endl;
         saveFile << "Answer:" << std::endl;
         for (unsigned i = 0; i < k*5; i++) {
-            std::cout << topKArms[i].id << ",";
+//            std::cout << topKArms[i].id << ",";
             saveFile << topKArms[i].id << ",";
 #ifdef Brute
             topKArmsTrueMeanBrute[i] = topKArmsBrute[i].trueMean();
@@ -202,19 +203,19 @@ public:
             topKArmsTrueMean[i] = topKArms[i].trueMean();
         }
 #ifndef Brute
-        std::cout << "Answer:" << std::endl;
+//        std::cout << "Answer:" << std::endl;
         saveFile << "Answer:" << std::endl;
 
         // Saving the local true order of k+4k points
         std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
         saveFile << "Position";
-        std::cout << "Position";
+//        std::cout << "Position";
         for (unsigned i = 0; i < k*5; i++) {
             saveFile <<  "," << topKArmsArgSort[i];
-            std::cout <<  "," << topKArmsArgSort[i];
+//            std::cout <<  "," << topKArmsArgSort[i];
         }
         saveFile << std::endl;
-        std::cout << std::endl;
+//        std::cout << std::endl;
 
         // Saving stats for all the arms
 //        saveFile << "AllPullsNumber";
