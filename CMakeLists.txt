@@ -19,15 +19,15 @@ set(CMAKE_CXX_STANDARD 11)
 #Bring the headers, such as Student.h into the project
 include_directories(cpp/include)
 include_directories(cpp/utilities)
-include_directories(FFHT)
+#include_directories(FFHT)
 
 #Can manually add the sources using the set command as follows:
 #set(SOURCES src/mainapp.cpp src/Student.cpp)
-add_subdirectory(dlib/dlib dlib_build)
+add_subdirectory(dlib dlib_build)
 #add_subdirectory(nanoflann nanoflann )
 add_subdirectory(cpp/lib lib)
 
-find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
+#find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
 #link_directories( ${HDF5_LIBRARY_DIRS} )
 #include_directories( ${HDF5_INCLUDE_DIRS} )
 
@@ -93,21 +93,20 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 #    target_link_libraries( knn10x dlib::dlib ${HDF5_CXX_LIBRARIES})
 
 #else()
-#    add_executable(knn cpp/src/Knn_Imagenet.cpp
+    add_executable(knn cpp/src/Knn_Imagenet.cpp
+            cpp/include/Points.h cpp/include/Arms.h
+            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
+            cpp/lib/Points.cpp
+            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp cpp/include/Knn.h  )
+    target_link_libraries(knn dlib::dlib pthread ${Boost_LIBRARIES})
+#
+#    add_executable(kmeans cpp/src/Kmeans_Imagenet.cpp
 #            cpp/include/Points.h cpp/include/Arms.h
 #            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
 #            cpp/lib/Points.cpp
-#            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp cpp/include/Knn.h
-#            cpp/include/kmeans.h )
-#    target_link_libraries(knn dlib::dlib pthread ${Boost_LIBRARIES})
-#
-    add_executable(kmeans cpp/src/Kmeans_Imagenet.cpp
-            cpp/include/Points.h cpp/include/Arms.h
-            cpp/utilities/ini.h cpp/utilities/INIReader.h cpp/utilities/ini.c
-            cpp/lib/Points.cpp 
-            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
-            cpp/include/kmeans.h FFHT/fht.h)
-    target_link_libraries(kmeans dlib::dlib pthread ${Boost_LIBRARIES})
+#            cpp/utilities/INIReader.cpp cpp/include/utils.h cpp/lib/utils.cpp
+#            cpp/include/kmeans.h)
+#    target_link_libraries(kmeans dlib::dlib pthread ${Boost_LIBRARIES})
 
 #    add_executable(heirarchical cpp/src/Heirarchical_Imagenet.cpp
 #            cpp/include/UCB_dynamic.h cpp/include/Points.h cpp/include/Arms.h
