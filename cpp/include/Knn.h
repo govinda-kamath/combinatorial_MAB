@@ -191,8 +191,10 @@ public:
         saveFile << "k," << k << "\n";
 
         // Saving k+4k nearest neighbhours
-        saveFile << "Answer," << std::endl;
+        std::cout << "Answer:" << std::endl;
+        saveFile << "Answer:" << std::endl;
         for (unsigned i = 0; i < k*5; i++) {
+            std::cout << topKArms[i].id << ",";
             saveFile << topKArms[i].id << ",";
 #ifdef Brute
             topKArmsTrueMeanBrute[i] = topKArmsBrute[i].trueMean();
@@ -200,27 +202,31 @@ public:
             topKArmsTrueMean[i] = topKArms[i].trueMean();
         }
 #ifndef Brute
-        saveFile << std::endl;
+        std::cout << "Answer:" << std::endl;
+        saveFile << "Answer:" << std::endl;
 
         // Saving the local true order of k+4k points
         std::sort(topKArmsArgSort.begin(), topKArmsArgSort.end(), comparator);
         saveFile << "Position";
+        std::cout << "Position";
         for (unsigned i = 0; i < k*5; i++) {
             saveFile <<  "," << topKArmsArgSort[i];
+            std::cout <<  "," << topKArmsArgSort[i];
         }
         saveFile << std::endl;
+        std::cout << std::endl;
 
         // Saving stats for all the arms
-        saveFile << "AllPullsNumber";
-        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-            saveFile <<  "," << finalNumberOfPulls[i];
-        }
-        saveFile << std::endl;
-
-        saveFile << "AllPullsIndex";
-        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
-            saveFile <<  "," << finalSortedOrder[i];
-        }
+//        saveFile << "AllPullsNumber";
+//        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
+//            saveFile <<  "," << finalNumberOfPulls[i];
+//        }
+//        saveFile << std::endl;
+//
+//        saveFile << "AllPullsIndex";
+//        for (unsigned i = 0; i < pointsVectorRight.size(); i++) {
+//            saveFile <<  "," << finalSortedOrder[i];
+//        }
         saveFile << std::endl;
 //        std::cout << "\nPoint number " << index  << " Av:" << avgNumberOfPulls[index] << "\n";
 

@@ -56,16 +56,16 @@ public:
     }
 
     // Step 1 of UCB
-    void initialise(unsigned numberOfInitialPulls = 100){
+    void initialise (unsigned numberOfInitialPulls = 100){
         for (unsigned long armIndex = 0; armIndex< numberOfArms; armIndex++) {
             initialiseSingleArm( armsContainer[armIndex],  numberOfInitialPulls );
         }
-//        updateGlobalSigma();
+        updateGlobalSigma();
 //        std::cout << "Global sigma after initialization =  " << globalSigma << std::endl;
 //        std::cout << "Global Number Of Pulls =  " << globalNumberOfPulls << std::endl;
 //        std::cout << "Adding to container ";
         for (unsigned long armIndex = 0; armIndex < numberOfArms; armIndex++){
-            std::cout<< armIndex << " ";
+//            std::cout<< armIndex << " ";
             addSingleArm(armsContainer[armIndex]);
         }
 //        std::cout<<std::endl;
@@ -90,7 +90,7 @@ public:
         arms.push(singleArm);
     }
 
-    // Dynamic part of UCB. Uaed to add new arm
+    // Dynamic part of UCB. Used to add new arm
     void initialiseAndAddNewArm( templateArm &newArm, unsigned numberOfInitialPulls = 100){
         if (numberOfInitialPulls>0){
             initialiseSingleArm(newArm, numberOfInitialPulls);
